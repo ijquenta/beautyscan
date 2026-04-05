@@ -8,6 +8,7 @@ class HistoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BeautyBackground(
       child: Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(title: const Text('History')),
         body: ListView.builder(
           itemCount: 3,

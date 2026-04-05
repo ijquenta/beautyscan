@@ -8,6 +8,7 @@ class AnalysisResultsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BeautyBackground(
       child: Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(title: const Text('Analysis Results')),
         body: Center(
           child: Column(

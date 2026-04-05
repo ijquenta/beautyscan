@@ -8,20 +8,22 @@ class ColorimetryDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BeautyBackground(
       child: Scaffold(
-      appBar: AppBar(title: const Text('Colorimetry Details')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Color palette and analysis...'),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Go Back'),
-            ),
-          ],
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(title: const Text('Colorimetry Detail')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Color palette and analysis...'),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Go Back'),
+              ),
+            ],
+          ),
         ),
       ),
-    ));
+    );
   }
 }

@@ -8,24 +8,28 @@ class RegisterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BeautyBackground(
       child: Scaffold(
-      appBar: AppBar(title: const Text('Register')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Register Form'),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
-              child: const Text('Register -> Home'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
-              child: const Text('Already have an account? Login'),
-            ),
-          ],
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(title: const Text('Register')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Register Form'),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () =>
+                    Navigator.pushReplacementNamed(context, '/home'),
+                child: const Text('Register -> Home'),
+              ),
+              TextButton(
+                onPressed: () =>
+                    Navigator.pushReplacementNamed(context, '/login'),
+                child: const Text('Already have an account? Login'),
+              ),
+            ],
+          ),
         ),
       ),
-    ));
+    );
   }
 }

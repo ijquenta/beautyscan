@@ -8,6 +8,7 @@ class HairstyleDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BeautyBackground(
       child: Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(title: const Text('Hairstyle Detail')),
         body: Center(
           child: Column(

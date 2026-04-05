@@ -9,8 +9,10 @@ class BeautyBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
       child: Stack(
         children: [
           // Círculo 2 (Inferior Centro-Izquierda)
@@ -50,16 +52,11 @@ class BeautyBackground extends StatelessWidget {
                 sigmaX: 80.0,
                 sigmaY: 80.0,
               ), // Fuerte difuminado para suavizar los colores fuertes
-              child: Container(
-                color: Colors
-                    .transparent, // Queremos pureza de color, sin velo extra
-              ),
+              child: Container(color: Colors.transparent),
             ),
           ),
 
           // Renderiza el contenido principal en la última capa
-          // NOTA: Si `child` es un Scaffold, asegúrate de que el Scaffold tenga
-          // `backgroundColor: Colors.transparent` para que este fondo se vea.
           child,
         ],
       ),

@@ -8,26 +8,28 @@ class GalleryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BeautyBackground(
       child: Scaffold(
-      appBar: AppBar(title: const Text('Gallery')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Gallery Grid View'),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () =>
-                  Navigator.pushNamed(context, '/hairstyle_processing'),
-              child: const Text('Select Photo & Try Hairstyle'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () => Navigator.pushNamed(context, '/analysis'),
-              child: const Text('Select Photo & Analyze Face'),
-            ),
-          ],
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(title: const Text('Gallery')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Gallery Grid View'),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () =>
+                    Navigator.pushNamed(context, '/hairstyle_processing'),
+                child: const Text('Select Photo & Try Hairstyle'),
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () => Navigator.pushNamed(context, '/analysis'),
+                child: const Text('Select Photo & Analyze Face'),
+              ),
+            ],
+          ),
         ),
       ),
-    ));
+    );
   }
 }

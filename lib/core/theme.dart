@@ -8,31 +8,58 @@ class AppTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primaryAccent,
         primary: AppColors.primaryAccent,
-        brightness: Brightness.light, 
+        brightness: Brightness.light,
       ),
       scaffoldBackgroundColor: Colors.transparent,
       useMaterial3: true,
-      
+
       fontFamily: 'Inter',
       textTheme: const TextTheme(
         // Headings con Playfair Display
-        displayLarge: TextStyle(fontFamily: 'PlayfairDisplay', fontWeight: FontWeight.bold, color: Colors.black87),
-        displayMedium: TextStyle(fontFamily: 'PlayfairDisplay', fontWeight: FontWeight.bold, color: Colors.black87),
-        displaySmall: TextStyle(fontFamily: 'PlayfairDisplay', fontWeight: FontWeight.w600, color: Colors.black87),
-        headlineLarge: TextStyle(fontFamily: 'PlayfairDisplay', fontWeight: FontWeight.w600, color: Colors.black87),
-        headlineMedium: TextStyle(fontFamily: 'PlayfairDisplay', fontWeight: FontWeight.w600, color: Colors.black87),
-        headlineSmall: TextStyle(fontFamily: 'PlayfairDisplay', fontWeight: FontWeight.w600, color: Colors.black87),
-        titleLarge: TextStyle(fontFamily: 'PlayfairDisplay', fontWeight: FontWeight.w600, color: Colors.black87),
-        
+        displayLarge: TextStyle(
+          fontFamily: 'PlayfairDisplay',
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
+        displayMedium: TextStyle(
+          fontFamily: 'PlayfairDisplay',
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
+        displaySmall: TextStyle(
+          fontFamily: 'PlayfairDisplay',
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+        ),
+        headlineLarge: TextStyle(
+          fontFamily: 'PlayfairDisplay',
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+        ),
+        headlineMedium: TextStyle(
+          fontFamily: 'PlayfairDisplay',
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+        ),
+        headlineSmall: TextStyle(
+          fontFamily: 'PlayfairDisplay',
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+        ),
+        titleLarge: TextStyle(
+          fontFamily: 'PlayfairDisplay',
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+        ),
+
         // Cuerpos de texto asumen defecto (Inter)
         bodyLarge: TextStyle(fontFamily: 'Inter', color: Colors.black87),
         bodyMedium: TextStyle(fontFamily: 'Inter', color: Colors.black87),
         bodySmall: TextStyle(fontFamily: 'Inter', color: Colors.black54),
         labelLarge: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600),
       ),
-      
+
       // Estilo de Componentes
-      
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -46,7 +73,7 @@ class AppTheme {
           fontSize: 20,
         ),
       ),
-      
+
       // Botón Primario y Pastillas (Pills)
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -58,15 +85,22 @@ class AppTheme {
             borderRadius: AppConstants.pillBorderRadius,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16, fontFamily: 'Inter'),
+          textStyle: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+            fontFamily: 'Inter',
+          ),
         ),
       ),
-      
+
       // Entradas de texto (Inputs y Forms)
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.whiteGlassmorphism,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: AppConstants.pillBorderRadius,
           borderSide: const BorderSide(color: AppColors.borderGlassmorphism),
@@ -77,10 +111,13 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: AppConstants.pillBorderRadius,
-          borderSide: const BorderSide(color: AppColors.primaryAccent, width: 2),
+          borderSide: const BorderSide(
+            color: AppColors.primaryAccent,
+            width: 2,
+          ),
         ),
       ),
-      
+
       // Tarjetas Glassmorphism
       cardTheme: CardThemeData(
         color: AppColors.whiteGlassmorphism,

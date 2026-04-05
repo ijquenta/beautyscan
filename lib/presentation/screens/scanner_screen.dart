@@ -8,20 +8,22 @@ class ScannerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BeautyBackground(
       child: Scaffold(
-      appBar: AppBar(title: const Text('Scanner')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Camera/Scanner View'),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => Navigator.pushNamed(context, '/analysis'),
-              child: const Text('Capture & Analyze'),
-            ),
-          ],
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(title: const Text('Scanner')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Camera/Scanner View'),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => Navigator.pushNamed(context, '/analysis'),
+                child: const Text('Capture & Analyze'),
+              ),
+            ],
+          ),
         ),
       ),
-    ));
+    );
   }
 }
