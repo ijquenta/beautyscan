@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../core/constants.dart';
+import '../../core/session_manager.dart';
+import '../../data/repositories/user_repository.dart';
 import '../components/atoms/beauty_background.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -11,12 +13,29 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final UserRepository _userRepository = UserRepository();
+
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 3), () async {
+      if (!mounted) return;
+      final hasSession = await SessionManager.isLoggedIn();
+      var loggedIn = false;
+      if (hasSession) {
+        // A session id in SharedPreferences is only valid if user exists in SQLite.
+        final currentUser = await _userRepository.getCurrentUser();
+        if (currentUser != null) {
+          loggedIn = true;
+        } else {
+          await SessionManager.clearSession();
+        }
+      }
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/onboarding');
+        Navigator.pushReplacementNamed(
+          context,
+          loggedIn ? '/home' : '/onboarding',
+        );
       }
     });
   }

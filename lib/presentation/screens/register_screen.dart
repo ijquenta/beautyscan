@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../core/constants.dart';
+import '../../core/session_manager.dart';
+import '../../data/repositories/user_repository.dart';
 import '../components/atoms/beauty_background.dart';
+import '../components/atoms/beauty_button.dart';
+import '../components/molecules/beauty_alert.dart';
+import '../components/molecules/beauty_text_field.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -15,8 +20,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _repo = UserRepository();
+
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
+  bool _isLoading = false;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -27,10 +36,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  void _onRegisterPressed() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: Integrar lógica real de registro
-      Navigator.pushReplacementNamed(context, '/home');
+  Future<void> _onRegisterPressed() async {
+    setState(() => _errorMessage = null);
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    final user = await _repo.register(
+      _nameController.text.trim(),
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (user != null) {
+      await SessionManager.saveSession(user.id!);
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    } else {
+      setState(
+        () => _errorMessage =
+            'No se pudo crear la cuenta. Revisa si el correo ya existe.',
+      );
     }
   }
 
@@ -54,10 +84,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   color: AppColors.primaryAccent,
                 ),
                 child: ClipOval(
-                  child: Image.asset(
-                    'assets/icon/app_icon.png',
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.asset('assets/icon/app_icon.png', fit: BoxFit.cover),
                 ),
               ),
               const SizedBox(width: 8),
@@ -73,17 +100,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         body: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24.0,
-              vertical: 16.0,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
             child: Card(
+              color: AppColors.whiteGlassmorphism,
+              elevation: 0,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-                side: const BorderSide(color: Colors.white54, width: 1),
+                borderRadius: AppConstants.largeCardRadius,
+                side: const BorderSide(color: AppColors.borderGlassmorphism, width: 1.5),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(32.0),
+                padding: const EdgeInsets.all(12),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -92,40 +118,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       // Titular
                       Text(
                         'Crea tu cuenta',
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(
-                              color: Colors.black87,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 30),
 
+                      // Error general
+                      if (_errorMessage != null)
+                        BeautyAlert(message: _errorMessage!),
+
                       // Campo Nombre
-                      TextFormField(
+                      BeautyTextField(
                         controller: _nameController,
                         textCapitalization: TextCapitalization.words,
-                        decoration: const InputDecoration(
-                          hintText: 'Nombre completo',
-                        ),
+                        hintText: 'Nombre completo',
+                        prefixIcon: Icons.person_rounded,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Ingresa tu nombre completo';
                           }
                           if (value.trim().length < 3) {
-                            return 'El nombre debe tener al menos 3 caracteres';
+                            return 'Mínimo 3 caracteres';
                           }
                           return null;
                         },
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       // Campo Email
-                      TextFormField(
+                      BeautyTextField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
-                          hintText: 'Correo electrónico',
-                        ),
+                        hintText: 'Correo electrónico',
+                        prefixIcon: Icons.email_rounded,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Ingresa tu correo electrónico';
@@ -137,26 +164,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       // Campo Contraseña
-                      TextFormField(
+                      BeautyTextField(
                         controller: _passwordController,
                         obscureText: !_isPasswordVisible,
-                        decoration: InputDecoration(
-                          hintText: 'Contraseña',
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _isPasswordVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: Colors.black38,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _isPasswordVisible = !_isPasswordVisible;
-                              });
-                            },
+                        hintText: 'Contraseña',
+                        prefixIcon: Icons.lock_rounded,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.black38,
+                          ),
+                          onPressed: () => setState(
+                            () => _isPasswordVisible = !_isPasswordVisible,
                           ),
                         ),
                         validator: (value) {
@@ -164,32 +188,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             return 'Ingresa una contraseña';
                           }
                           if (value.length < 6) {
-                            return 'La contraseña debe tener al menos 6 caracteres';
+                            return 'Mínimo 6 caracteres';
                           }
                           return null;
                         },
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       // Campo Confirmar Contraseña
-                      TextFormField(
+                      BeautyTextField(
                         controller: _confirmPasswordController,
                         obscureText: !_isConfirmPasswordVisible,
-                        decoration: InputDecoration(
-                          hintText: 'Confirmar contraseña',
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _isConfirmPasswordVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: Colors.black38,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _isConfirmPasswordVisible =
-                                    !_isConfirmPasswordVisible;
-                              });
-                            },
+                        hintText: 'Confirmar contraseña',
+                        prefixIcon: Icons.lock_outline_rounded,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isConfirmPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.black38,
+                          ),
+                          onPressed: () => setState(
+                            () => _isConfirmPasswordVisible =
+                                !_isConfirmPasswordVisible,
                           ),
                         ),
                         validator: (value) {
@@ -203,15 +224,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         },
                       ),
 
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 36),
 
-                      // Botón de Envío
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _onRegisterPressed,
-                          child: const Text('Crear cuenta'),
-                        ),
+                      // Botón de envío
+                      BeautyButton(
+                        text: 'Crear cuenta',
+                        isLoading: _isLoading,
+                        onPressed: _onRegisterPressed,
                       ),
 
                       const SizedBox(height: 24),
@@ -225,9 +244,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             style: TextStyle(color: Colors.black54),
                           ),
                           GestureDetector(
-                            onTap: () {
-                              Navigator.pushReplacementNamed(context, '/login');
-                            },
+                            onTap: () => Navigator.pushReplacementNamed(
+                              context,
+                              '/login',
+                            ),
                             child: const Text(
                               'Inicia sesión',
                               style: TextStyle(
