@@ -49,7 +49,6 @@ class BeautyScanApp extends StatelessWidget {
         '/settings': (c) => const SettingsScreen(),
         '/hairstyle_detail': (c) => const HairstyleDetailScreen(),
         '/colorimetry_detail': (c) => const ColorimetryDetailScreen(),
-        '/feedback': (c) => const FeedbackScreen(),
       },
     );
   }

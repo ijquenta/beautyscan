@@ -1,67 +1,124 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../core/constants.dart';
 import '../components/atoms/beauty_background.dart';
+import '../../data/repositories/user_repository.dart';
+import '../../domain/models/user_model.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final _repo = UserRepository();
+  UserModel? _user;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final user = await _repo.getCurrentUser();
+    if (mounted) {
+      setState(() {
+        _user = user;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return BeautyBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
+        bottomNavigationBar: Container(
+          decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: Colors.black12, width: 1)),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _BottomNavButton(
+                    label: 'PRINCIPAL',
+                    isActive: true,
+                    onTap: () {},
+                  ),
+                  _BottomNavButton(
+                    label: 'ANALIZAR',
+                    isActive: false,
+                    onTap: () => Navigator.pushNamed(context, '/scanner'),
+                  ),
+                  _BottomNavButton(
+                    label: 'HISTORIAL',
+                    isActive: false,
+                    onTap: () => Navigator.pushNamed(context, '/history'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
         body: SafeArea(
           child: CustomScrollView(
             slivers: [
               // Header
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                  padding: const EdgeInsets.fromLTRB(32, 20, 32, 0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
                         children: [
-                          Text(
-                            'Hola,',
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: Colors.black54,
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.primaryAccent,
+                            ),
+                            child: ClipOval(
+                              child: Image.asset('assets/icon/app_icon.png', fit: BoxFit.cover),
                             ),
                           ),
-                          Text(
-                            'Bienvenida',
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          const SizedBox(width: 8),
+                          const Text(
+                            'BEAUTYSCAN',
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 10,
+                              letterSpacing: 3.0,
+                              fontWeight: FontWeight.w700,
                               color: Colors.black87,
-                              fontWeight: FontWeight.bold,
-                              height: 1.1,
                             ),
                           ),
                         ],
                       ),
                       GestureDetector(
-                        onTap: () => Navigator.pushNamed(context, '/profile'),
+                        onTap: () => Navigator.pushNamed(context, '/profile').then((_) => _loadUser()),
                         child: Container(
-                          width: 46,
-                          height: 46,
+                          width: 40,
+                          height: 40,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: AppColors.whiteGlassmorphism,
-                            border: Border.all(color: Colors.white70, width: 1.5),
-                            boxShadow: const [
-                              BoxShadow(color: AppColors.shadowGlow, blurRadius: 12),
-                            ],
+                            border: Border.all(color: Colors.black12, width: 1),
+                            color: Colors.white.withValues(alpha: 0.5),
                           ),
-                          child: const Center(
-                            child: Text(
-                              'U',
-                              style: TextStyle(
-                                fontFamily: 'PlayfairDisplay',
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                color: AppColors.primaryAccent,
-                              ),
-                            ),
+                          child: ClipOval(
+                            child: _user?.profilePhoto != null && File(_user!.profilePhoto!).existsSync()
+                                ? Image.file(
+                                    File(_user!.profilePhoto!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : const Icon(Icons.person_outline_rounded, color: Colors.black54, size: 20),
                           ),
                         ),
                       ),
@@ -70,212 +127,147 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
-              // Hero Banner
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-                  child: Container(
-                    height: 160,
-                    decoration: BoxDecoration(
-                      borderRadius: AppConstants.largeCardRadius,
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFFC2547A), Color(0xFFD4729A)],
+                  padding: const EdgeInsets.fromLTRB(32, 60, 32, 40),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Hola, ${_user?.name?.split(' ')[0] ?? 'Usuario'}',
+                        style: const TextStyle(
+                          fontFamily: 'PlayfairDisplay',
+                          fontSize: 36,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black54,
+                          letterSpacing: -0.5,
+                        ),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryAccent.withValues(alpha: 0.35),
-                          blurRadius: 24,
-                          offset: const Offset(0, 8),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Descubre tu\nesencia.',
+                        style: TextStyle(
+                          fontFamily: 'PlayfairDisplay',
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
+                          letterSpacing: -1.0,
+                          height: 1.0,
                         ),
-                      ],
-                    ),
-                    child: Stack(
-                      children: [
-                        // Circulo decorativo
-                        Positioned(
-                          right: -20,
-                          top: -20,
-                          child: Container(
-                            width: 140,
-                            height: 140,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withValues(alpha: 0.1),
-                            ),
+                      ),
+                      const SizedBox(height: 40),
+
+                      GestureDetector(
+                        onTap: () => Navigator.pushNamed(context, '/scanner'),
+                        child: Container(
+                          width: double.infinity,
+                          decoration: const BoxDecoration(
+                            border: Border(bottom: BorderSide(color: Colors.black12, width: 1)),
                           ),
-                        ),
-                        Positioned(
-                          right: 30,
-                          bottom: -30,
-                          child: Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withValues(alpha: 0.08),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: const [
                               Text(
-                                'Descubre tu\nesencia beauty',
-                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  height: 1.2,
+                                'Nuevo Análisis',
+                                style: TextStyle(
+                                  fontFamily: 'PlayfairDisplay',
+                                  fontSize: 24,
+                                  color: Colors.black87,
                                 ),
                               ),
-                              const SizedBox(height: 14),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: AppConstants.pillBorderRadius,
-                                ),
-                                child: const Text(
-                                  'Iniciar escaneo',
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    color: AppColors.primaryAccent,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
+                              Icon(Icons.arrow_forward_rounded, color: Colors.black54, size: 20),
                             ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+                      ),
 
-              // Acciones Rápidas
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
-                  child: Text(
-                    'Acciones rápidas',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w600,
-                    ),
+                      GestureDetector(
+                        onTap: () => Navigator.pushNamed(context, '/gallery'),
+                        child: Container(
+                          width: double.infinity,
+                          decoration: const BoxDecoration(
+                            border: Border(bottom: BorderSide(color: Colors.black12, width: 1)),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: const [
+                              Text(
+                                'Galería',
+                                style: TextStyle(
+                                  fontFamily: 'PlayfairDisplay',
+                                  fontSize: 24,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                              Icon(Icons.arrow_forward_rounded, color: Colors.black38, size: 20),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      GestureDetector(
+                        onTap: () => Navigator.pushNamed(context, '/history'),
+                        child: Container(
+                          width: double.infinity,
+                          decoration: const BoxDecoration(
+                            border: Border(bottom: BorderSide(color: Colors.black12, width: 1)),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: const [
+                              Text(
+                                'El Archivo',
+                                style: TextStyle(
+                                  fontFamily: 'PlayfairDisplay',
+                                  fontSize: 24,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                              Icon(Icons.arrow_forward_rounded, color: Colors.black38, size: 20),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 14,
-                    childAspectRatio: 1.1,
-                  ),
-                  delegate: SliverChildListDelegate([
-                    _QuickActionCard(
-                      label: 'Escanear',
-                      subtitle: 'Analiza tu rostro',
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFFDE8F0), Color(0xFFFFD6E8)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      accentColor: AppColors.primaryAccent,
-                      onTap: () => Navigator.pushNamed(context, '/scanner'),
-                    ),
-                    _QuickActionCard(
-                      label: 'Galería',
-                      subtitle: 'Tus fotos',
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFE8E0F5), Color(0xFFD4C8F0)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      accentColor: Color(0xFF7C5CBF),
-                      onTap: () => Navigator.pushNamed(context, '/gallery'),
-                    ),
-                    _QuickActionCard(
-                      label: 'Historial',
-                      subtitle: 'Análisis anteriores',
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFE0EEFF), Color(0xFFC8DCFF)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      accentColor: Color(0xFF3A6FD8),
-                      onTap: () => Navigator.pushNamed(context, '/history'),
-                    ),
-                    _QuickActionCard(
-                      label: 'Perfil',
-                      subtitle: 'Tu información',
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFFFF0E0), Color(0xFFFFDEC8)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      accentColor: Color(0xFFD4721A),
-                      onTap: () => Navigator.pushNamed(context, '/profile'),
-                    ),
-                  ]),
                 ),
               ),
 
               // Últimos análisis
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Últimos análisis',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.pushNamed(context, '/history'),
-                        child: const Text(
-                          'Ver todos',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            color: AppColors.primaryAccent,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                    ],
+                  padding: const EdgeInsets.fromLTRB(32, 20, 32, 10),
+                  child: const Text(
+                    'RECIENTE',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 2.0,
+                      color: Colors.black38,
+                    ),
                   ),
                 ),
               ),
+
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+                padding: const EdgeInsets.fromLTRB(32, 0, 32, 40),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    _RecentAnalysisCard(
-                      type: 'Colorimetría',
-                      result: 'Primavera Cálida',
+                    _EditorialLogCard(
+                      title: 'Primavera Cálida',
+                      category: 'Colorimetría',
                       date: 'Hace 2 días',
-                      badgeColor: const Color(0xFFC2547A),
                       onTap: () => Navigator.pushNamed(context, '/analysis_results'),
                     ),
-                    const SizedBox(height: 12),
-                    _RecentAnalysisCard(
-                      type: 'Peinado IA',
-                      result: 'Bob Texturizado',
+                    const SizedBox(height: 16),
+                    _EditorialLogCard(
+                      title: 'Bob Texturizado',
+                      category: 'Peinado',
                       date: 'Hace 5 días',
-                      badgeColor: const Color(0xFF7C5CBF),
                       onTap: () => Navigator.pushNamed(context, '/hairstyle_display'),
                     ),
                   ]),
@@ -289,18 +281,16 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _QuickActionCard extends StatelessWidget {
-  final String label;
-  final String subtitle;
-  final LinearGradient gradient;
-  final Color accentColor;
+class _EditorialLogCard extends StatelessWidget {
+  final String title;
+  final String category;
+  final String date;
   final VoidCallback onTap;
 
-  const _QuickActionCard({
-    required this.label,
-    required this.subtitle,
-    required this.gradient,
-    required this.accentColor,
+  const _EditorialLogCard({
+    required this.title,
+    required this.category,
+    required this.date,
     required this.onTap,
   });
 
@@ -309,39 +299,45 @@ class _QuickActionCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        decoration: BoxDecoration(
-          gradient: gradient,
-          borderRadius: AppConstants.defaultCardRadius,
-          border: Border.all(color: Colors.white70, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: accentColor.withValues(alpha: 0.12),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(18),
-        child: Column(
+        color: Colors.transparent, // Zonas activas
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Text(
-              label,
-              style: TextStyle(
-                fontFamily: 'PlayfairDisplay',
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: accentColor,
+              date.toUpperCase(),
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 9,
+                fontWeight: FontWeight.w400,
+                color: Colors.black38,
+                letterSpacing: 1.0,
               ),
             ),
-            const SizedBox(height: 2),
-            Text(
-              subtitle,
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 11,
-                color: accentColor.withValues(alpha: 0.7),
+            const SizedBox(width: 24),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontFamily: 'PlayfairDisplay',
+                      fontSize: 16,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    category.toUpperCase(),
+                    style: const TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 9,
+                      color: Colors.black45,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -351,18 +347,14 @@ class _QuickActionCard extends StatelessWidget {
   }
 }
 
-class _RecentAnalysisCard extends StatelessWidget {
-  final String type;
-  final String result;
-  final String date;
-  final Color badgeColor;
+class _BottomNavButton extends StatelessWidget {
+  final String label;
+  final bool isActive;
   final VoidCallback onTap;
 
-  const _RecentAnalysisCard({
-    required this.type,
-    required this.result,
-    required this.date,
-    required this.badgeColor,
+  const _BottomNavButton({
+    required this.label,
+    required this.isActive,
     required this.onTap,
   });
 
@@ -370,74 +362,18 @@ class _RecentAnalysisCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.whiteGlassmorphism,
-          borderRadius: AppConstants.defaultCardRadius,
-          border: Border.all(color: Colors.white60, width: 1),
-          boxShadow: const [
-            BoxShadow(color: AppColors.shadowGlow, blurRadius: 12),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: badgeColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Center(
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: badgeColor,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    type,
-                    style: const TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 11,
-                      color: Colors.black45,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    result,
-                    style: const TextStyle(
-                      fontFamily: 'PlayfairDisplay',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Text(
-              date,
-              style: const TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 11,
-                color: Colors.black38,
-              ),
-            ),
-            const SizedBox(width: 6),
-            const Icon(Icons.chevron_right_rounded, color: Colors.black26, size: 20),
-          ],
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 10,
+            letterSpacing: 2.0,
+            fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+            color: isActive ? Colors.black87 : Colors.black38,
+          ),
         ),
       ),
     );

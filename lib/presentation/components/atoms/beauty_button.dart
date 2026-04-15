@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants.dart';
 
 class BeautyButton extends StatelessWidget {
   final String text;
@@ -20,39 +19,31 @@ class BeautyButton extends StatelessWidget {
       height: 56,
       decoration: BoxDecoration(
         color: onPressed == null && !isLoading 
-            ? Colors.grey.shade300 
-            : AppColors.primaryAccent,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: onPressed == null && !isLoading ? null : [
-          BoxShadow(
-            color: AppColors.primaryAccent.withOpacity(0.35),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          )
-        ],
+            ? const Color(0xFFF0F0F0) 
+            : Colors.black87, // Solid black, sharp editorial look
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
           onTap: isLoading ? null : onPressed,
           child: Center(
             child: isLoading
                 ? const SizedBox(
-                    height: 24,
-                    width: 24,
+                    height: 20,
+                    width: 20,
                     child: CircularProgressIndicator(
                       color: Colors.white,
-                      strokeWidth: 2.5,
+                      strokeWidth: 1.5,
                     ),
                   )
                 : Text(
-                    text,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
+                    text.toUpperCase(),
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      color: onPressed == null && !isLoading ? Colors.black38 : Colors.white,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      letterSpacing: 0.3,
+                      letterSpacing: 2.5,
                     ),
                   ),
           ),

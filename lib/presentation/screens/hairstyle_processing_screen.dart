@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/constants.dart';
 import '../components/atoms/beauty_background.dart';
 
 class HairstyleProcessingScreen extends StatefulWidget {
@@ -15,10 +14,10 @@ class _HairstyleProcessingScreenState extends State<HairstyleProcessingScreen>
   late AnimationController _rotateController;
 
   final List<_ProcessingStep> _steps = [
-    _ProcessingStep(label: 'Cargando modelo de IA', done: true),
-    _ProcessingStep(label: 'Segmentando el cabello', done: true),
-    _ProcessingStep(label: 'Aplicando nuevo estilo', done: false),
-    _ProcessingStep(label: 'Refinando detalles finales', done: false),
+    _ProcessingStep(label: 'CARGANDO MODELO', done: true),
+    _ProcessingStep(label: 'ANALIZANDO ESTRUCTURA', done: true),
+    _ProcessingStep(label: 'SINTETIZANDO CABELLO', done: false),
+    _ProcessingStep(label: 'REFINADO EDITORIAL', done: false),
   ];
 
   @override
@@ -26,7 +25,7 @@ class _HairstyleProcessingScreenState extends State<HairstyleProcessingScreen>
     super.initState();
     _rotateController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 3),
+      duration: const Duration(seconds: 4),
     )..repeat();
   }
 
@@ -46,204 +45,150 @@ class _HairstyleProcessingScreenState extends State<HairstyleProcessingScreen>
           elevation: 0,
           leading: GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.whiteGlassmorphism,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white60, width: 1),
+            child: const Padding(
+              padding: EdgeInsets.only(left: 32, top: 20),
+              child: Text(
+                'VOLVER',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 10,
+                  letterSpacing: 2.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
               ),
-              child: const Icon(Icons.close_rounded, color: Colors.black87, size: 20),
             ),
           ),
-          title: Text(
-            'Aplicando estilo',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Colors.black87,
-            ),
-          ),
-          centerTitle: true,
+          leadingWidth: 100,
         ),
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              children: [
-                const Spacer(flex: 2),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Spacer(flex: 2),
 
-                // Animacion de procesamiento
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Anillo giratorio
-                    RotationTransition(
-                      turns: _rotateController,
-                      child: Container(
-                        width: 160,
-                        height: 160,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.primaryAccent.withValues(alpha: 0.15),
-                            width: 2,
+              const Text(
+                'Procesando.',
+                style: TextStyle(
+                  fontFamily: 'PlayfairDisplay',
+                  fontSize: 48,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black87,
+                  letterSpacing: -1.0,
+                  height: 1.0,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Aplicando el nuevo estilo con alta\nprecisión arquitectónica.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  color: Colors.black54,
+                  height: 1.6,
+                  fontSize: 14,
+                ),
+              ),
+
+              const Spacer(flex: 2),
+
+              // Animación geométrica mínima
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  RotationTransition(
+                    turns: _rotateController,
+                    child: Container(
+                      width: 150,
+                      height: 150,
+                      decoration: const BoxDecoration(shape: BoxShape.circle),
+                      child: CustomPaint(painter: _MinimalArcPainter()),
+                    ),
+                  ),
+                  const Text(
+                    'IA',
+                    style: TextStyle(
+                      fontFamily: 'PlayfairDisplay',
+                      fontSize: 32,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+
+              const Spacer(flex: 3),
+
+              // Pasos (texto puro)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: _steps.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final step = entry.value;
+                    final isActive = !step.done && (index == 0 || _steps[index - 1].done);
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 24,
+                            child: step.done
+                                ? const Text('✓', style: TextStyle(color: Colors.black87, fontSize: 12))
+                                : isActive
+                                    ? const SizedBox(
+                                        width: 10,
+                                        height: 10,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 1.5,
+                                          color: Colors.black87,
+                                        ),
+                                      )
+                                    : const SizedBox(),
                           ),
-                        ),
-                        child: CustomPaint(painter: _ArcPainter()),
-                      ),
-                    ),
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.primaryAccent.withValues(alpha: 0.08),
-                      ),
-                    ),
-                    Container(
-                      width: 84,
-                      height: 84,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF7C5CBF), Color(0xFFC2547A)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF7C5CBF).withValues(alpha: 0.4),
-                            blurRadius: 24,
+                          Text(
+                            step.label,
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 10,
+                              letterSpacing: 2.5,
+                              fontWeight: step.done || isActive ? FontWeight.w600 : FontWeight.w400,
+                              color: step.done || isActive ? Colors.black87 : Colors.black38,
+                            ),
                           ),
                         ],
                       ),
-                      child: Center(
-                        child: Text(
-                          'IA',
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                    );
+                  }).toList(),
+                ),
+              ),
+
+              const Spacer(flex: 2),
+
+              GestureDetector(
+                onTap: () => Navigator.pushReplacementNamed(context, '/hairstyle_display'),
+                child: Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    border: Border(top: BorderSide(color: Colors.black12, width: 1)),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: const Center(
+                    child: Text(
+                      'VER RESULTADO (DEMO)',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 3.0,
+                        color: Colors.black87,
                       ),
                     ),
-                  ],
-                ),
-
-                const SizedBox(height: 32),
-
-                Text(
-                  'La IA está trabajando',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Colors.black87,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Estamos simulando el peinado\nsobre tu foto con alta precisión',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    color: Colors.black45,
-                    height: 1.5,
-                  ),
-                ),
-
-                const Spacer(flex: 2),
-
-                // Pasos
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: AppColors.whiteGlassmorphism,
-                    borderRadius: AppConstants.largeCardRadius,
-                    border: Border.all(color: Colors.white60, width: 1),
-                    boxShadow: const [
-                      BoxShadow(color: AppColors.shadowGlow, blurRadius: 16),
-                    ],
-                  ),
-                  child: Column(
-                    children: _steps.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final step = entry.value;
-                      final isActive = !step.done &&
-                          (index == 0 || _steps[index - 1].done);
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 28,
-                              height: 28,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: step.done
-                                    ? const Color(0xFF7C5CBF)
-                                    : isActive
-                                        ? const Color(0xFF7C5CBF)
-                                            .withValues(alpha: 0.15)
-                                        : Colors.black.withValues(alpha: 0.06),
-                              ),
-                              child: Center(
-                                child: step.done
-                                    ? const Icon(Icons.check_rounded,
-                                        color: Colors.white, size: 14)
-                                    : isActive
-                                        ? const SizedBox(
-                                            width: 12,
-                                            height: 12,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: Color(0xFF7C5CBF),
-                                            ),
-                                          )
-                                        : Container(
-                                            width: 8,
-                                            height: 8,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Colors.black
-                                                  .withValues(alpha: 0.2),
-                                            ),
-                                          ),
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Text(
-                              step.label,
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 14,
-                                fontWeight: step.done || isActive
-                                    ? FontWeight.w600
-                                    : FontWeight.w400,
-                                color: step.done || isActive
-                                    ? Colors.black87
-                                    : Colors.black38,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-
-                const Spacer(flex: 3),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pushReplacementNamed(
-                      context,
-                      '/hairstyle_display',
-                    ),
-                    child: const Text('Ver resultado (demo)'),
-                  ),
-                ),
-                const SizedBox(height: 24),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -257,21 +202,34 @@ class _ProcessingStep {
   const _ProcessingStep({required this.label, required this.done});
 }
 
-class _ArcPainter extends CustomPainter {
+class _MinimalArcPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.primaryAccent.withValues(alpha: 0.6)
-      ..strokeWidth = 2.5
+      ..color = Colors.black87
+      ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+      ..strokeCap = StrokeCap.square;
 
     canvas.drawArc(
       Rect.fromLTWH(0, 0, size.width, size.height),
-      -1.57,
-      2.4,
+      0,
+      3.14, // Half circle
       false,
       paint,
+    );
+    
+    final paintLight = Paint()
+      ..color = Colors.black12
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+      
+    canvas.drawArc(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      3.14,
+      3.14, 
+      false,
+      paintLight,
     );
   }
 

@@ -23,7 +23,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _repo = UserRepository();
 
   bool _isPasswordVisible = false;
-  bool _isConfirmPasswordVisible = false;
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -58,8 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
     } else {
       setState(
-        () => _errorMessage =
-            'No se pudo crear la cuenta. Revisa si el correo ya existe.',
+        () => _errorMessage = 'Revisa los datos. El correo podría existir.',
       );
     }
   }
@@ -69,198 +67,127 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return BeautyBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primaryAccent,
-                ),
-                child: ClipOval(
-                  child: Image.asset('assets/icon/app_icon.png', fit: BoxFit.cover),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'BeautyScan',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.primaryAccent,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-        body: Center(
+        body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
-            child: Card(
-              color: AppColors.whiteGlassmorphism,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: AppConstants.largeCardRadius,
-                side: const BorderSide(color: AppColors.borderGlassmorphism, width: 1.5),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Titular
-                      Text(
-                        'Crea tu cuenta',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: Colors.black87,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-
-                      // Error general
-                      if (_errorMessage != null)
-                        BeautyAlert(message: _errorMessage!),
-
-                      // Campo Nombre
-                      BeautyTextField(
-                        controller: _nameController,
-                        textCapitalization: TextCapitalization.words,
-                        hintText: 'Nombre completo',
-                        prefixIcon: Icons.person_rounded,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Ingresa tu nombre completo';
-                          }
-                          if (value.trim().length < 3) {
-                            return 'Mínimo 3 caracteres';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Campo Email
-                      BeautyTextField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        hintText: 'Correo electrónico',
-                        prefixIcon: Icons.email_rounded,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Ingresa tu correo electrónico';
-                          }
-                          final emailRegex = RegExp(r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,}$');
-                          if (!emailRegex.hasMatch(value.trim())) {
-                            return 'Ingresa un correo válido';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Campo Contraseña
-                      BeautyTextField(
-                        controller: _passwordController,
-                        obscureText: !_isPasswordVisible,
-                        hintText: 'Contraseña',
-                        prefixIcon: Icons.lock_rounded,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _isPasswordVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: Colors.black38,
-                          ),
-                          onPressed: () => setState(
-                            () => _isPasswordVisible = !_isPasswordVisible,
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Ingresa una contraseña';
-                          }
-                          if (value.length < 6) {
-                            return 'Mínimo 6 caracteres';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Campo Confirmar Contraseña
-                      BeautyTextField(
-                        controller: _confirmPasswordController,
-                        obscureText: !_isConfirmPasswordVisible,
-                        hintText: 'Confirmar contraseña',
-                        prefixIcon: Icons.lock_outline_rounded,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _isConfirmPasswordVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: Colors.black38,
-                          ),
-                          onPressed: () => setState(
-                            () => _isConfirmPasswordVisible =
-                                !_isConfirmPasswordVisible,
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Confirma tu contraseña';
-                          }
-                          if (value != _passwordController.text) {
-                            return 'Las contraseñas no coinciden';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      const SizedBox(height: 36),
-
-                      // Botón de envío
-                      BeautyButton(
-                        text: 'Crear cuenta',
-                        isLoading: _isLoading,
-                        onPressed: _onRegisterPressed,
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Redirección a Login
-                      Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          const Text(
-                            '¿Ya tienes cuenta? ',
-                            style: TextStyle(color: Colors.black54),
-                          ),
-                          GestureDetector(
-                            onTap: () => Navigator.pushReplacementNamed(
-                              context,
-                              '/login',
-                            ),
-                            child: const Text(
-                              'Inicia sesión',
-                              style: TextStyle(
-                                color: AppColors.primaryAccent,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 24),
+                  Text(
+                    'Registro.',
+                    style: TextStyle(
+                      fontFamily: 'PlayfairDisplay',
+                      fontSize: 48,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -1,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Un nuevo comienzo.',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 14,
+                      color: Colors.black45,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 48),
+
+                  if (_errorMessage != null)
+                    BeautyAlert(message: _errorMessage!),
+
+                  BeautyTextField(
+                    controller: _nameController,
+                    textCapitalization: TextCapitalization.words,
+                    hintText: 'Nombre completo',
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) return 'Requerido';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  BeautyTextField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    hintText: 'Correo electrónico',
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) return 'Requerido';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  BeautyTextField(
+                    controller: _passwordController,
+                    obscureText: !_isPasswordVisible,
+                    hintText: 'Contraseña',
+                    suffixIcon: GestureDetector(
+                      onTap: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          _isPasswordVisible ? 'CERRAR' : 'VER',
+                          style: const TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.5,
+                            color: Colors.black45,
+                          ),
+                        ),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return 'Requerido';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  BeautyTextField(
+                    controller: _confirmPasswordController,
+                    obscureText: !_isPasswordVisible,
+                    hintText: 'Confirmar contraseña',
+                    validator: (value) {
+                      if (value != _passwordController.text) return 'No coinciden';
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: 48),
+
+                  BeautyButton(
+                    text: 'REGISTRARSE',
+                    isLoading: _isLoading,
+                    onPressed: _onRegisterPressed,
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  Center(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pushReplacementNamed(context, '/login'),
+                      child: const Text(
+                        'VOLVER AL INICIO',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 11,
+                          letterSpacing: 2,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black54,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

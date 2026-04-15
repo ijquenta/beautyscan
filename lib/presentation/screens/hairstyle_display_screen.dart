@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../components/atoms/beauty_background.dart';
-import '../../core/constants.dart';
 import '../components/organisms/before_after_slider.dart';
 
 class HairstyleDisplayScreen extends StatelessWidget {
@@ -10,118 +9,172 @@ class HairstyleDisplayScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BeautyBackground(
       child: Scaffold(
-      backgroundColor: Colors.transparent,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const Text('Simulación IA'),
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.black87),
-      ),
-      body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Comparador Wipeo
-                Expanded(
-                  flex: 3,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      boxShadow: const [
-                        BoxShadow(
-                          color: AppColors.shadowGlow,
-                          blurRadius: 20,
-                          spreadRadius: 5,
-                        ),
-                      ],
-                      borderRadius: AppConstants.largeCardRadius,
-                    ),
-                    // Imágenes Hardcodeadas públicas de Unsplash
-                    // Simulando Antes (Mujer rubia) y Después (Castaña editada)
-                    child: const BeforeAfterSlider(
-                      beforeImage: NetworkImage(
-                        'https://images.unsplash.com/photo-1549471013-3364d7ce4668?auto=format&fit=crop&q=80&w=800',
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: const Padding(
+              padding: EdgeInsets.only(left: 32, top: 20),
+              child: Text(
+                'VOLVER',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 10,
+                  letterSpacing: 2.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+          ),
+          leadingWidth: 100,
+        ),
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(32, 20, 32, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'EL RESULTADO',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 3.0,
+                        color: Colors.black38,
                       ),
-                      afterImage: NetworkImage(
-                        'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&q=80&w=800',
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'Simulación.',
+                      style: TextStyle(
+                        fontFamily: 'PlayfairDisplay',
+                        fontSize: 48,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
+                        letterSpacing: -1.0,
+                        height: 1.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Image slider without shadows or borders (pure flat display)
+              Expanded(
+                child: Container(
+                  color: Colors.black, // Dark background frame for the photography
+                  margin: const EdgeInsets.symmetric(horizontal: 0),
+                  child: const BeforeAfterSlider(
+                    beforeImage: NetworkImage(
+                      'https://images.unsplash.com/photo-1549471013-3364d7ce4668?auto=format&fit=crop&q=80&w=800',
+                    ),
+                    afterImage: NetworkImage(
+                      'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&q=80&w=800',
+                    ),
+                  ),
+                ),
+              ),
+
+              // Feedback interaction minimal line
+              Padding(
+                padding: const EdgeInsets.fromLTRB(32, 32, 32, 0),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    border: Border(bottom: BorderSide(color: Colors.black12, width: 1.5)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Expanded(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'AJUSTAR (EJ: MÁS OSCURO)',
+                            hintStyle: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 10,
+                              letterSpacing: 2.0,
+                              color: Colors.black38,
+                            ),
+                          ),
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 10,
+                            letterSpacing: 2.0,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {},
+                        child: const Text(
+                          'ENVIAR',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2.0,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Bottom Actions
+              GestureDetector(
+                onTap: () => Navigator.pushNamed(context, '/hairstyle_detail'),
+                child: Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    border: Border(top: BorderSide(color: Colors.black12, width: 1)),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: const Center(
+                    child: Text(
+                      'VER DETALLES COMPLETOS',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2.0,
+                        color: Colors.black87,
                       ),
                     ),
                   ),
                 ),
-
-                const SizedBox(height: 24),
-
-                // Feedback chat / Ajustes a la IA
-                Text(
-                  '¿Ajustar simulación?',
-                  style: Theme.of(context).textTheme.titleLarge,
+              ),
+              GestureDetector(
+                onTap: () => Navigator.popUntil(context, ModalRoute.withName('/home')),
+                child: Container(
+                  width: double.infinity,
+                  color: Colors.black87,
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: const Center(
+                    child: Text(
+                      'GUARDAR RESULTADO',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2.0,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const Expanded(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Ej: Hazlo un poco más oscuro...',
-                          hintStyle: TextStyle(color: Colors.black38),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      decoration: const BoxDecoration(
-                        color: AppColors.primaryAccent,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(color: AppColors.shadowGlow, blurRadius: 8),
-                        ],
-                      ),
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.send_rounded,
-                          color: Colors.white,
-                        ),
-                        onPressed: () {
-                          // TODO: Acción de envío al prompt del chat de Gemini
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                // Botones Finales
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.primaryAccent,
-                        textStyle: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-                      onPressed: () =>
-                          Navigator.pushNamed(context, '/hairstyle_detail'),
-                      child: const Text('Ver Detalles'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => Navigator.popUntil(
-                        context,
-                        ModalRoute.withName('/home'),
-                      ),
-                      child: const Text('Guardar Resultado'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

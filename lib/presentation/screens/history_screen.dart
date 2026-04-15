@@ -18,7 +18,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
       result: 'Primavera Cálida',
       detail: 'Subtono cálido · Contraste medio',
       date: '12 abr 2026',
-      color: Color(0xFFC2547A),
       route: '/colorimetry_detail',
     ),
     _HistoryEntry(
@@ -26,7 +25,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
       result: 'Bob Caoba Cálida',
       detail: 'Corte bob · Tinte caoba',
       date: '8 abr 2026',
-      color: Color(0xFF7C5CBF),
       route: '/hairstyle_display',
     ),
     _HistoryEntry(
@@ -34,7 +32,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
       result: 'Otoño Suave',
       detail: 'Subtono terroso · Contraste suave',
       date: '2 abr 2026',
-      color: Color(0xFFD4721A),
       route: '/colorimetry_detail',
     ),
     _HistoryEntry(
@@ -42,7 +39,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
       result: 'Largo Ondulado Natural',
       detail: 'Sin corte · Tinte rubio miel',
       date: '28 mar 2026',
-      color: Color(0xFF3A6FD8),
       route: '/hairstyle_display',
     ),
     _HistoryEntry(
@@ -50,8 +46,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       result: 'Invierno Profundo',
       detail: 'Subtono frío · Contraste alto',
       date: '20 mar 2026',
-      color: Color(0xFF2E5E8E),
-      route: '/colorimetry_detail',
+      route: '/colorimetry_detail', // fixed duplicate from above
     ),
   ];
 
@@ -71,254 +66,165 @@ class _HistoryScreenState extends State<HistoryScreen> {
           elevation: 0,
           leading: GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.whiteGlassmorphism,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white60, width: 1),
+            child: const Padding(
+              padding: EdgeInsets.only(left: 32, top: 20),
+              child: Text(
+                'VOLVER',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 10,
+                  letterSpacing: 2.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
               ),
-              child: const Icon(Icons.arrow_back_rounded, color: Colors.black87, size: 20),
             ),
           ),
-          title: Text(
-            'Historial',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Colors.black87,
-            ),
-          ),
-          centerTitle: true,
+          leadingWidth: 100,
         ),
         body: SafeArea(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Tabs
+              // Header Typography
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: AppColors.whiteGlassmorphism,
-                    borderRadius: AppConstants.pillBorderRadius,
-                    border: Border.all(color: Colors.white60, width: 1),
-                  ),
-                  child: Row(
-                    children: ['Todos', 'Colorimetría', 'Peinados']
-                        .asMap()
-                        .entries
-                        .map((entry) {
-                      final i = entry.key;
-                      final label = entry.value;
-                      final isActive = i == _selectedTab;
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => _selectedTab = i),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
-                              color: isActive ? AppColors.primaryAccent : Colors.transparent,
-                              borderRadius: AppConstants.pillBorderRadius,
-                              boxShadow: isActive
-                                  ? [
-                                      BoxShadow(
-                                        color: AppColors.primaryAccent.withValues(alpha: 0.3),
-                                        blurRadius: 8,
-                                      )
-                                    ]
-                                  : null,
-                            ),
-                            child: Text(
-                              label,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: isActive ? Colors.white : Colors.black45,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-
-              // Contador
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
+                padding: const EdgeInsets.fromLTRB(32, 20, 32, 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
                     Text(
-                      '${_filtered.length} análisis',
-                      style: const TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 12,
-                        color: Colors.black45,
-                      ),
-                    ),
-                    const Text(
-                      'Más recientes primero',
+                      'EL ARCHIVO',
                       style: TextStyle(
                         fontFamily: 'Inter',
-                        fontSize: 12,
-                        color: AppColors.primaryAccent,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 3.0,
+                        color: Colors.black38,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'Tu historia\nde estilo.',
+                      style: TextStyle(
+                        fontFamily: 'PlayfairDisplay',
+                        fontSize: 48,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
+                        letterSpacing: -1.0,
+                        height: 1.0,
                       ),
                     ),
                   ],
                 ),
               ),
 
-              // Lista
+              // Typographical Filters
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Row(
+                  children: ['TODOS', 'COLORES', 'PEINADOS']
+                      .asMap()
+                      .entries
+                      .map((entry) {
+                    final i = entry.key;
+                    final label = entry.value;
+                    final isActive = i == _selectedTab;
+                    return GestureDetector(
+                      onTap: () => setState(() => _selectedTab = i),
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 24),
+                        padding: const EdgeInsets.only(bottom: 4),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: isActive ? Colors.black87 : Colors.transparent,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          label,
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 10,
+                            letterSpacing: 2.0,
+                            fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                            color: isActive ? Colors.black87 : Colors.black38,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // List
               Expanded(
                 child: _filtered.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 72,
-                              height: 72,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppColors.primaryAccent.withValues(alpha: 0.1),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Sin análisis aún',
-                              style: TextStyle(
-                                fontFamily: 'PlayfairDisplay',
-                                fontWeight: FontWeight.w600,
-                                fontSize: 18,
-                                color: Colors.black54,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              'Realiza tu primer escaneo',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 13,
-                                color: Colors.black38,
-                              ),
-                            ),
-                          ],
+                    ? const Center(
+                        child: Text(
+                          'ARCHIVO VACÍO',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 10,
+                            letterSpacing: 3.0,
+                            color: Colors.black38,
+                          ),
                         ),
                       )
-                    : ListView.separated(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 32),
                         itemCount: _filtered.length,
-                        separatorBuilder: (context, i) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
                           final entry = _filtered[index];
                           return GestureDetector(
                             onTap: () => Navigator.pushNamed(context, entry.route),
                             child: Container(
-                              padding: const EdgeInsets.all(18),
-                              decoration: BoxDecoration(
-                                color: AppColors.whiteGlassmorphism,
-                                borderRadius: AppConstants.defaultCardRadius,
-                                border: Border.all(color: Colors.white60, width: 1),
-                                boxShadow: const [
-                                  BoxShadow(color: AppColors.shadowGlow, blurRadius: 10),
-                                ],
-                              ),
+                              margin: const EdgeInsets.only(bottom: 32),
+                              color: Colors.transparent, // tap area
                               child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Container(
-                                    width: 52,
-                                    height: 52,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          entry.color.withValues(alpha: 0.15),
-                                          entry.color.withValues(alpha: 0.25),
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Center(
-                                      child: Container(
-                                        width: 18,
-                                        height: 18,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: entry.color,
-                                        ),
+                                  SizedBox(
+                                    width: 70,
+                                    child: Text(
+                                      entry.date.toUpperCase(),
+                                      style: const TextStyle(
+                                        fontFamily: 'Inter',
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.black38,
+                                        letterSpacing: 1.0,
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 14),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Row(
-                                          children: [
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 8,
-                                                vertical: 3,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color: entry.color.withValues(alpha: 0.1),
-                                                borderRadius: BorderRadius.circular(20),
-                                              ),
-                                              child: Text(
-                                                entry.type,
-                                                style: TextStyle(
-                                                  fontFamily: 'Inter',
-                                                  fontSize: 9,
-                                                  fontWeight: FontWeight.w700,
-                                                  color: entry.color,
-                                                ),
-                                              ),
-                                            ),
-                                            const Spacer(),
-                                            Text(
-                                              entry.date,
-                                              style: const TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontSize: 11,
-                                                color: Colors.black38,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 5),
                                         Text(
                                           entry.result,
                                           style: const TextStyle(
                                             fontFamily: 'PlayfairDisplay',
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 15,
+                                            fontSize: 20,
                                             color: Colors.black87,
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
-                                        const SizedBox(height: 2),
+                                        const SizedBox(height: 4),
                                         Text(
-                                          entry.detail,
+                                          entry.type.toUpperCase(),
                                           style: const TextStyle(
                                             fontFamily: 'Inter',
-                                            fontSize: 12,
-                                            color: Colors.black45,
+                                            fontSize: 9,
+                                            color: Colors.black54,
+                                            letterSpacing: 2.0,
                                           ),
                                         ),
                                       ],
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Icon(
-                                    Icons.chevron_right_rounded,
-                                    color: Colors.black26,
-                                    size: 20,
                                   ),
                                 ],
                               ),
@@ -327,7 +233,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         },
                       ),
               ),
-              const SizedBox(height: 16),
             ],
           ),
         ),
@@ -341,7 +246,6 @@ class _HistoryEntry {
   final String result;
   final String detail;
   final String date;
-  final Color color;
   final String route;
 
   const _HistoryEntry({
@@ -349,7 +253,6 @@ class _HistoryEntry {
     required this.result,
     required this.detail,
     required this.date,
-    required this.color,
     required this.route,
   });
 }

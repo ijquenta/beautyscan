@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/constants.dart';
 import '../components/atoms/beauty_background.dart';
 
 class AnalysisScreen extends StatefulWidget {
@@ -15,10 +14,10 @@ class _AnalysisScreenState extends State<AnalysisScreen>
   late Animation<double> _pulseAnimation;
 
   final List<_AnalysisStep> _steps = [
-    _AnalysisStep(label: 'Detectando puntos faciales', done: true),
-    _AnalysisStep(label: 'Analizando tono de piel', done: true),
-    _AnalysisStep(label: 'Calculando colorimetría', done: false),
-    _AnalysisStep(label: 'Generando recomendaciones', done: false),
+    _AnalysisStep(label: 'DETECTANDO PUNTOS FACIALES', done: true),
+    _AnalysisStep(label: 'ANALIZANDO TONO DE PIEL', done: true),
+    _AnalysisStep(label: 'CALCULANDO COLORIMETRÍA', done: false),
+    _AnalysisStep(label: 'GENERANDO RECOMENDACIONES', done: false),
   ];
 
   @override
@@ -28,7 +27,7 @@ class _AnalysisScreenState extends State<AnalysisScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1400),
     )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 0.92, end: 1.08).animate(
+    _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
   }
@@ -49,203 +48,165 @@ class _AnalysisScreenState extends State<AnalysisScreen>
           elevation: 0,
           leading: GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.whiteGlassmorphism,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white60, width: 1),
+            child: const Padding(
+              padding: EdgeInsets.only(left: 32, top: 20),
+              child: Text(
+                'CANCELAR',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 10,
+                  letterSpacing: 2.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
               ),
-              child: const Icon(Icons.close_rounded, color: Colors.black87, size: 20),
             ),
           ),
-          title: Text(
-            'Analizando',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Colors.black87,
-            ),
-          ),
-          centerTitle: true,
+          leadingWidth: 150,
         ),
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              children: [
-                const Spacer(flex: 2),
-
-                // Animacion central
-                AnimatedBuilder(
-                  animation: _pulseAnimation,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: _pulseAnimation.value,
-                      child: child,
-                    );
-                  },
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        width: 160,
-                        height: 160,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.primaryAccent.withValues(alpha: 0.08),
-                        ),
-                      ),
-                      Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.primaryAccent.withValues(alpha: 0.14),
-                        ),
-                      ),
-                      Container(
-                        width: 84,
-                        height: 84,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFC2547A), Color(0xFFD4729A)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primaryAccent.withValues(alpha: 0.4),
-                              blurRadius: 24,
-                            ),
-                          ],
-                        ),
-                        child: const Center(
-                          child: SizedBox(
-                            width: 36,
-                            height: 36,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2.5,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Spacer(flex: 2),
+              
+              const Text(
+                'El Análisis.',
+                style: TextStyle(
+                  fontFamily: 'PlayfairDisplay',
+                  fontSize: 48,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black87,
+                  letterSpacing: -1.0,
+                  height: 1.0,
                 ),
-
-                const SizedBox(height: 32),
-
-                Text(
-                  'Procesando tu análisis',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Colors.black87,
-                    fontWeight: FontWeight.bold,
-                  ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Estamos procesando tu rostro.\nLa espera será breve.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  color: Colors.black45,
+                  height: 1.5,
+                  fontSize: 14,
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Por favor espera, esto solo\ntarda unos segundos',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    color: Colors.black45,
-                    height: 1.5,
-                  ),
-                ),
+              ),
 
-                const Spacer(flex: 2),
+              const Spacer(flex: 2),
 
-                // Pasos del análisis
-                Container(
-                  padding: const EdgeInsets.all(24),
+              // Animacion central minimalista
+              AnimatedBuilder(
+                animation: _pulseAnimation,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _pulseAnimation.value,
+                    child: child,
+                  );
+                },
+                child: Container(
+                  width: 140,
+                  height: 140,
                   decoration: BoxDecoration(
-                    color: AppColors.whiteGlassmorphism,
-                    borderRadius: AppConstants.largeCardRadius,
-                    border: Border.all(color: Colors.white60, width: 1),
-                    boxShadow: const [
-                      BoxShadow(color: AppColors.shadowGlow, blurRadius: 16),
-                    ],
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.black12, width: 1.5),
                   ),
-                  child: Column(
-                    children: _steps.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final step = entry.value;
-                      final isActive = !step.done && (index == 0 || _steps[index - 1].done);
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 28,
-                              height: 28,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: step.done
-                                    ? AppColors.primaryAccent
-                                    : isActive
-                                        ? AppColors.primaryAccent.withValues(alpha: 0.15)
-                                        : Colors.black.withValues(alpha: 0.06),
-                              ),
-                              child: Center(
-                                child: step.done
-                                    ? const Icon(Icons.check_rounded, color: Colors.white, size: 14)
-                                    : isActive
-                                        ? const SizedBox(
-                                            width: 12,
-                                            height: 12,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: AppColors.primaryAccent,
-                                            ),
-                                          )
-                                        : Container(
-                                            width: 8,
-                                            height: 8,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Colors.black.withValues(alpha: 0.2),
-                                            ),
-                                          ),
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Text(
-                              step.label,
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 14,
-                                fontWeight: step.done || isActive
-                                    ? FontWeight.w600
-                                    : FontWeight.w400,
-                                color: step.done || isActive
-                                    ? Colors.black87
-                                    : Colors.black38,
-                              ),
-                            ),
-                          ],
+                  child: Center(
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.black26, width: 1),
+                      ),
+                      child: const Center(
+                        child: SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: CircularProgressIndicator(
+                            color: Colors.black87,
+                            strokeWidth: 1.0,
+                          ),
                         ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-
-                const Spacer(flex: 3),
-
-                // Boton simulacion (mock)
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pushReplacementNamed(
-                      context,
-                      '/analysis_results',
+                      ),
                     ),
-                    child: const Text('Ver resultados (demo)'),
                   ),
                 ),
-                const SizedBox(height: 24),
-              ],
-            ),
+              ),
+
+              const Spacer(flex: 3),
+
+              // Pasos del análisis (Tipográficos)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: _steps.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final step = entry.value;
+                    final isActive = !step.done && (index == 0 || _steps[index - 1].done);
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 24,
+                            child: step.done
+                                ? const Text('—', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold))
+                                : isActive
+                                    ? const SizedBox(
+                                        width: 10,
+                                        height: 10,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 1.5,
+                                          color: Colors.black87,
+                                        ),
+                                      )
+                                    : const SizedBox(),
+                          ),
+                          Text(
+                            step.label,
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 10,
+                              letterSpacing: 2.0,
+                              fontWeight: step.done || isActive ? FontWeight.w600 : FontWeight.w400,
+                              color: step.done || isActive ? Colors.black87 : Colors.black38,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+
+              const Spacer(flex: 2),
+
+              // DEMO ACTION
+              GestureDetector(
+                onTap: () => Navigator.pushReplacementNamed(context, '/analysis_results'),
+                child: Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    border: Border(top: BorderSide(color: Colors.black12, width: 1)),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: const Center(
+                    child: Text(
+                      'VER RESULTADOS (DEMO)',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 3.0,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
