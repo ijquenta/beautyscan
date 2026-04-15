@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../components/atoms/beauty_background.dart';
 
 class AnalysisScreen extends StatelessWidget {
-  const AnalysisScreen({Key? key}) : super(key: key);
+  const AnalysisScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

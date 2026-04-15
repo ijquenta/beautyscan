@@ -14,7 +14,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 15), () {
+    Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/onboarding');
       }
@@ -143,7 +143,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: TweenAnimationBuilder<double>(
-                      duration: const Duration(seconds: 15),
+                      duration: const Duration(seconds: 3),
                       tween: Tween<double>(begin: 0.0, end: 1.0),
                       curve: Curves.easeInOutQuart,
                       builder: (context, value, _) {

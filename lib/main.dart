@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:beautyscan/core/theme.dart';
-import 'package:beautyscan/presentation/components/atoms/beauty_background.dart';
 import 'package:beautyscan/presentation/screens/splash_screen.dart';
 import 'package:beautyscan/presentation/screens/onboarding_screen.dart';
 import 'package:beautyscan/presentation/screens/login_screen.dart';

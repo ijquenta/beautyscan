@@ -8,6 +8,8 @@ plugins {
 android {
     namespace = "com.example.beautyscan"
     compileSdk = flutter.compileSdkVersion
+    // Pin to stable build-tools to avoid aapt parsing failures seen on 36.1.0.
+    buildToolsVersion = "35.0.0"
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

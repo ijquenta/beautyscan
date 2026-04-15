@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../components/atoms/beauty_background.dart';
 
 class HistoryScreen extends StatelessWidget {
-  const HistoryScreen({Key? key}) : super(key: key);
+  const HistoryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

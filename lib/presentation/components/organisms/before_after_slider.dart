@@ -6,10 +6,10 @@ class BeforeAfterSlider extends StatefulWidget {
   final ImageProvider afterImage;
   
   const BeforeAfterSlider({
-    Key? key, 
-    required this.beforeImage, 
+    super.key,
+    required this.beforeImage,
     required this.afterImage,
-  }) : super(key: key);
+  });
 
   @override
   State<BeforeAfterSlider> createState() => _BeforeAfterSliderState();
@@ -41,9 +41,13 @@ class _BeforeAfterSliderState extends State<BeforeAfterSlider> {
                   child: Image(
                     image: widget.afterImage,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const ColoredBox(
+                      color: Color(0xFFEEEEEE),
+                      child: Center(child: Icon(Icons.broken_image_outlined, color: Colors.black26, size: 48)),
+                    ),
                   ),
                 ),
-                
+
                 // Imagen frontal (Antes / Original) recortada (Wipe)
                 Positioned.fill(
                   child: ClipRect(
@@ -53,6 +57,10 @@ class _BeforeAfterSliderState extends State<BeforeAfterSlider> {
                       child: Image(
                         image: widget.beforeImage,
                         fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => const ColoredBox(
+                          color: Color(0xFFEEEEEE),
+                          child: Center(child: Icon(Icons.broken_image_outlined, color: Colors.black26, size: 48)),
+                        ),
                         // Forzamos el ancho para obligar al Align a recortar visualmente sin "aplastar"
                         width: width,
                         height: height,

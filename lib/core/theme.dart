@@ -10,7 +10,6 @@ class AppTheme {
         primary: AppColors.primaryAccent,
         brightness: Brightness.light,
       ),
-      scaffoldBackgroundColor: Colors.transparent,
       useMaterial3: true,
 
       fontFamily: 'Inter',

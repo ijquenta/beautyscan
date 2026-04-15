@@ -19,9 +19,7 @@ class HairstyleDisplayScreen extends StatelessWidget {
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black87),
       ),
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
-        child: SafeArea(
+      body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -127,6 +125,6 @@ class HairstyleDisplayScreen extends StatelessWidget {
           ),
         ),
       ),
-    ));
+    );
   }
 }
