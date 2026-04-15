@@ -1,7 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
-class ScannerScreen extends StatelessWidget {
+class ScannerScreen extends StatefulWidget {
   const ScannerScreen({super.key});
+
+  @override
+  State<ScannerScreen> createState() => _ScannerScreenState();
+}
+
+class _ScannerScreenState extends State<ScannerScreen> {
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _takePhoto() async {
+    try {
+      final XFile? photo = await _picker.pickImage(source: ImageSource.gallery);
+      // Fallback a galería si están en emulador y la cámara truena o cancelan
+      final XFile? finalPhoto = photo;
+      
+      if (finalPhoto != null) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(
+            context,
+            '/analysis',
+            arguments: finalPhoto.path,
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint("Error al abrir cámara: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,12 +43,14 @@ class ScannerScreen extends StatelessWidget {
             color: const Color(0xFF1E1E1E),
             child: const Center(
               child: Text(
-                'Lente',
+                'TOCA EL CÍRCULO INFERIOR\nPARA ESCANEAR',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white24,
                   fontSize: 10,
                   fontFamily: 'Inter',
                   letterSpacing: 4,
+                  height: 1.5,
                 ),
               ),
             ),
@@ -139,7 +169,7 @@ class ScannerScreen extends StatelessWidget {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () => Navigator.pushNamed(context, '/analysis'),
+                  onTap: _takePhoto,
                   child: Container(
                     width: 70,
                     height: 70,

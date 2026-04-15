@@ -1,11 +1,67 @@
 import 'package:flutter/material.dart';
+import '../../domain/models/colorimetry_result_model.dart';
+import '../../data/repositories/colorimetry_repository.dart';
 import '../components/atoms/beauty_background.dart';
 
-class AnalysisResultsScreen extends StatelessWidget {
+class AnalysisResultsScreen extends StatefulWidget {
   const AnalysisResultsScreen({super.key});
 
   @override
+  State<AnalysisResultsScreen> createState() => _AnalysisResultsScreenState();
+}
+
+class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
+  final ColorimetryRepository _repo = ColorimetryRepository();
+  ColorimetryResultModel? _result;
+  bool _isLoading = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_result == null) {
+      final id = ModalRoute.of(context)!.settings.arguments as int?;
+      if (id != null) {
+        _loadData(id);
+      } else {
+        // Fallback error
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _loadData(int id) async {
+    final data = await _repo.getResultById(id);
+    setState(() {
+      _result = data;
+      _isLoading = false;
+    });
+  }
+
+  Color _hexToColor(String hex) {
+    hex = hex.replaceAll('#', '');
+    if (hex.length == 6) {
+      hex = 'FF$hex';
+    }
+    return Color(int.parse(hex, radix: 16));
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const BeautyBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Center(
+            child: Text('CARGANDO...', style: TextStyle(fontFamily: 'Inter', letterSpacing: 2.0)),
+          ),
+        ),
+      );
+    }
+
+    if (_result == null) {
+      return const Scaffold(body: Center(child: Text('Error cargando resultado.')));
+    }
+
     return BeautyBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -20,7 +76,7 @@ class AnalysisResultsScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       GestureDetector(
-                        onTap: () => Navigator.pop(context),
+                        onTap: () => Navigator.popUntil(context, ModalRoute.withName('/home')),
                         child: const Text(
                           'VOLVER',
                           style: TextStyle(
@@ -33,9 +89,9 @@ class AnalysisResultsScreen extends StatelessWidget {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () => Navigator.pushNamed(context, '/gallery'),
                         child: const Text(
-                          'GUARDAR',
+                          'GALERÍA',
                           style: TextStyle(
                             fontFamily: 'Inter',
                             fontWeight: FontWeight.bold,
@@ -68,9 +124,9 @@ class AnalysisResultsScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Primavera\nCálida.',
-                        style: TextStyle(
+                      Text(
+                        _result!.season.replaceAll(' ', '\n'), // Separar "Primavera Cálida" en 2 líneas
+                        style: const TextStyle(
                           fontFamily: 'PlayfairDisplay',
                           fontSize: 56,
                           fontWeight: FontWeight.bold,
@@ -86,9 +142,9 @@ class AnalysisResultsScreen extends StatelessWidget {
                         color: Colors.black87,
                       ),
                       const SizedBox(height: 32),
-                      const Text(
-                        'Tonos vibrantes y soleados que\nmaximizan tu luminosidad natural.\nUn contraste medio pero radiante.',
-                        style: TextStyle(
+                      Text(
+                        _result!.makeupTips ?? 'Tonos exclusivos recomendados para optimizar tu colorimetría personal y destacar tu identidad natural.',
+                        style: const TextStyle(
                           fontFamily: 'Inter',
                           fontSize: 14,
                           color: Colors.black54,
@@ -105,11 +161,10 @@ class AnalysisResultsScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: Column(
-                    children: const [
-                      _EditorialMetric(label: 'Rostro', value: 'Ovalado'),
-                      _EditorialMetric(label: 'Subtono', value: 'Cálido'),
-                      _EditorialMetric(label: 'Contraste', value: 'Medio'),
-                      _EditorialMetric(label: 'Intensidad', value: 'Suave'),
+                    children: [
+                      _EditorialMetric(label: 'Tono General', value: _result!.skinTone),
+                      _EditorialMetric(label: 'Subtono', value: _result!.undertone),
+                      const _EditorialMetric(label: 'Intensidad', value: 'Dinámica IA'),
                     ],
                   ),
                 ),
@@ -141,66 +196,45 @@ class AnalysisResultsScreen extends StatelessWidget {
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
                   ),
-                  delegate: SliverChildListDelegate(const [
-                    _EditorialColor(color: Color(0xFFE8936A)),
-                    _EditorialColor(color: Color(0xFFD4845A)),
-                    _EditorialColor(color: Color(0xFFC2547A)),
-                    _EditorialColor(color: Color(0xFFE8C060)),
-                    _EditorialColor(color: Color(0xFF8BAE50)),
-                    _EditorialColor(color: Color(0xFF4A9E8C)),
-                  ]),
-                ),
-              ),
-
-              // Bottom Actions
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 60),
-                  child: Column(
-                    children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pushNamed(context, '/colorimetry_detail'),
-                        child: Container(
-                          width: double.infinity,
-                          decoration: const BoxDecoration(
-                            border: Border(top: BorderSide(color: Colors.black12, width: 1)),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 24),
-                          child: const Text(
-                            'Detalle del Análisis',
-                            style: TextStyle(
-                              fontFamily: 'PlayfairDisplay',
-                              fontSize: 20,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.pushNamed(context, '/hairstyle_processing'),
-                        child: Container(
-                          width: double.infinity,
-                          decoration: const BoxDecoration(
-                            border: Border(
-                              top: BorderSide(color: Colors.black12, width: 1),
-                              bottom: BorderSide(color: Colors.black12, width: 1),
-                            ),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 24),
-                          child: const Text(
-                            'Simular Peinado',
-                            style: TextStyle(
-                              fontFamily: 'PlayfairDisplay',
-                              fontSize: 20,
-                              color: Colors.black54,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                  delegate: SliverChildListDelegate(
+                    _result!.recommendedColors.map((hex) => _EditorialColor(color: _hexToColor(hex))).toList(),
                   ),
                 ),
               ),
+
+              // Palette a Evitar
+              if (_result!.colorsToAvoid.isNotEmpty) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(32, 0, 32, 20),
+                    child: const Text(
+                      'COLORES A EVITAR',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 3.0,
+                        color: Colors.black38,
+                      ),
+                    ),
+                  ),
+                ),
+
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 80),
+                  sliver: SliverGrid(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      childAspectRatio: 1.0,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
+                    delegate: SliverChildListDelegate(
+                      _result!.colorsToAvoid.map((hex) => _EditorialColor(color: _hexToColor(hex), avoid: true)).toList(),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -221,6 +255,7 @@ class _EditorialMetric extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label.toUpperCase(),
@@ -231,13 +266,17 @@ class _EditorialMetric extends StatelessWidget {
               letterSpacing: 2.0,
             ),
           ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontFamily: 'PlayfairDisplay',
-              color: Colors.black87,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontFamily: 'PlayfairDisplay',
+                color: Colors.black87,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -248,13 +287,19 @@ class _EditorialMetric extends StatelessWidget {
 
 class _EditorialColor extends StatelessWidget {
   final Color color;
-  const _EditorialColor({required this.color});
+  final bool avoid;
+  const _EditorialColor({required this.color, this.avoid = false});
 
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
       aspectRatio: 1,
-      child: Container(color: color), // Pure, flat color without border or drop shadows
+      child: Container(
+        decoration: BoxDecoration(
+          color: color, // Pure, flat color without border or drop shadows
+          border: avoid ? Border.all(color: Colors.black26, width: 0.5) : null,
+        ),
+      ), 
     );
   }
 }

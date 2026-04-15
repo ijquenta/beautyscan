@@ -105,6 +105,34 @@ class DatabaseHelper {
     );
   }
 
+  // ─── COLORIMETRY ─────────────────────────────────────────
+
+  Future<int> insertColorimetryResult(Map<String, dynamic> data) async {
+    final db = await database;
+    return db.insert('colorimetry_results', data);
+  }
+
+  Future<List<Map<String, dynamic>>> getColorimetryResultsByUser(int userId) async {
+    final db = await database;
+    return db.query(
+      'colorimetry_results',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+      orderBy: 'created_at DESC',
+    );
+  }
+
+  Future<Map<String, dynamic>?> getColorimetryResultById(int id) async {
+    final db = await database;
+    final result = await db.query(
+      'colorimetry_results',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    return result.isNotEmpty ? result.first : null;
+  }
+
   // ─── STATS ───────────────────────────────────────────────
 
   Future<int> countColorimetryResults(int userId) async {

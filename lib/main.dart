@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_gemini/flutter_gemini.dart';
+import 'package:beautyscan/core/secrets.dart';
 import 'package:beautyscan/core/theme.dart';
 import 'package:beautyscan/presentation/screens/splash_screen.dart';
 import 'package:beautyscan/presentation/screens/onboarding_screen.dart';
@@ -16,9 +19,9 @@ import 'package:beautyscan/presentation/screens/profile_screen.dart';
 import 'package:beautyscan/presentation/screens/settings_screen.dart';
 import 'package:beautyscan/presentation/screens/hairstyle_detail_screen.dart';
 import 'package:beautyscan/presentation/screens/colorimetry_detail_screen.dart';
-import 'package:beautyscan/presentation/screens/feedback_screen.dart';
 
 void main() {
+  Gemini.init(apiKey: Secrets.geminiApiKey);
   runApp(const BeautyScanApp());
 }
 

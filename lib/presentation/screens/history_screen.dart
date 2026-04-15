@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../core/constants.dart';
+import '../../domain/models/colorimetry_result_model.dart';
+import '../../data/repositories/colorimetry_repository.dart';
+import '../../data/repositories/user_repository.dart';
 import '../components/atoms/beauty_background.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -11,44 +13,58 @@ class HistoryScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryScreen> {
   int _selectedTab = 0;
+  bool _isLoading = true;
+  List<_HistoryEntry> _entries = [];
+  
+  final ColorimetryRepository _colorimetryRepo = ColorimetryRepository();
+  final UserRepository _userRepo = UserRepository();
 
-  final List<_HistoryEntry> _entries = [
-    _HistoryEntry(
-      type: 'Colorimetría',
-      result: 'Primavera Cálida',
-      detail: 'Subtono cálido · Contraste medio',
-      date: '12 abr 2026',
-      route: '/colorimetry_detail',
-    ),
-    _HistoryEntry(
-      type: 'Peinado IA',
-      result: 'Bob Caoba Cálida',
-      detail: 'Corte bob · Tinte caoba',
-      date: '8 abr 2026',
-      route: '/hairstyle_display',
-    ),
-    _HistoryEntry(
-      type: 'Colorimetría',
-      result: 'Otoño Suave',
-      detail: 'Subtono terroso · Contraste suave',
-      date: '2 abr 2026',
-      route: '/colorimetry_detail',
-    ),
-    _HistoryEntry(
-      type: 'Peinado IA',
-      result: 'Largo Ondulado Natural',
-      detail: 'Sin corte · Tinte rubio miel',
-      date: '28 mar 2026',
-      route: '/hairstyle_display',
-    ),
-    _HistoryEntry(
-      type: 'Colorimetría',
-      result: 'Invierno Profundo',
-      detail: 'Subtono frío · Contraste alto',
-      date: '20 mar 2026',
-      route: '/colorimetry_detail', // fixed duplicate from above
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final user = await _userRepo.getCurrentUser();
+    if (user != null) {
+      final colorimetryData = await _colorimetryRepo.getResultsByUser(user.id!);
+      
+      final mappedEntries = colorimetryData.map((c) => _HistoryEntry(
+        id: c.id!,
+        type: 'Colorimetría',
+        result: c.season,
+        detail: 'Subtono ${c.undertone}',
+        date: _formatDate(c.createdAt),
+        route: '/analysis_results',
+      )).toList();
+
+      if (mounted) {
+        setState(() {
+          _entries = mappedEntries;
+          _isLoading = false;
+        });
+      }
+    } else {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  String _formatDate(String isoString) {
+    try {
+      final dt = DateTime.parse(isoString);
+      return '${dt.day} ${_getMonth(dt.month)}'.toUpperCase();
+    } catch (_) {
+      return '';
+    }
+  }
+
+  String _getMonth(int m) {
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return months[m - 1];
+  }
 
   List<_HistoryEntry> get _filtered {
     if (_selectedTab == 0) return _entries;
@@ -162,7 +178,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
               // List
               Expanded(
-                child: _filtered.isEmpty
+                child: _isLoading 
+                  ? const Center(
+                      child: Text('CARGANDO...', style: TextStyle(fontFamily: 'Inter', letterSpacing: 2.0)),
+                    )
+                  : _filtered.isEmpty
                     ? const Center(
                         child: Text(
                           'ARCHIVO VACÍO',
@@ -180,7 +200,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         itemBuilder: (context, index) {
                           final entry = _filtered[index];
                           return GestureDetector(
-                            onTap: () => Navigator.pushNamed(context, entry.route),
+                            onTap: () => Navigator.pushNamed(context, entry.route, arguments: entry.id),
                             child: Container(
                               margin: const EdgeInsets.only(bottom: 32),
                               color: Colors.transparent, // tap area
@@ -190,7 +210,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   SizedBox(
                                     width: 70,
                                     child: Text(
-                                      entry.date.toUpperCase(),
+                                      entry.date,
                                       style: const TextStyle(
                                         fontFamily: 'Inter',
                                         fontSize: 9,
@@ -242,6 +262,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 }
 
 class _HistoryEntry {
+  final int id;
   final String type;
   final String result;
   final String detail;
@@ -249,6 +270,7 @@ class _HistoryEntry {
   final String route;
 
   const _HistoryEntry({
+    required this.id,
     required this.type,
     required this.result,
     required this.detail,
