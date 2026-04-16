@@ -17,8 +17,9 @@ class DatabaseHelper {
     final path = p.join(dbPath, 'beautyscan.db');
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -40,6 +41,7 @@ class DatabaseHelper {
       CREATE TABLE colorimetry_results (
         id                  INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id             INTEGER NOT NULL,
+        client_name         TEXT    NOT NULL,
         photo_path          TEXT    NOT NULL,
         skin_tone           TEXT    NOT NULL,
         undertone           TEXT    NOT NULL,
@@ -64,6 +66,13 @@ class DatabaseHelper {
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       )
     ''');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Agregar nombre de clienta al historial
+      await db.execute('ALTER TABLE colorimetry_results ADD COLUMN client_name TEXT NOT NULL DEFAULT ""');
+    }
   }
 
   // ─── USERS ───────────────────────────────────────────────

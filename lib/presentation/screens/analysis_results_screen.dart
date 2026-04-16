@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../domain/models/colorimetry_result_model.dart';
 import '../../data/repositories/colorimetry_repository.dart';
@@ -114,7 +116,7 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'EL RESULTADO',
+                        'ANÁLISIS DE',
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontSize: 10,
@@ -125,17 +127,40 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        _result!.season.replaceAll(' ', '\n'), // Separar "Primavera Cálida" en 2 líneas
+                        _result!.clientName,
                         style: const TextStyle(
                           fontFamily: 'PlayfairDisplay',
-                          fontSize: 56,
+                          fontSize: 48,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
                           height: 1.0,
                           letterSpacing: -1.0,
                         ),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 8),
+                      Text(
+                        _result!.season.replaceAll(' ', '\n'), // Separar "Primavera Cálida" en 2 líneas
+                        style: const TextStyle(
+                          fontFamily: 'PlayfairDisplay',
+                          fontSize: 32,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black54,
+                          height: 1.0,
+                          letterSpacing: -1.0,
+                        ),
+                      ),
+                      const SizedBox(height: 48),
+
+                      // Radial Palette Display
+                      Center(
+                        child: _RadialPaletteDisplay(
+                          imagePath: _result!.photoPath,
+                          recommended: _result!.recommendedColors.map(_hexToColor).toList(),
+                          toAvoid: _result!.colorsToAvoid.map(_hexToColor).toList(),
+                        ),
+                      ),
+
+                      const SizedBox(height: 48),
                       Container(
                         width: 40,
                         height: 1,
@@ -300,6 +325,95 @@ class _EditorialColor extends StatelessWidget {
           border: avoid ? Border.all(color: Colors.black26, width: 0.5) : null,
         ),
       ), 
+    );
+  }
+}
+
+class _RadialPaletteDisplay extends StatelessWidget {
+  final String imagePath;
+  final List<Color> recommended;
+  final List<Color> toAvoid;
+
+  const _RadialPaletteDisplay({
+    required this.imagePath,
+    required this.recommended,
+    required this.toAvoid,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const double size = 300;
+    const double imageSize = 160;
+    const double radius = size / 2 - 15;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Center Image
+          ClipOval(
+            child: imagePath.isNotEmpty && File(imagePath).existsSync()
+              ? Image.file(
+                  File(imagePath),
+                  width: imageSize,
+                  height: imageSize,
+                  fit: BoxFit.cover,
+                )
+              : Container(
+                  width: imageSize,
+                  height: imageSize,
+                  color: Colors.black12,
+                ),
+          ),
+          
+          // Recommended Colors (Left Hemisphere)
+          if (recommended.isNotEmpty)
+            ...List.generate(recommended.length, (index) {
+              final double step = recommended.length > 1 ? pi / (recommended.length - 1) : 0;
+              final double angle = pi / 2 + step * index; 
+              return Positioned(
+                left: size / 2 - 15 + radius * cos(angle),
+                top: size / 2 - 15 + radius * sin(angle),
+                child: _ColorPoint(color: recommended[index], size: 30),
+              );
+            }),
+          
+          // Avoid Colors (Right Hemisphere)
+          if (toAvoid.isNotEmpty)
+            ...List.generate(toAvoid.length, (index) {
+              final double step = toAvoid.length > 1 ? pi / (toAvoid.length - 1) : 0;
+              final double angle = pi / 2 - step * index; 
+              return Positioned(
+                left: size / 2 - 12 + radius * cos(angle),
+                top: size / 2 - 12 + radius * sin(angle),
+                child: _ColorPoint(color: toAvoid[index], size: 24, isAvoid: true),
+              );
+            }),
+        ],
+      ),
+    );
+  }
+}
+
+class _ColorPoint extends StatelessWidget {
+  final Color color;
+  final double size;
+  final bool isAvoid;
+
+  const _ColorPoint({required this.color, required this.size, this.isAvoid = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        border: isAvoid ? Border.all(color: Colors.black26, width: 1.0) : null,
+      ),
     );
   }
 }

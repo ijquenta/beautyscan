@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 import '../../domain/models/colorimetry_result_model.dart';
 import '../repositories/user_repository.dart';
@@ -8,7 +9,7 @@ import '../repositories/user_repository.dart';
 class GeminiService {
   final _userRepo = UserRepository();
 
-  Future<ColorimetryResultModel> analyzeColorimetry(Uint8List imageBytes, String photoPath) async {
+  Future<ColorimetryResultModel> analyzeColorimetry(Uint8List imageBytes, String photoPath, String clientName) async {
     final prompt = '''
 Eres un Asesor de Imagen Cromatico de Alto Nivel de una Revista de Moda (Vogue, Harper's Bazaar).
 Analiza esta foto del rostro de la persona para determinar su Estación Cromática con precisión.
@@ -51,6 +52,7 @@ INSTRUCCIONES DE COLORES:
 
       return ColorimetryResultModel(
         userId: userId,
+        clientName: clientName,
         photoPath: photoPath,
         skinTone: data['skin_tone'] ?? 'Media',
         undertone: data['undertone'] ?? 'Neutra',

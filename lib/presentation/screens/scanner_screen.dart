@@ -11,52 +11,124 @@ class ScannerScreen extends StatefulWidget {
 class _ScannerScreenState extends State<ScannerScreen> {
   final ImagePicker _picker = ImagePicker();
 
-  Future<void> _takePhoto() async {
+  Future<void> _pickImage(ImageSource source) async {
     try {
-      final XFile? photo = await _picker.pickImage(source: ImageSource.gallery);
-      // Fallback a galería si están en emulador y la cámara truena o cancelan
+      final XFile? photo = await _picker.pickImage(source: source);
       final XFile? finalPhoto = photo;
       
       if (finalPhoto != null) {
-        if (mounted) {
+        if (!mounted) return;
+        
+        final clientName = await _askClientName(context);
+        if (clientName != null && mounted) {
           Navigator.pushReplacementNamed(
             context,
             '/analysis',
-            arguments: finalPhoto.path,
+            arguments: {
+              'path': finalPhoto.path,
+              'clientName': clientName,
+            },
           );
         }
       }
     } catch (e) {
-      debugPrint("Error al abrir cámara: $e");
+      debugPrint("Error picking image: $e");
     }
+  }
+
+  Future<String?> _askClientName(BuildContext context) async {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFFFBFBFB),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+          title: const Text(
+            'DATOS DEL ANÁLISIS',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 10,
+              letterSpacing: 3.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.black38,
+            ),
+          ),
+          content: TextField(
+            controller: controller,
+            textCapitalization: TextCapitalization.words,
+            cursorColor: Colors.black87,
+            style: const TextStyle(
+              fontFamily: 'PlayfairDisplay',
+              fontSize: 24,
+              color: Colors.black87,
+            ),
+            decoration: const InputDecoration(
+              hintText: 'Nombre de la clienta',
+              hintStyle: TextStyle(
+                fontFamily: 'PlayfairDisplay',
+                fontSize: 24,
+                color: Colors.black26,
+              ),
+              border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black12)),
+              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, null),
+              child: const Text(
+                'CANCELAR',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 10,
+                  letterSpacing: 2.0,
+                  color: Colors.black54,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                final text = controller.text.trim();
+                Navigator.pop(context, text.isNotEmpty ? text : 'Cliente Anónimo');
+              },
+              child: const Text(
+                'CONTINUAR',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 10,
+                  letterSpacing: 2.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Opaque editorial camera look
+      backgroundColor: Colors.black,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // SIMULATED CAMERA VIEW
+          // BACKGROUND IMAGE
+          Image.asset(
+            'assets/images/foto-chica.png',
+            fit: BoxFit.cover,
+          ),
+          
+          // Subtle dark overlay to ensure UI elements are visible
           Container(
-            color: const Color(0xFF1E1E1E),
-            child: const Center(
-              child: Text(
-                'TOCA EL CÍRCULO INFERIOR\nPARA ESCANEAR',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white24,
-                  fontSize: 10,
-                  fontFamily: 'Inter',
-                  letterSpacing: 4,
-                  height: 1.5,
-                ),
-              ),
-            ),
+            color: Colors.black.withValues(alpha: 0.3),
           ),
 
-          // Subtle overlays
+          // Subtle overlays (gradients)
           Positioned(
             top: 0,
             left: 0,
@@ -68,7 +140,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.8),
+                    Colors.black.withValues(alpha: 0.6),
                     Colors.transparent,
                   ],
                 ),
@@ -87,7 +159,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.9),
+                    Colors.black.withValues(alpha: 0.7),
                     Colors.transparent,
                   ],
                 ),
@@ -120,7 +192,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   'ROSTRO EN LUZ NATURAL',
                   style: TextStyle(
                     fontFamily: 'Inter',
-                    color: Colors.white54,
+                    color: Colors.white70,
                     fontSize: 9,
                     fontWeight: FontWeight.w400,
                     letterSpacing: 1.5,
@@ -130,7 +202,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
             ),
           ),
 
-          // Framing brackets (no more thick ovals)
+          // Framing brackets
           Center(
             child: SizedBox(
               width: 250,
@@ -156,12 +228,12 @@ class _ScannerScreenState extends State<ScannerScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 GestureDetector(
-                  onTap: () => Navigator.pushReplacementNamed(context, '/gallery'),
+                  onTap: () => _pickImage(ImageSource.gallery),
                   child: const Text(
                     'GALERÍA',
                     style: TextStyle(
                       fontFamily: 'Inter',
-                      color: Colors.white70,
+                      color: Colors.white,
                       fontSize: 11,
                       fontWeight: FontWeight.w400,
                       letterSpacing: 2.0,
@@ -169,7 +241,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   ),
                 ),
                 GestureDetector(
-                  onTap: _takePhoto,
+                  onTap: () => _pickImage(ImageSource.camera),
                   child: Container(
                     width: 70,
                     height: 70,
@@ -190,12 +262,12 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () {},
+                   onTap: () => Navigator.pushNamed(context, '/gallery'),
                   child: const Text(
-                    'GIRAR',
+                    'HISTORIAL',
                     style: TextStyle(
                       fontFamily: 'Inter',
-                      color: Colors.white70,
+                      color: Colors.white,
                       fontSize: 11,
                       fontWeight: FontWeight.w400,
                       letterSpacing: 2.0,

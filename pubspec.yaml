@@ -21,6 +21,7 @@ dependencies:
   path_provider: ^2.1.5
   path: ^1.9.1
   flutter_gemini: ^3.0.0
+  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.10.0 
@@ -45,6 +46,8 @@ flutter:
   assets:
     - assets/icon/app_icon.png
     - assets/images/splash_image.png
+    - assets/images/foto-chica.png
+    - .env
 
   # To add assets to your application, add an assets section, like this:
   # assets:

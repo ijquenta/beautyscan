@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../data/services/gemini_service.dart';
 import '../../data/repositories/colorimetry_repository.dart';
 
@@ -49,18 +50,27 @@ class _AnalysisScreenState extends State<AnalysisScreen> with SingleTickerProvid
 
   Future<void> _processImageWithGemini() async {
     try {
-      final path = ModalRoute.of(context)!.settings.arguments as String?;
-      if (path == null) throw Exception("No image path provided");
+      final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+      if (args == null) throw Exception("No args provided");
       
-      setState(() => _imagePath = path);
+      final tempPath = args['path'] as String;
+      final clientName = args['clientName'] as String;
 
-      final fileBytes = await File(path).readAsBytes();
+      // Copy to persistent documents directory
+      final appDir = await getApplicationDocumentsDirectory();
+      final fileName = 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final permanentFile = await File(tempPath).copy('${appDir.path}/$fileName');
+      final persistentPath = permanentFile.path;
+
+      setState(() => _imagePath = persistentPath);
+
+      final fileBytes = await permanentFile.readAsBytes();
       
       final geminiService = GeminiService();
       final colorimetryRepo = ColorimetryRepository();
 
       // Llamada real a IA
-      final resultModel = await geminiService.analyzeColorimetry(fileBytes, path);
+      final resultModel = await geminiService.analyzeColorimetry(fileBytes, persistentPath, clientName);
       
       // Guardado real a base de datos
       final savedId = await colorimetryRepo.saveResult(resultModel);

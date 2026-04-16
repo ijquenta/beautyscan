@@ -3,6 +3,7 @@ import 'dart:convert';
 class ColorimetryResultModel {
   final int? id;
   final int userId;
+  final String clientName;
   final String photoPath;
   final String skinTone;
   final String undertone;
@@ -15,6 +16,7 @@ class ColorimetryResultModel {
   const ColorimetryResultModel({
     this.id,
     required this.userId,
+    required this.clientName,
     required this.photoPath,
     required this.skinTone,
     required this.undertone,
@@ -29,6 +31,7 @@ class ColorimetryResultModel {
     return {
       'id': id,
       'user_id': userId,
+      'client_name': clientName,
       'photo_path': photoPath,
       'skin_tone': skinTone,
       'undertone': undertone,
@@ -44,6 +47,7 @@ class ColorimetryResultModel {
     return ColorimetryResultModel(
       id: map['id'] as int?,
       userId: map['user_id'] as int,
+      clientName: map['client_name'] as String? ?? 'Cliente',
       photoPath: map['photo_path'] as String,
       skinTone: map['skin_tone'] as String,
       undertone: map['undertone'] as String,
