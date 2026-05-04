@@ -95,6 +95,18 @@ class UserRepository {
     return rows > 0;
   }
 
+  Future<bool> resetPasswordByEmail(String email, String newPassword) async {
+    final normalizedEmail = email.trim().toLowerCase();
+    final row = await _db.getUserByEmail(normalizedEmail);
+    if (row == null) return false;
+
+    final userId = row['id'] as int;
+    final rows = await _db.updateUser(userId, {
+      'password_hash': _hashPassword(newPassword.trim()),
+    });
+    return rows > 0;
+  }
+
   /// Copia la foto elegida al directorio de documentos de la app y guarda la ruta.
   Future<String?> updatePhoto(int userId, String sourcePath) async {
     try {

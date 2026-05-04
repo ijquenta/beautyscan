@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../domain/models/colorimetry_result_model.dart';
 import '../../data/repositories/colorimetry_repository.dart';
 import '../../data/repositories/user_repository.dart';
 import '../components/atoms/beauty_background.dart';
@@ -33,7 +32,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
       final mappedEntries = colorimetryData.map((c) => _HistoryEntry(
         id: c.id!,
         type: 'Colorimetría',
-        result: c.season,
+        clientName: c.clientName,
+        season: c.season,
         detail: 'Subtono ${c.undertone}',
         date: _formatDate(c.createdAt),
         route: '/analysis_results',
@@ -224,8 +224,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
+                                        // Título: nombre del cliente
                                         Text(
-                                          entry.result,
+                                          entry.clientName,
                                           style: const TextStyle(
                                             fontFamily: 'PlayfairDisplay',
                                             fontSize: 20,
@@ -234,12 +235,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                           ),
                                         ),
                                         const SizedBox(height: 4),
+                                        // Subtítulo: temporada cromática
+                                        Text(
+                                          entry.season,
+                                          style: const TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 11,
+                                            color: Colors.black54,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
                                         Text(
                                           entry.type.toUpperCase(),
                                           style: const TextStyle(
                                             fontFamily: 'Inter',
                                             fontSize: 9,
-                                            color: Colors.black54,
+                                            color: Colors.black38,
                                             letterSpacing: 2.0,
                                           ),
                                         ),
@@ -264,7 +276,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
 class _HistoryEntry {
   final int id;
   final String type;
-  final String result;
+  final String clientName;
+  final String season;
   final String detail;
   final String date;
   final String route;
@@ -272,7 +285,8 @@ class _HistoryEntry {
   const _HistoryEntry({
     required this.id,
     required this.type,
-    required this.result,
+    required this.clientName,
+    required this.season,
     required this.detail,
     required this.date,
     required this.route,

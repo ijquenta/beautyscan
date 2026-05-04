@@ -1,39 +1,17 @@
 import 'package:flutter/material.dart';
 import '../components/atoms/beauty_background.dart';
+import '../../domain/models/hairstyle_model.dart';
 
 class HairstyleProcessingScreen extends StatefulWidget {
   const HairstyleProcessingScreen({super.key});
 
   @override
-  State<HairstyleProcessingScreen> createState() =>
-      _HairstyleProcessingScreenState();
+  State<HairstyleProcessingScreen> createState() => _HairstyleProcessingScreenState();
 }
 
-class _HairstyleProcessingScreenState extends State<HairstyleProcessingScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _rotateController;
-
-  final List<_ProcessingStep> _steps = [
-    _ProcessingStep(label: 'CARGANDO MODELO', done: true),
-    _ProcessingStep(label: 'ANALIZANDO ESTRUCTURA', done: true),
-    _ProcessingStep(label: 'SINTETIZANDO CABELLO', done: false),
-    _ProcessingStep(label: 'REFINADO EDITORIAL', done: false),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _rotateController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 4),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _rotateController.dispose();
-    super.dispose();
-  }
+class _HairstyleProcessingScreenState extends State<HairstyleProcessingScreen> {
+  int _selectedIndex = 2; // Default bob texturizado
+  final List<HairstyleModel> _styles = HairstyleModel.catalog;
 
   @override
   Widget build(BuildContext context) {
@@ -63,111 +41,168 @@ class _HairstyleProcessingScreenState extends State<HairstyleProcessingScreen>
         ),
         body: SafeArea(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Spacer(flex: 2),
-
-              const Text(
-                'Procesando.',
-                style: TextStyle(
-                  fontFamily: 'PlayfairDisplay',
-                  fontSize: 48,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black87,
-                  letterSpacing: -1.0,
-                  height: 1.0,
-                ),
-              ),
               const SizedBox(height: 16),
-              const Text(
-                'Aplicando el nuevo estilo con alta\nprecisión arquitectónica.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  color: Colors.black54,
-                  height: 1.6,
-                  fontSize: 14,
+
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  'Catálogo.',
+                  style: TextStyle(
+                    fontFamily: 'PlayfairDisplay',
+                    fontSize: 48,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
+                    letterSpacing: -1.0,
+                    height: 1.0,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  'Elige un estilo para la simulación fotorrealista.',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    color: Colors.black54,
+                    height: 1.6,
+                    fontSize: 13,
+                  ),
                 ),
               ),
 
-              const Spacer(flex: 2),
+              const SizedBox(height: 48),
 
-              // Animación geométrica mínima
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  RotationTransition(
-                    turns: _rotateController,
-                    child: Container(
-                      width: 150,
-                      height: 150,
-                      decoration: const BoxDecoration(shape: BoxShape.circle),
-                      child: CustomPaint(painter: _MinimalArcPainter()),
-                    ),
+              Expanded(
+                child: GridView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.8,
                   ),
-                  const Text(
-                    'IA',
-                    style: TextStyle(
-                      fontFamily: 'PlayfairDisplay',
-                      fontSize: 32,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ],
-              ),
+                  itemCount: _styles.length,
+                  itemBuilder: (context, index) {
+                    final style = _styles[index];
+                    final isSelected = index == _selectedIndex;
 
-              const Spacer(flex: 3),
-
-              // Pasos (texto puro)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _steps.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final step = entry.value;
-                    final isActive = !step.done && (index == 0 || _steps[index - 1].done);
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 24,
-                            child: step.done
-                                ? const Text('✓', style: TextStyle(color: Colors.black87, fontSize: 12))
-                                : isActive
-                                    ? const SizedBox(
-                                        width: 10,
-                                        height: 10,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 1.5,
-                                          color: Colors.black87,
-                                        ),
-                                      )
-                                    : const SizedBox(),
+                    return GestureDetector(
+                      onTap: () => setState(() => _selectedIndex = index),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                        clipBehavior: Clip.antiAlias,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: isSelected ? Colors.black87 : Colors.black12,
+                            width: isSelected ? 2 : 1,
                           ),
-                          Text(
-                            step.label,
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 10,
-                              letterSpacing: 2.5,
-                              fontWeight: step.done || isActive ? FontWeight.w600 : FontWeight.w400,
-                              color: step.done || isActive ? Colors.black87 : Colors.black38,
+                          image: DecorationImage(
+                            image: AssetImage(style.imagePath),
+                            fit: BoxFit.cover,
+                            colorFilter: isSelected ? null : ColorFilter.mode(
+                              Colors.white.withValues(alpha: 0.3),
+                              BlendMode.lighten,
                             ),
                           ),
-                        ],
+                        ),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              height: 100,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.transparent,
+                                      Colors.black.withValues(alpha: 0.8),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Align(
+                                    alignment: Alignment.topRight,
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 300),
+                                      width: 12,
+                                      height: 12,
+                                      decoration: BoxDecoration(
+                                        color: isSelected ? style.accentColor : Colors.white.withValues(alpha: 0.5),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: isSelected ? Colors.transparent : Colors.white54,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    style.name.replaceAll('\\n', ' '),
+                                    style: TextStyle(
+                                      fontFamily: 'PlayfairDisplay',
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    style.styleType.toUpperCase(),
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 9,
+                                      letterSpacing: 2.0,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
-                  }).toList(),
+                  },
                 ),
               ),
 
-              const Spacer(flex: 2),
-
               GestureDetector(
-                onTap: () => Navigator.pushReplacementNamed(context, '/hairstyle_display'),
+                onTap: () {
+                  final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+                  final originalPhotoPath = args?['photoPath'] as String?;
+
+                  if (originalPhotoPath == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Error: No photo provided.')),
+                    );
+                    return;
+                  }
+
+                  Navigator.pushNamed(
+                    context,
+                    '/hairstyle_loading',
+                    arguments: {
+                      'style': _styles[_selectedIndex],
+                      'photoPath': originalPhotoPath,
+                    },
+                  );
+                },
                 child: Container(
                   width: double.infinity,
                   decoration: const BoxDecoration(
@@ -176,7 +211,7 @@ class _HairstyleProcessingScreenState extends State<HairstyleProcessingScreen>
                   padding: const EdgeInsets.symmetric(vertical: 24),
                   child: const Center(
                     child: Text(
-                      'VER RESULTADO (DEMO)',
+                      'VER RESULTADO',
                       style: TextStyle(
                         fontFamily: 'Inter',
                         fontSize: 10,
@@ -194,45 +229,4 @@ class _HairstyleProcessingScreenState extends State<HairstyleProcessingScreen>
       ),
     );
   }
-}
-
-class _ProcessingStep {
-  final String label;
-  final bool done;
-  const _ProcessingStep({required this.label, required this.done});
-}
-
-class _MinimalArcPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.black87
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.square;
-
-    canvas.drawArc(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      0,
-      3.14, // Half circle
-      false,
-      paint,
-    );
-    
-    final paintLight = Paint()
-      ..color = Colors.black12
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-      
-    canvas.drawArc(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      3.14,
-      3.14, 
-      false,
-      paintLight,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

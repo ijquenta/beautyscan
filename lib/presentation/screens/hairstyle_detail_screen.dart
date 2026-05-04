@@ -1,11 +1,31 @@
 import 'package:flutter/material.dart';
 import '../components/atoms/beauty_background.dart';
+import '../../domain/models/hairstyle_model.dart';
 
-class HairstyleDetailScreen extends StatelessWidget {
+class HairstyleDetailScreen extends StatefulWidget {
   const HairstyleDetailScreen({super.key});
 
   @override
+  State<HairstyleDetailScreen> createState() => _HairstyleDetailScreenState();
+}
+
+class _HairstyleDetailScreenState extends State<HairstyleDetailScreen> {
+  HairstyleModel? _style;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is HairstyleModel) {
+      _style = args;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Fallback al bob texturizado si no se pasa argumento
+    final style = _style ?? HairstyleModel.catalog[2];
+
     return BeautyBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -31,7 +51,15 @@ class HairstyleDetailScreen extends StatelessWidget {
           leadingWidth: 100,
           actions: [
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Estilo compartido.',
+                        style: TextStyle(fontFamily: 'Inter')),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              },
               child: const Padding(
                 padding: EdgeInsets.only(right: 32, top: 20),
                 child: Text(
@@ -53,13 +81,13 @@ class HairstyleDetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Encabezado
+                // ── Encabezado ───────────────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.fromLTRB(32, 20, 32, 40),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
+                    children: [
+                      const Text(
                         'ESTILO SIMULADO IA',
                         style: TextStyle(
                           fontFamily: 'Inter',
@@ -69,10 +97,10 @@ class HairstyleDetailScreen extends StatelessWidget {
                           color: Colors.black38,
                         ),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       Text(
-                        'Texturizado\nCaoba Cálida.',
-                        style: TextStyle(
+                        style.name,
+                        style: const TextStyle(
                           fontFamily: 'PlayfairDisplay',
                           fontSize: 52,
                           fontWeight: FontWeight.w700,
@@ -81,10 +109,10 @@ class HairstyleDetailScreen extends StatelessWidget {
                           height: 1.0,
                         ),
                       ),
-                      SizedBox(height: 24),
+                      const SizedBox(height: 24),
                       Text(
-                        'Corte bob con capas texturizadas y un tinte\ncaoba cálido que realza tu temporada natural.',
-                        style: TextStyle(
+                        style.description,
+                        style: const TextStyle(
                           fontFamily: 'Inter',
                           color: Colors.black54,
                           fontSize: 14,
@@ -95,31 +123,36 @@ class HairstyleDetailScreen extends StatelessWidget {
                   ),
                 ),
 
-                // Specs
+                // ── Características ───────────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: Row(
                     children: [
                       Expanded(
-                        child: _buildCharacteristic('TIPO', 'Bob Corte'),
+                        child: _buildCharacteristic(
+                            'TIPO', _capitalize(style.styleType)),
                       ),
                       const SizedBox(width: 24),
                       Expanded(
-                        child: _buildCharacteristic('LARGO', 'Medio corto'),
+                        child: _buildCharacteristic(
+                            'MANTENIMIENTO', style.maintenanceLevel),
                       ),
                     ],
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 32, vertical: 24),
                   child: Row(
                     children: [
                       Expanded(
-                        child: _buildCharacteristic('TEXTURA', 'Ondulado'),
+                        child: _buildCharacteristic('ESTILO',
+                            style.styleType == 'rizado' ? 'Texturizado' : 'Liso/Ondulado'),
                       ),
                       const SizedBox(width: 24),
                       Expanded(
-                        child: _buildCharacteristic('MANTENIMIENTO', 'Moderado'),
+                        child: _buildCharacteristic(
+                            'TECNOLOGÍA', 'Simulación IA'),
                       ),
                     ],
                   ),
@@ -127,46 +160,35 @@ class HairstyleDetailScreen extends StatelessWidget {
 
                 const SizedBox(height: 48),
 
-                // Recomendados
+                // ── Productos / Herramientas ──────────────────────────────
                 _buildSectionTitle('PRODUCTOS / HERRAMIENTAS'),
                 const SizedBox(height: 24),
-                ..._ProductItem.samples.map(
-                  (p) => _buildProductRow(p),
-                ),
+                ...style.products.map((p) => _buildProductRow(p)),
 
                 const SizedBox(height: 48),
 
-                // Pasos estilista
+                // ── Guía del Estilista ────────────────────────────────────
                 _buildSectionTitle('GUÍA PARA EL ESTILISTA'),
                 const SizedBox(height: 24),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: Column(
-                    children: const [
-                      _InstructionStep(
-                        number: 'I.',
-                        text: 'Decoloración en mechones superiores pre-tinte.',
-                      ),
-                      _InstructionStep(
-                        number: 'II.',
-                        text: 'Tinte 6.45 (caoba cálido) por toda la longitud (35 min).',
-                      ),
-                      _InstructionStep(
-                        number: 'III.',
-                        text: 'Corte bob, altura del mentón con capas internas.',
-                      ),
-                      _InstructionStep(
-                        number: 'IV.',
-                        text: 'Ondas con plancha 32mm, finalizando con aceite argán.',
-                      ),
-                    ],
+                    children: style.stylistSteps.asMap().entries.map((e) {
+                      final romanNumerals = ['I.', 'II.', 'III.', 'IV.', 'V.'];
+                      final num = e.key < romanNumerals.length
+                          ? romanNumerals[e.key]
+                          : '${e.key + 1}.';
+                      return _InstructionStep(number: num, text: e.value);
+                    }).toList(),
                   ),
                 ),
 
                 const SizedBox(height: 48),
 
+                // ── Botón de Acción ───────────────────────────────────────
                 GestureDetector(
-                  onTap: () => Navigator.popUntil(context, ModalRoute.withName('/home')),
+                  onTap: () => Navigator.popUntil(
+                      context, ModalRoute.withName('/home')),
                   child: Container(
                     width: double.infinity,
                     color: Colors.black87,
@@ -192,6 +214,9 @@ class HairstyleDetailScreen extends StatelessWidget {
       ),
     );
   }
+
+  String _capitalize(String s) =>
+      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 
   Widget _buildSectionTitle(String title) {
     return Padding(
@@ -236,12 +261,13 @@ class HairstyleDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProductRow(_ProductItem item) {
+  Widget _buildProductRow(HairstyleProduct item) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 32),
       padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.black12, width: 1.0)),
+        border:
+            Border(bottom: BorderSide(color: Colors.black12, width: 1.0)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -331,22 +357,4 @@ class _InstructionStep extends StatelessWidget {
       ),
     );
   }
-}
-
-class _ProductItem {
-  final String name;
-  final String brand;
-  final String use;
-
-  const _ProductItem({
-    required this.name,
-    required this.brand,
-    required this.use,
-  });
-
-  static const List<_ProductItem> samples = [
-    _ProductItem(name: '6.45 CAOBA', brand: 'Koleston Perfect', use: 'Tinte'),
-    _ProductItem(name: 'MASCARILLA', brand: 'Kerastase Nutritive', use: 'Reparador'),
-    _ProductItem(name: 'ACEITE ARGÁN', brand: 'Moroccanoil', use: 'Acabado'),
-  ];
 }

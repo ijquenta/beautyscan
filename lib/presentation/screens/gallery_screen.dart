@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../domain/models/colorimetry_result_model.dart';
 import '../../data/repositories/colorimetry_repository.dart';
 import '../../data/repositories/user_repository.dart';
 import '../components/atoms/beauty_background.dart';
@@ -40,7 +39,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
         return _GalleryItem(
           id: c.id!,
           type: 'COLORIMETRÍA',
-          label: c.season,
+          clientName: c.clientName,
+          season: c.season,
           date: _formatDate(c.createdAt),
           color: baseColor,
           route: '/analysis_results',
@@ -279,8 +279,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
+                                        // Título: Nombre del cliente
                                         Text(
-                                          item.label,
+                                          item.clientName,
                                           style: const TextStyle(
                                             fontFamily: 'PlayfairDisplay',
                                             fontSize: 20,
@@ -288,7 +289,18 @@ class _GalleryScreenState extends State<GalleryScreen> {
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
-                                        const SizedBox(height: 8),
+                                        const SizedBox(height: 4),
+                                        // Subtítulo: Temporada cromática
+                                        Text(
+                                          item.season,
+                                          style: const TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 11,
+                                            color: Colors.black54,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
                                         Row(
                                           children: [
                                             Text(
@@ -296,7 +308,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                                               style: const TextStyle(
                                                 fontFamily: 'Inter',
                                                 fontSize: 9,
-                                                color: Colors.black54,
+                                                color: Colors.black38,
                                                 letterSpacing: 2.0,
                                               ),
                                             ),
@@ -333,7 +345,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
 class _GalleryItem {
   final int id;
   final String type;
-  final String label;
+  final String clientName;
+  final String season;
   final String date;
   final Color color;
   final String route;
@@ -341,7 +354,8 @@ class _GalleryItem {
   const _GalleryItem({
     required this.id,
     required this.type,
-    required this.label,
+    required this.clientName,
+    required this.season,
     required this.date,
     required this.color,
     required this.route,

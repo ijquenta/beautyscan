@@ -57,6 +57,109 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _showForgotPasswordDialog() {
+    final resetEmailController = TextEditingController();
+    final newPasswordController = TextEditingController();
+    final resetFormKey = GlobalKey<FormState>();
+    bool isResetting = false;
+    String? localError;
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              backgroundColor: const Color(0xFFFBFBFB),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Form(
+                  key: resetFormKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Recuperar\nContraseña',
+                        style: TextStyle(
+                          fontFamily: 'PlayfairDisplay',
+                          fontSize: 32,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w700,
+                          height: 1.0,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      if (localError != null) ...[
+                        BeautyAlert(message: localError!),
+                        const SizedBox(height: 16),
+                      ],
+                      BeautyTextField(
+                        controller: resetEmailController,
+                        keyboardType: TextInputType.emailAddress,
+                        hintText: 'Correo electrónico',
+                        validator: (v) => v!.isEmpty ? 'Requerido' : null,
+                      ),
+                      const SizedBox(height: 16),
+                      BeautyTextField(
+                        controller: newPasswordController,
+                        obscureText: true,
+                        hintText: 'Nueva Contraseña',
+                        validator: (v) => v!.length < 6 ? 'Mínimo 6 caracteres' : null,
+                      ),
+                      const SizedBox(height: 32),
+                      BeautyButton(
+                        text: 'Restablecer',
+                        isLoading: isResetting,
+                        onPressed: () async {
+                          if (!resetFormKey.currentState!.validate()) return;
+                          
+                          setDialogState(() {
+                            isResetting = true;
+                            localError = null;
+                          });
+
+                          final success = await _repo.resetPasswordByEmail(
+                            resetEmailController.text.trim(),
+                            newPasswordController.text.trim(),
+                          );
+
+                          if (mounted) {
+                            if (success) {
+                              Navigator.pop(ctx);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  backgroundColor: Colors.black87,
+                                  behavior: SnackBarBehavior.floating,
+                                  content: Text(
+                                    'Contraseña actualizada',
+                                    style: TextStyle(fontFamily: 'Inter', color: Colors.white),
+                                  ),
+                                ),
+                              );
+                            } else {
+                              setDialogState(() {
+                                isResetting = false;
+                                localError = 'El correo no existe.';
+                              });
+                            }
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BeautyBackground(
@@ -136,7 +239,27 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
 
-                  const SizedBox(height: 64),
+                  const SizedBox(height: 16),
+                  
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: GestureDetector(
+                      onTap: _showForgotPasswordDialog,
+                      child: const Text(
+                        'OLVIDASTE TU CONTRASEÑA',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 10,
+                          letterSpacing: 1.5,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black54,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 48),
 
                   BeautyButton(
                     text: 'Continuar',

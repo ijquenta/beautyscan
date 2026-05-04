@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../core/constants.dart';
 import '../components/atoms/beauty_background.dart';
 import '../../data/repositories/user_repository.dart';
+import '../../data/repositories/colorimetry_repository.dart';
 import '../../domain/models/user_model.dart';
+import '../../domain/models/colorimetry_result_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,7 +16,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _repo = UserRepository();
+  final _colorimetryRepo = ColorimetryRepository();
   UserModel? _user;
+  List<ColorimetryResultModel> _recentResults = [];
 
   @override
   void initState() {
@@ -25,9 +29,16 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadUser() async {
     final user = await _repo.getCurrentUser();
     if (mounted) {
-      setState(() {
-        _user = user;
-      });
+      setState(() => _user = user);
+    }
+    if (user != null) {
+      final results = await _colorimetryRepo.getResultsByUser(user.id!);
+      if (mounted) {
+        setState(() {
+          // Mostramos máximo los 3 últimos
+          _recentResults = results.take(3).toList();
+        });
+      }
     }
   }
 
@@ -256,21 +267,41 @@ class _HomeScreenState extends State<HomeScreen> {
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(32, 0, 32, 40),
                 sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _EditorialLogCard(
-                      title: 'Primavera Cálida',
-                      category: 'Colorimetría',
-                      date: 'Hace 2 días',
-                      onTap: () => Navigator.pushNamed(context, '/analysis_results'),
-                    ),
-                    const SizedBox(height: 16),
-                    _EditorialLogCard(
-                      title: 'Bob Texturizado',
-                      category: 'Peinado',
-                      date: 'Hace 5 días',
-                      onTap: () => Navigator.pushNamed(context, '/hairstyle_display'),
-                    ),
-                  ]),
+                  delegate: SliverChildListDelegate(
+                    _recentResults.isEmpty
+                      ? [
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Text(
+                              'Sin análisis recientes',
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 10,
+                                color: Colors.black38,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                          ),
+                        ]
+                      : _recentResults.asMap().entries.expand((entry) {
+                          final i = entry.key;
+                          final r = entry.value;
+                          return [
+                            if (i > 0) const SizedBox(height: 16),
+                            _EditorialLogCard(
+                              title: r.clientName,
+                              subtitle: r.season,
+                              category: 'Colorimetría',
+                              date: _formatDate(r.createdAt),
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                '/analysis_results',
+                                arguments: r.id,
+                              ),
+                            ),
+                          ];
+                        }).toList(),
+                  ),
                 ),
               ),
             ],
@@ -279,16 +310,33 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  String _formatDate(String isoString) {
+    try {
+      final dt = DateTime.parse(isoString);
+      return '${dt.day} ${_getMonth(dt.month)}'.toUpperCase();
+    } catch (_) {
+      return '';
+    }
+  }
+
+  String _getMonth(int m) {
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+        'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return months[m - 1];
+  }
 }
 
 class _EditorialLogCard extends StatelessWidget {
   final String title;
+  final String? subtitle;
   final String category;
   final String date;
   final VoidCallback onTap;
 
   const _EditorialLogCard({
     required this.title,
+    this.subtitle,
     required this.category,
     required this.date,
     required this.onTap,
@@ -299,7 +347,7 @@ class _EditorialLogCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        color: Colors.transparent, // Zonas activas
+        color: Colors.transparent,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -318,6 +366,7 @@ class _EditorialLogCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Título: nombre del cliente
                   Text(
                     title,
                     style: const TextStyle(
@@ -327,13 +376,26 @@ class _EditorialLogCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    // Subtítulo: temporada
+                    Text(
+                      subtitle!,
+                      style: const TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 10,
+                        color: Colors.black54,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 4),
                   Text(
                     category.toUpperCase(),
                     style: const TextStyle(
                       fontFamily: 'Inter',
                       fontSize: 9,
-                      color: Colors.black45,
+                      color: Colors.black38,
                       letterSpacing: 1.0,
                     ),
                   ),
