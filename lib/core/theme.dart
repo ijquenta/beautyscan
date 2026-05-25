@@ -6,8 +6,8 @@ class AppTheme {
     return ThemeData(
       // Configuración Base de Color
       colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primaryAccent,
-        primary: AppColors.primaryAccent,
+        seedColor: AppColors.cremaSuave,
+        primary: AppColors.negroCarbon,
         brightness: Brightness.light,
       ),
       useMaterial3: true,
@@ -18,43 +18,43 @@ class AppTheme {
         displayLarge: TextStyle(
           fontFamily: 'PlayfairDisplay',
           fontWeight: FontWeight.bold,
-          color: Colors.black87,
+          color: AppColors.negroCarbon,
         ),
         displayMedium: TextStyle(
           fontFamily: 'PlayfairDisplay',
           fontWeight: FontWeight.bold,
-          color: Colors.black87,
+          color: AppColors.negroCarbon,
         ),
         displaySmall: TextStyle(
           fontFamily: 'PlayfairDisplay',
           fontWeight: FontWeight.w600,
-          color: Colors.black87,
+          color: AppColors.negroCarbon,
         ),
         headlineLarge: TextStyle(
           fontFamily: 'PlayfairDisplay',
           fontWeight: FontWeight.w600,
-          color: Colors.black87,
+          color: AppColors.negroCarbon,
         ),
         headlineMedium: TextStyle(
           fontFamily: 'PlayfairDisplay',
           fontWeight: FontWeight.w600,
-          color: Colors.black87,
+          color: AppColors.negroCarbon,
         ),
         headlineSmall: TextStyle(
           fontFamily: 'PlayfairDisplay',
           fontWeight: FontWeight.w600,
-          color: Colors.black87,
+          color: AppColors.negroCarbon,
         ),
         titleLarge: TextStyle(
           fontFamily: 'PlayfairDisplay',
           fontWeight: FontWeight.w600,
-          color: Colors.black87,
+          color: AppColors.negroCarbon,
         ),
 
         // Cuerpos de texto asumen defecto (Inter)
-        bodyLarge: TextStyle(fontFamily: 'Inter', color: Colors.black87),
-        bodyMedium: TextStyle(fontFamily: 'Inter', color: Colors.black87),
-        bodySmall: TextStyle(fontFamily: 'Inter', color: Colors.black54),
+        bodyLarge: TextStyle(fontFamily: 'Inter', color: AppColors.negroCarbon),
+        bodyMedium: TextStyle(fontFamily: 'Inter', color: AppColors.negroCarbon),
+        bodySmall: TextStyle(fontFamily: 'Inter', color: AppColors.grisCalido),
         labelLarge: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600),
       ),
 
@@ -64,11 +64,11 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0, // Evita que se oscurezca al hacer scroll
         centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.black87),
+        iconTheme: IconThemeData(color: AppColors.negroCarbon),
         titleTextStyle: TextStyle(
           fontFamily: 'PlayfairDisplay',
           fontWeight: FontWeight.w600,
-          color: Colors.black87,
+          color: AppColors.negroCarbon,
           fontSize: 20,
         ),
       ),
@@ -76,8 +76,8 @@ class AppTheme {
       // Botón Primario y Pastillas (Pills)
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryAccent,
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.negroCarbon,
+          foregroundColor: AppColors.blancoOffWhite,
           elevation: 4,
           shadowColor: AppColors.shadowGlow,
           shape: RoundedRectangleBorder(
@@ -95,7 +95,7 @@ class AppTheme {
       // Entradas de texto (Inputs y Forms)
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.whiteGlassmorphism,
+        fillColor: AppColors.blancoOffWhite.withValues(alpha: 0.9),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 16,
@@ -111,7 +111,7 @@ class AppTheme {
         focusedBorder: OutlineInputBorder(
           borderRadius: AppConstants.pillBorderRadius,
           borderSide: const BorderSide(
-            color: AppColors.primaryAccent,
+            color: AppColors.negroCarbon,
             width: 2,
           ),
         ),
@@ -119,7 +119,7 @@ class AppTheme {
 
       // Tarjetas Glassmorphism
       cardTheme: CardThemeData(
-        color: AppColors.whiteGlassmorphism,
+        color: AppColors.blancoOffWhite.withValues(alpha: 0.95),
         elevation: 8,
         shadowColor: AppColors.shadowGlow,
         shape: RoundedRectangleBorder(

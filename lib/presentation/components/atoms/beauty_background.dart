@@ -12,51 +12,46 @@ class BeautyBackground extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+      color: AppColors.beigeFondo, // Tono unificador
       child: Stack(
         children: [
-          // Círculo 2 (Inferior Centro-Izquierda)
+          // Brillo cálido superior (Rosa Piel)
           Positioned(
-            bottom: -150,
-            left: -100,
+            top: -100,
+            right: -50,
             child: Container(
-              width: 400, // Doble del tamaño
-              height: 400,
+              width: 300,
+              height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                // Usamos un púrpura más saturado base, el blur lo hará luz pastel.
-                color: AppColors.primaryAccent.withValues(alpha: 0.4),
+                color: AppColors.rosaPiel.withValues(alpha: 0.6),
               ),
             ),
           ),
 
-          // Círculo 1 (Superior Derecha)
+          // Brillo suave inferior (Crema Suave)
           Positioned(
-            top: -50,
-            right: -80,
+            bottom: -150,
+            left: -100,
             child: Container(
               width: 400,
               height: 400,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                // Usamos tu color de Acento primario, al difuminarse quedará el rosa pastel perfecto.
-                color: AppColors.primaryAccent.withValues(alpha: 0.4),
+                color: AppColors.cremaSuave.withValues(alpha: 0.5),
               ),
             ),
           ),
 
-          // Capa de desenfoque Glassmorphism
+          // Desenfoque para integrar los brillos con el fondo beige
           Positioned.fill(
             child: BackdropFilter(
-              filter: ImageFilter.blur(
-                sigmaX: 80.0,
-                sigmaY: 80.0,
-              ), // Fuerte difuminado para suavizar los colores fuertes
+              filter: ImageFilter.blur(sigmaX: 100.0, sigmaY: 100.0),
               child: Container(color: Colors.transparent),
             ),
           ),
 
-          // Renderiza el contenido principal en la última capa
+          // Contenido principal
           child,
         ],
       ),

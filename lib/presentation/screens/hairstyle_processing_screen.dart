@@ -200,6 +200,7 @@ class _HairstyleProcessingScreenState extends State<HairstyleProcessingScreen> {
                     arguments: {
                       'style': _styles[_selectedIndex],
                       'photoPath': originalPhotoPath,
+                      'colorimetry': args?['colorimetry'],
                     },
                   );
                 },

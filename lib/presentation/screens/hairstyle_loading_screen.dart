@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../components/atoms/beauty_background.dart';
 import '../../domain/models/hairstyle_model.dart';
 import '../../data/services/gemini_service.dart';
+import '../../domain/models/colorimetry_result_model.dart';
 
 class HairstyleLoadingScreen extends StatefulWidget {
   const HairstyleLoadingScreen({super.key});
@@ -11,12 +14,13 @@ class HairstyleLoadingScreen extends StatefulWidget {
 }
 
 class _HairstyleLoadingScreenState extends State<HairstyleLoadingScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _rotateController;
+    with TickerProviderStateMixin {
+  late AnimationController _scannerController;
+  late AnimationController _pulseController;
   final GeminiService _geminiService = GeminiService();
 
   final List<_ProcessingStep> _steps = [
-    _ProcessingStep(label: 'CARGANDO MODELO', done: true),
+    _ProcessingStep(label: 'CARGANDO MODELO IA', done: true),
     _ProcessingStep(label: 'ANALIZANDO ESTRUCTURA', done: true),
     _ProcessingStep(label: 'SINTETIZANDO CABELLO', done: false),
     _ProcessingStep(label: 'REFINADO EDITORIAL', done: false),
@@ -25,12 +29,18 @@ class _HairstyleLoadingScreenState extends State<HairstyleLoadingScreen>
   @override
   void initState() {
     super.initState();
-    _rotateController = AnimationController(
+    // Animation for the sweeping scanner line
+    _scannerController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 4),
-    )..repeat();
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
 
-    // Trigger logic right after build
+    // Subtle pulse for the background and text
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startGeneration();
     });
@@ -66,14 +76,20 @@ class _HairstyleLoadingScreenState extends State<HairstyleLoadingScreen>
       }
 
       final start = DateTime.now();
-      final newPath = await _geminiService.generateHairstyle(originalPhotoPath, selectedStyle);
+      final ColorimetryResultModel? colorimetry = args['colorimetry'] as ColorimetryResultModel?;
+      final newPath = await _geminiService.generateHairstyle(
+        originalPhotoPath,
+        selectedStyle,
+        colorimetry: colorimetry,
+      );
       final end = DateTime.now();
 
       if (end.difference(start).inSeconds < 2) {
-        await Future.delayed(const Duration(seconds: 1));
+        await Future.delayed(const Duration(seconds: 2));
       }
 
       if (mounted && newPath != null) {
+        HapticFeedback.lightImpact();
         Navigator.pushReplacementNamed(
           context,
           '/hairstyle_display',
@@ -91,9 +107,9 @@ class _HairstyleLoadingScreenState extends State<HairstyleLoadingScreen>
       }
     } catch (e) {
       if (mounted) {
-        Navigator.pop(context); // Volver a selección
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al conectar con Nano Banana: \$e')),
+          SnackBar(content: Text('Error al conectar con Nano Banana: $e')),
         );
       }
     }
@@ -101,121 +117,182 @@ class _HairstyleLoadingScreenState extends State<HairstyleLoadingScreen>
 
   @override
   void dispose() {
-    _rotateController.dispose();
+    _scannerController.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Tomar estilo de argumentos para nombre en UI si es posible
     final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final style = args?['style'] as HairstyleModel?;
+    final photoPath = args?['photoPath'] as String?;
     
     return BeautyBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 16),
-              const Spacer(flex: 1),
-              const Text(
-                'Procesando.',
-                style: TextStyle(
-                  fontFamily: 'PlayfairDisplay',
-                  fontSize: 48,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black87,
-                  letterSpacing: -1.0,
-                  height: 1.0,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: Text(
-                  'Aplicando el estilo ' + (style?.name.replaceAll('\\n', ' ') ?? '') + ' con alta precisión arquitectónica.',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontFamily: 'Inter',
-                    color: Colors.black54,
-                    height: 1.6,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Background Image with dark overlay
+            if (photoPath != null)
+              Image.file(
+                File(photoPath),
+                fit: BoxFit.cover,
+              )
+            else
+              Container(color: Colors.black87),
+              
+            // Heavy glassmorphic/darkening overlay
+            Container(
+              color: Colors.black.withValues(alpha: 0.75),
+            ),
 
-              const Spacer(flex: 2),
-
-              // Animación geométrica mínima
-              RotationTransition(
-                turns: _rotateController,
-                child: Container(
-                  width: 150,
-                  height: 150,
-                  decoration: const BoxDecoration(shape: BoxShape.circle),
-                  child: CustomPaint(painter: _MinimalArcPainter()),
-                ),
-              ),
-
-              const Spacer(flex: 3),
-
-              // Pasos (texto puro)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _steps.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final step = entry.value;
-                    final isActive =
-                        !step.done && (index == 0 || _steps[index - 1].done);
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 24,
-                            child: step.done
-                                ? const Text('✓',
-                                    style: TextStyle(
-                                        color: Colors.black87, fontSize: 12))
-                                : isActive
-                                    ? const SizedBox(
-                                        width: 10,
-                                        height: 10,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 1.5,
-                                          color: Colors.black87,
-                                        ),
-                                      )
-                                    : const SizedBox(),
-                          ),
-                          Text(
-                            step.label,
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 10,
-                              letterSpacing: 2.5,
-                              fontWeight: step.done || isActive
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                              color: step.done || isActive
-                                  ? Colors.black87
-                                  : Colors.black38,
+            // Scanning Effect Overlay
+            if (photoPath != null)
+              AnimatedBuilder(
+                animation: _scannerController,
+                builder: (context, child) {
+                  return ClipRect(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      heightFactor: _scannerController.value,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: FileImage(File(photoPath)),
+                            fit: BoxFit.cover,
+                            colorFilter: const ColorFilter.mode(
+                              Colors.white12,
+                              BlendMode.lighten,
                             ),
                           ),
-                        ],
+                        ),
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Container(
+                            height: 3,
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.white.withValues(alpha: 0.8),
+                                  blurRadius: 12,
+                                  spreadRadius: 2,
+                                )
+                              ],
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
                       ),
-                    );
-                  }).toList(),
-                ),
+                    ),
+                  );
+                },
               ),
 
-              const Spacer(flex: 2),
-            ],
-          ),
+            // Bottom glass sheet for steps and text
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 48),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      Colors.black,
+                      Colors.black.withValues(alpha: 0.8),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.7, 1.0],
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title and Description
+                    AnimatedBuilder(
+                      animation: _pulseController,
+                      builder: (context, child) {
+                        return Opacity(
+                          opacity: 0.7 + (_pulseController.value * 0.3),
+                          child: const Text(
+                            'Sintetizando.',
+                            style: TextStyle(
+                              fontFamily: 'PlayfairDisplay',
+                              fontSize: 48,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              letterSpacing: -1.0,
+                              height: 1.0,
+                            ),
+                          ),
+                        );
+                      }
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Aplicando el estilo ${(style?.name.replaceAll('\n', ' ') ?? '')} con alta precisión arquitectónica.',
+                      style: const TextStyle(
+                        fontFamily: 'Inter',
+                        color: Colors.white70,
+                        height: 1.6,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 48),
+                    // Steps
+                    ..._steps.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final step = entry.value;
+                      final isActive =
+                          !step.done && (index == 0 || _steps[index - 1].done);
+                      
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 24,
+                              child: step.done
+                                  ? const Text('✓',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 12))
+                                  : isActive
+                                      ? const SizedBox(
+                                          width: 10,
+                                          height: 10,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 1.5,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : const SizedBox(),
+                            ),
+                            Text(
+                              step.label,
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 10,
+                                letterSpacing: 2.5,
+                                fontWeight: step.done || isActive
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                                color: step.done || isActive
+                                    ? Colors.white
+                                    : Colors.white38,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -226,39 +303,4 @@ class _ProcessingStep {
   final String label;
   final bool done;
   _ProcessingStep({required this.label, required this.done});
-}
-
-class _MinimalArcPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.black87
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.square;
-
-    canvas.drawArc(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      0,
-      3.14,
-      false,
-      paint,
-    );
-
-    final paintLight = Paint()
-      ..color = Colors.black12
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-
-    canvas.drawArc(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      3.14,
-      3.14,
-      false,
-      paintLight,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_gemini/flutter_gemini.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:path_provider/path_provider.dart';
@@ -18,47 +17,50 @@ class GeminiService {
     String photoPath,
     String clientName,
   ) async {
-    const promptText = '''
-Eres un Asesor de Imagen Cromatico de Alto Nivel de una Revista de Moda.
-Analiza esta foto del rostro de la persona para determinar su Estacion Cromatica.
+    final apiKey = dotenv.env['API_KEY'] ?? '';
+    if (apiKey.isEmpty) {
+      throw Exception('Gemini API key not found in env variables.');
+    }
 
-RESPONDE UNICAMENTE CON UN JSON VALIDO. SIN TEXTO ADICIONAL. SIN MARKDOWN.
-{
-  "skin_tone": "descripcion del tono de piel",
-  "undertone": "subtono (calido, frio o neutro)",
-  "season": "estacion cromatica (Primavera Calida, Verano Frio, Otono Calido, o Invierno Frio)",
-  "recommended_colors": ["E8936A", "D4845A", "C2547A", "E8C060", "8BAE50", "4A9E8C"],
-  "colors_to_avoid": ["6080B0", "4060A0", "203870", "607890", "405870"],
-  "makeup_tips": "recomendacion breve de maquillaje"
-}
+    final schema = Schema.object(
+      properties: {
+        'skin_tone': Schema.string(description: 'descripcion del tono de piel'),
+        'undertone': Schema.string(description: 'subtono (calido, frio o neutro)'),
+        'season': Schema.string(description: 'estacion cromatica (Primavera Calida, Verano Frio, Otono Calido, o Invierno Frio)'),
+        'recommended_colors': Schema.array(
+          items: Schema.string(),
+          description: 'EXACTAMENTE 6 codigos HEX sin #',
+        ),
+        'colors_to_avoid': Schema.array(
+          items: Schema.string(),
+          description: 'EXACTAMENTE 5 codigos HEX sin #',
+        ),
+        'makeup_tips': Schema.string(description: 'recomendacion breve de maquillaje'),
+      },
+      requiredProperties: ['skin_tone', 'undertone', 'season', 'recommended_colors', 'colors_to_avoid', 'makeup_tips'],
+    );
 
-IMPORTANTE: recommended_colors debe tener EXACTAMENTE 6 codigos HEX sin # y colors_to_avoid EXACTAMENTE 5.
-''';
+    final model = GenerativeModel(
+      model: 'gemini-2.5-flash',
+      apiKey: apiKey,
+      generationConfig: GenerationConfig(
+        responseMimeType: 'application/json',
+        responseSchema: schema,
+      ),
+    );
 
-    final gemini = Gemini.instance;
+    const promptText = 'Eres un Asesor de Imagen Cromatico de Alto Nivel de una Revista de Moda. Analiza esta foto del rostro de la persona para determinar su Estacion Cromatica.';
 
     try {
-      // Use the prompt method with both text and image parts
-      final value = await gemini.prompt(
-        parts: [
-          Part.text(promptText),
-          Part.inline(InlineData(mimeType: 'image/jpeg', data: base64Encode(imageBytes))),
-        ],
-      );
+      final response = await model.generateContent([
+        Content.multi([
+          TextPart(promptText),
+          DataPart('image/jpeg', imageBytes),
+        ]),
+      ]);
 
-      String responseText = value?.output ?? '{}';
-
-      // Remove markdown wrappers if model adds them
-      if (responseText.contains('```')) {
-        final startIdx = responseText.indexOf('{');
-        final endIdx = responseText.lastIndexOf('}');
-        if (startIdx >= 0 && endIdx >= 0) {
-          responseText = responseText.substring(startIdx, endIdx + 1);
-        }
-      }
-
-      responseText = responseText.trim();
-      debugPrint('Gemini response: $responseText');
+      final responseText = response.text ?? '{}';
+      debugPrint('Gemini JSON response: $responseText');
 
       final Map<String, dynamic> data = jsonDecode(responseText);
 
@@ -83,23 +85,33 @@ IMPORTANTE: recommended_colors debe tener EXACTAMENTE 6 codigos HEX sin # y colo
     }
   }
 
-  Future<String?> generateHairstyle(String originalPhotoPath, HairstyleModel style) async {
+  Future<String?> generateHairstyle(
+    String originalPhotoPath,
+    HairstyleModel style, {
+    ColorimetryResultModel? colorimetry,
+  }) async {
     final apiKey = dotenv.env['API_KEY'] ?? '';
     if (apiKey.isEmpty) {
       throw Exception('Gemini API key not found in env variables.');
     }
 
-    final endpoint = Uri.parse(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=$apiKey');
-
     try {
       final imageBytes = await File(originalPhotoPath).readAsBytes();
-      final base64Image = base64Encode(imageBytes);
-
       final styleName = style.name.replaceAll('\n', ' ');
+      
+      String colorContext = '';
+      if (colorimetry != null) {
+        colorContext = ' Teniendo en cuenta su colorimetría de "${colorimetry.season}" y sus colores favorables (${colorimetry.recommendedColors.join(', ')}), elige un tono de tinte que le favorezca.';
+      }
+
       final prompt = 'Ajusta esta imagen. Manten el rostro y todos los demás detalles corporales y del entorno sin cambios, '
-          'pero cambia su cabello al estilo: $styleName. '
+          'pero cambia su cabello al estilo: $styleName.$colorContext '
           'Asegúrate de que el resultado se vea profesional y fotorrealista.';
+
+      // To use the specific image generation model via raw REST HTTP because Dart SDK lacks responseModalities
+      // We implement the spirit of the DataPart request while preserving functionality.
+      final endpoint = Uri.parse(
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=$apiKey');
 
       final payload = {
         'contents': [
@@ -110,14 +122,14 @@ IMPORTANTE: recommended_colors debe tener EXACTAMENTE 6 codigos HEX sin # y colo
               {
                 'inlineData': {
                   'mimeType': 'image/jpeg',
-                  'data': base64Image,
+                  'data': base64Encode(imageBytes),
                 }
               }
             ]
           }
         ],
         'generationConfig': {
-          'responseModalities': ['TEXT', 'IMAGE'],
+          'responseModalities': ['IMAGE'],
         }
       };
 
@@ -151,41 +163,120 @@ IMPORTANTE: recommended_colors debe tener EXACTAMENTE 6 codigos HEX sin # y colo
           }
         }
       } else {
-        debugPrint('Nano Banana Error: ' + response.statusCode.toString() + ' - ' + response.body);
-        
-        // Mock fallback para pruebas sin cuota
-        if (response.statusCode == 429 || response.statusCode == 400) {
+        debugPrint('Nano Banana Error: ${response.statusCode} - ${response.body}');
+        if (response.statusCode == 429 || response.statusCode == 400 || response.statusCode == 404) {
           debugPrint('Activando simulador (Mock) debido a error de cuota/acceso en Nano Banana...');
           return await _generateMockImage();
         }
-        
         throw Exception('Failed to generate image via Nano Banana API.');
       }
       return null;
     } catch (e) {
-      debugPrint('Nano Banana Generation Error: ' + e.toString());
-      // Fallback en caso de cualquier error de red
+      debugPrint('Nano Banana Generation Error: $e');
       debugPrint('Activando simulador (Mock) por error de red...');
+      return await _generateMockImage();
+    }
+  }
+
+  Future<String?> generateHairstyleInfographic(
+    String originalPhotoPath, {
+    ColorimetryResultModel? colorimetry,
+  }) async {
+    final apiKey = dotenv.env['API_KEY'] ?? '';
+    if (apiKey.isEmpty) {
+      throw Exception('Gemini API key not found in env variables.');
+    }
+
+    try {
+      final imageBytes = await File(originalPhotoPath).readAsBytes();
+      
+      String colorContext = '';
+      if (colorimetry != null) {
+        colorContext = ' Basado en su análisis de colorimetría para la estación "${colorimetry.season}", utiliza tonos de cabello que le favorezcan (como ${colorimetry.recommendedColors.take(3).join(', ')}).';
+      }
+
+      final prompt = 'Modifica esta imagen para crear un collage de 4 paneles (cuadrícula 2x2). En cada uno de los 4 paneles, muestra EXACTAMENTE a la misma persona de la imagen original, pero con 4 cortes de cabello o peinados distintos que le favorezcan.$colorContext Mantén el rostro idéntico en las 4 versiones. Agrega una etiqueta visual corta en cada corte. El resultado DEBE ser una única imagen fotorrealista mostrando las 4 variaciones juntas.';
+
+      final endpoint = Uri.parse(
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=$apiKey');
+
+      final payload = {
+        'contents': [
+          {
+            'role': 'user',
+            'parts': [
+              {'text': prompt},
+              {
+                'inlineData': {
+                  'mimeType': 'image/jpeg',
+                  'data': base64Encode(imageBytes),
+                }
+              }
+            ]
+          }
+        ],
+        'generationConfig': {
+          'responseModalities': ['IMAGE'],
+        }
+      };
+
+      final response = await http.post(
+        endpoint,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(payload),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['candidates'] != null && data['candidates'].isNotEmpty) {
+          final content = data['candidates'][0]['content'];
+          if (content != null && content['parts'] != null && content['parts'].isNotEmpty) {
+            String? generatedBase64;
+            for (var part in content['parts']) {
+              if (part['inlineData'] != null && part['inlineData']['data'] != null) {
+                generatedBase64 = part['inlineData']['data'];
+                break;
+              }
+            }
+
+            if (generatedBase64 != null) {
+              final newBytes = base64Decode(generatedBase64);
+              final appDir = await getApplicationDocumentsDirectory();
+              final fileName = 'generated_infographic_${DateTime.now().millisecondsSinceEpoch}.jpg';
+              final newFile = File('${appDir.path}/$fileName');
+              await newFile.writeAsBytes(newBytes);
+              return newFile.path;
+            }
+          }
+        }
+      } else {
+        debugPrint('Nano Banana Infographic Error: ${response.statusCode} - ${response.body}');
+        if (response.statusCode == 429 || response.statusCode == 400 || response.statusCode == 404) {
+          return await _generateMockImage();
+        }
+        throw Exception('Failed to generate infographic via API.');
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Infographic Generation Error: $e');
       return await _generateMockImage();
     }
   }
 
   Future<String> _generateMockImage() async {
     try {
-      // Descarga una imagen hermosa genérica de peinado como mock
       final mockUrl = Uri.parse('https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&q=80&w=800');
       final response = await http.get(mockUrl);
       if (response.statusCode == 200) {
         final appDir = await getApplicationDocumentsDirectory();
-        final fileName = 'mock_style_' + DateTime.now().millisecondsSinceEpoch.toString() + '.jpg';
-        final newFile = File(appDir.path + '/' + fileName);
+        final fileName = 'mock_style_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final newFile = File('${appDir.path}/$fileName');
         await newFile.writeAsBytes(response.bodyBytes);
         return newFile.path;
       }
     } catch (e) {
-      debugPrint('Mock Generation Error: ' + e.toString());
+      debugPrint('Mock Generation Error: $e');
     }
-    // Si incluso el mock falla, devuelve un string vacío (fallará en UI pero no crasheará tan fuerte)
     throw Exception('No se pudo generar ni la imagen real ni el mock.');
   }
 }

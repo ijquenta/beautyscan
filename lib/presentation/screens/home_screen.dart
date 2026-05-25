@@ -155,16 +155,44 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Descubre tu\nesencia.',
-                        style: TextStyle(
-                          fontFamily: 'PlayfairDisplay',
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black87,
-                          letterSpacing: -1.0,
-                          height: 1.0,
-                        ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              'Descubre tu\nesencia.',
+                              style: TextStyle(
+                                fontFamily: 'PlayfairDisplay',
+                                fontSize: 36,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.negroCarbon,
+                                letterSpacing: -1.0,
+                                height: 1.0,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 140,
+                            height: 180,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.negroCarbon.withValues(alpha: 0.15),
+                                  blurRadius: 30,
+                                  offset: const Offset(0, 15),
+                                )
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(24),
+                              child: Image.asset(
+                                'assets/images/chica-principal.png',
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 40),
 

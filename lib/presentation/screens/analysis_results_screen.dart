@@ -5,6 +5,7 @@ import '../../domain/models/colorimetry_result_model.dart';
 import '../../domain/models/hair_colorimetry_result.dart';
 import '../../data/repositories/colorimetry_repository.dart';
 import '../../data/services/hair_colorimetry_service.dart';
+import '../../data/services/gemini_service.dart';
 import '../components/atoms/beauty_background.dart';
 
 class AnalysisResultsScreen extends StatefulWidget {
@@ -17,11 +18,13 @@ class AnalysisResultsScreen extends StatefulWidget {
 class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
   final ColorimetryRepository _repo = ColorimetryRepository();
   final HairColorimetryService _hairService = HairColorimetryService();
+  final GeminiService _geminiService = GeminiService();
 
   ColorimetryResultModel? _result;
   HairColorimetryResult? _hairResult;
   bool _isLoading = true;
   bool _isSaving = false;
+
 
   @override
   void didChangeDependencies() {
@@ -85,6 +88,35 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
     }
   }
 
+  void _showStaticInfographic() {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
+          title: const Text(
+            'LOOKS SUGERIDOS',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 10,
+              letterSpacing: 2.0,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        body: Center(
+          child: InteractiveViewer(
+            minScale: 0.5,
+            maxScale: 4.0,
+            child: Image.asset('assets/images/imagen-looks.jpeg'),
+          ),
+        ),
+      ),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -105,490 +137,332 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
     }
 
     return BeautyBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: SafeArea(
-          child: CustomScrollView(
-            slivers: [
-              // ─── Header Editorial ────────────────────────────────────────
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 40, 32, 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: () => Navigator.popUntil(
-                            context, ModalRoute.withName('/home')),
-                        child: const Text(
-                          'VOLVER',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 10,
-                            letterSpacing: 2.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () =>
-                            Navigator.pushNamed(context, '/gallery'),
-                        child: const Text(
-                          'GALERÍA',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
-                            letterSpacing: 2.0,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // ─── Title ──────────────────────────────────────────────────
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 60, 32, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'ANÁLISIS DE',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 3.0,
-                          color: Colors.black38,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        _result!.clientName,
-                        style: const TextStyle(
-                          fontFamily: 'PlayfairDisplay',
-                          fontSize: 48,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                          height: 1.0,
-                          letterSpacing: -1.0,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _result!.season.replaceAll(' ', '\n'),
-                        style: const TextStyle(
-                          fontFamily: 'PlayfairDisplay',
-                          fontSize: 32,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.black54,
-                          height: 1.0,
-                          letterSpacing: -1.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // ════════════════════════════════════════════════════════════
-              // ─── SECCIÓN: COLORIMETRÍA CAPILAR ───────────────────────────
-              // ════════════════════════════════════════════════════════════
-              if (_hairResult != null) ...[
-                SliverToBoxAdapter(
-                  child: _SectionDivider(label: 'COLORIMETRÍA CAPILAR'),
-                ),
-
-                // Foto centrada con tonos de tinte favorables alrededor
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(32, 40, 32, 0),
-                    child: Center(
-                      child: _RadialPaletteDisplay(
-                        imagePath: _result!.photoPath,
-                        recommended: _hairResult!.suggestedHairTones
-                            .map(_hexToColor)
-                            .toList(),
-                        toAvoid: const [],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Tonos capilares recomendados
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(32, 40, 32, 16),
-                    child: const Text(
-                      'TONOS DE TINTE FAVORABLES',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 3.0,
-                        color: Colors.black38,
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Paleta capilar con etiquetas
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: _HairPaletteRow(
-                      hexColors: _hairResult!.suggestedHairTones,
-                      labels: _hairResult!.suggestedHairLabels,
-                    ),
-                  ),
-                ),
-
-                // Tonos a evitar capilar
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(32, 40, 32, 16),
-                    child: const Text(
-                      'TONOS A EVITAR EN CABELLO',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 3.0,
-                        color: Colors.black38,
-                      ),
-                    ),
-                  ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
-                  sliver: SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      childAspectRatio: 1.0,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                    ),
-                    delegate: SliverChildListDelegate(
-                      _hairResult!.hairTonesToAvoid
-                          .map((hex) => _EditorialColor(
-                              color: _hexToColor(hex), avoid: true))
-                          .toList(),
-                    ),
-                  ),
-                ),
-
-                // Consejo del Estilista
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(32, 40, 32, 16),
-                    child: const Text(
-                      'CONSEJO DEL COLORISTA',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 3.0,
-                        color: Colors.black38,
-                      ),
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(32, 0, 32, 8),
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black12),
-                      ),
-                      child: Text(
-                        _hairResult!.stylistNote,
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 12,
-                          color: Colors.black54,
-                          height: 1.6,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Tips capilares
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(32, 32, 32, 16),
-                    child: const Text(
-                      'CUIDADOS CAPILARES',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 3.0,
-                        color: Colors.black38,
-                      ),
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(32, 0, 32, 48),
-                    child: Column(
-                      children: _hairResult!.hairCareAdvice
-                          .map((tip) => _TipRow(text: tip))
-                          .toList(),
-                    ),
-                  ),
-                ),
-              ],
-
-              // ════════════════════════════════════════════════════════════
-              // ─── SECCIÓN: COLORIMETRÍA FACIAL ────────────────────────────
-              // ════════════════════════════════════════════════════════════
-              SliverToBoxAdapter(
-                child: _SectionDivider(label: 'COLORIMETRÍA FACIAL'),
-              ),
-
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 40, 32, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Paleta radial con colores faciales
-                      Center(
-                        child: _RadialPaletteDisplay(
-                          imagePath: _result!.photoPath,
-                          recommended: _result!.recommendedColors
-                              .map(_hexToColor)
-                              .toList(),
-                          toAvoid: _result!.colorsToAvoid
-                              .map(_hexToColor)
-                              .toList(),
-                        ),
-                      ),
-                      const SizedBox(height: 48),
-                      Container(width: 40, height: 1, color: Colors.black87),
-                      const SizedBox(height: 32),
-                      Text(
-                        _result!.makeupTips ??
-                            'Tonos exclusivos recomendados para optimizar tu colorimetría personal y destacar tu identidad natural.',
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 14,
-                          color: Colors.black54,
-                          height: 1.6,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // ─── Métricas faciales ──────────────────────────────────────
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 40, 32, 0),
-                  child: Column(
-                    children: [
-                      _EditorialMetric(
-                          label: 'Tono General', value: _result!.skinTone),
-                      _EditorialMetric(
-                          label: 'Subtono', value: _result!.undertone),
-                      const _EditorialMetric(
-                          label: 'Intensidad', value: 'Dinámica IA'),
-                    ],
-                  ),
-                ),
-              ),
-
-              // ─── La paleta principal ─────────────────────────────────────
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 48, 32, 20),
-                  child: const Text(
-                    'LA PALETA',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 3.0,
-                      color: Colors.black38,
-                    ),
-                  ),
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(32, 0, 32, 40),
-                sliver: SliverGrid(
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    childAspectRatio: 1.0,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                  ),
-                  delegate: SliverChildListDelegate(
-                    _result!.recommendedColors
-                        .map((hex) =>
-                            _EditorialColor(color: _hexToColor(hex)))
-                        .toList(),
-                  ),
-                ),
-              ),
-
-              if (_result!.colorsToAvoid.isNotEmpty) ...[
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(32, 0, 32, 20),
-                    child: const Text(
-                      'COLORES A EVITAR',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 3.0,
-                        color: Colors.black38,
-                      ),
-                    ),
-                  ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 60),
-                  sliver: SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      childAspectRatio: 1.0,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                    ),
-                    delegate: SliverChildListDelegate(
-                      _result!.colorsToAvoid
-                          .map((hex) => _EditorialColor(
-                              color: _hexToColor(hex), avoid: true))
-                          .toList(),
-                    ),
-                  ),
-                ),
-              ],
-
-              // ════════════════════════════════════════════════════════════
-              // ─── SECCIÓN: ANÁLISIS DE PEINADO ────────────────────────────
-              // ════════════════════════════════════════════════════════════
-              SliverToBoxAdapter(
-                child: _SectionDivider(label: 'ANÁLISIS DE PEINADO'),
-              ),
-
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 32, 32, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _EditorialMetric(
-                          label: 'Temporada Cromática',
-                          value: _result!.season),
-                      _EditorialMetric(
-                          label: 'Subtono Capilar',
-                          value: _result!.undertone),
-                      _EditorialMetric(
-                          label: 'Tono Base de Piel',
-                          value: _result!.skinTone),
-                    ],
-                  ),
-                ),
-              ),
-
-              // ════════════════════════════════════════════════════════════
-              // ─── BOTÓN PROBAR PEINADOS ────────────────────────────────────
-              // ════════════════════════════════════════════════════════════
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 32, 32, 32),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        '/hairstyle_processing',
-                        arguments: {
-                          'photoPath': _result!.photoPath,
-                        },
-                      );
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black87, width: 1.5),
-                        color: Colors.transparent,
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      child: const Center(
-                        child: Text(
-                          'PROBAR PEINADOS',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 3.0,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // ════════════════════════════════════════════════════════════
-              // ─── BOTÓN GUARDAR INFORME PRO ────────────────────────────────
-              // ════════════════════════════════════════════════════════════
-              SliverToBoxAdapter(
-                child: GestureDetector(
-                  onTap: _isSaving ? null : _saveProReport,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: double.infinity,
-                    color: _isSaving ? Colors.black45 : Colors.black87,
-                    padding: const EdgeInsets.symmetric(vertical: 26),
-                    child: Center(
-                      child: _isSaving
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 1.5,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text(
-                              'GUARDAR INFORME PRO',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 3.0,
-                                color: Colors.white,
-                              ),
+      child: DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+            child: NestedScrollView(
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                return [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(32, 40, 32, 0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: () => Navigator.popUntil(context, ModalRoute.withName('/home')),
+                            child: const Text(
+                              'VOLVER',
+                              style: TextStyle(fontFamily: 'Inter', fontSize: 10, letterSpacing: 2.0, fontWeight: FontWeight.bold, color: Colors.black87),
                             ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(32, 40, 32, 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'ANÁLISIS DE',
+                            style: TextStyle(fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 3.0, color: Colors.black38),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            _result!.clientName,
+                            style: const TextStyle(fontFamily: 'PlayfairDisplay', fontSize: 48, fontWeight: FontWeight.bold, color: Colors.black87, height: 1.0, letterSpacing: -1.0),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _SliverAppBarDelegate(
+                      const TabBar(
+                        dividerColor: Colors.transparent,
+                        indicatorColor: Colors.black87,
+                        labelColor: Colors.black87,
+                        unselectedLabelColor: Colors.black38,
+                        labelStyle: TextStyle(fontFamily: 'Inter', fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2.0),
+                        tabs: [
+                          Tab(text: 'CAPILAR'),
+                          Tab(text: 'FACIAL'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ];
+              },
+              body: TabBarView(
+                children: [
+                  _buildCapilarTab(),
+                  _buildFacialTab(),
+                ],
               ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 40)),
-            ],
+            ),
           ),
+          bottomNavigationBar: _buildBottomSaveButton(),
         ),
       ),
     );
+  }
+
+  Widget _buildCapilarTab() {
+    if (_hairResult == null) {
+      return const Center(child: Text('No hay datos capilares.'));
+    }
+    return CustomScrollView(
+      key: const PageStorageKey<String>('capilar'),
+      slivers: [
+        SliverToBoxAdapter(child: const SizedBox(height: 24)),
+        SliverToBoxAdapter(
+          child: Center(
+            child: ClipOval(
+              child: _result!.photoPath.isNotEmpty && File(_result!.photoPath).existsSync()
+                  ? Image.file(File(_result!.photoPath),
+                      width: 160, height: 160, fit: BoxFit.cover)
+                  : Container(
+                      width: 160,
+                      height: 160,
+                      color: Colors.black12,
+                    ),
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(32, 32, 32, 16),
+            child: const Text('TONOS DE TINTE FAVORABLES', style: TextStyle(fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 3.0, color: Colors.black38)),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: _HairPaletteRow(
+              hexColors: _hairResult!.suggestedHairTones,
+              labels: _hairResult!.suggestedHairLabels,
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(32, 40, 32, 16),
+            child: const Text('TONOS A EVITAR EN CABELLO', style: TextStyle(fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 3.0, color: Colors.black38)),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4, childAspectRatio: 1.0, crossAxisSpacing: 12, mainAxisSpacing: 12,
+            ),
+            delegate: SliverChildListDelegate(
+              _hairResult!.hairTonesToAvoid.map((hex) => _EditorialColor(color: _hexToColor(hex), avoid: true)).toList(),
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(32, 40, 32, 16),
+            child: const Text('CONSEJO DEL COLORISTA', style: TextStyle(fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 3.0, color: Colors.black38)),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(32, 0, 32, 8),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(border: Border.all(color: Colors.black12)),
+              child: Text(
+                _hairResult!.stylistNote,
+                style: const TextStyle(fontFamily: 'Inter', fontSize: 12, color: Colors.black54, height: 1.6, fontStyle: FontStyle.italic),
+              ),
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(32, 32, 32, 16),
+            child: const Text('CUIDADOS CAPILARES', style: TextStyle(fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 3.0, color: Colors.black38)),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(32, 0, 32, 48),
+            child: Column(
+              children: _hairResult!.hairCareAdvice.map((tip) => _TipRow(text: tip)).toList(),
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(32, 32, 32, 16),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/hairstyle_processing', arguments: {
+                  'photoPath': _result!.photoPath,
+                  'colorimetry': _result,
+                });
+              },
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(border: Border.all(color: Colors.black87, width: 1.5), color: Colors.transparent),
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: const Center(
+                  child: Text('PROBAR PEINADOS', style: TextStyle(fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 3.0, color: Colors.black87)),
+                ),
+              ),
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(32, 0, 32, 40),
+            child: GestureDetector(
+              onTap: _showStaticInfographic,
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black87, width: 1.5),
+                  color: Colors.transparent,
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: const Center(
+                  child: Text('VER LOOKS SUGERIDOS', style: TextStyle(fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 3.0, color: Colors.black87)),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFacialTab() {
+    return CustomScrollView(
+      key: const PageStorageKey<String>('facial'),
+      slivers: [
+        SliverToBoxAdapter(child: const SizedBox(height: 40)),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: _RadialPaletteDisplay(
+                    imagePath: _result!.photoPath,
+                    recommended: _result!.recommendedColors.map(_hexToColor).toList(),
+                    toAvoid: _result!.colorsToAvoid.map(_hexToColor).toList(),
+                  ),
+                ),
+                const SizedBox(height: 48),
+                Container(width: 40, height: 1, color: Colors.black87),
+                const SizedBox(height: 32),
+                Text(
+                  _result!.makeupTips ?? 'Tonos exclusivos recomendados para optimizar tu colorimetría personal y destacar tu identidad natural.',
+                  style: const TextStyle(fontFamily: 'Inter', fontSize: 14, color: Colors.black54, height: 1.6),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(32, 40, 32, 0),
+            child: Column(
+              children: [
+                _EditorialMetric(label: 'Tono General', value: _result!.skinTone),
+                _EditorialMetric(label: 'Subtono', value: _result!.undertone),
+                const _EditorialMetric(label: 'Intensidad', value: 'Dinámica IA'),
+              ],
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(32, 48, 32, 20),
+            child: const Text('LA PALETA', style: TextStyle(fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 3.0, color: Colors.black38)),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(32, 0, 32, 40),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3, childAspectRatio: 1.0, crossAxisSpacing: 16, mainAxisSpacing: 16,
+            ),
+            delegate: SliverChildListDelegate(
+              _result!.recommendedColors.map((hex) => _EditorialColor(color: _hexToColor(hex))).toList(),
+            ),
+          ),
+        ),
+        if (_result!.colorsToAvoid.isNotEmpty) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(32, 0, 32, 20),
+              child: const Text('COLORES A EVITAR', style: TextStyle(fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 3.0, color: Colors.black38)),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(32, 0, 32, 60),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3, childAspectRatio: 1.0, crossAxisSpacing: 16, mainAxisSpacing: 16,
+              ),
+              delegate: SliverChildListDelegate(
+                _result!.colorsToAvoid.map((hex) => _EditorialColor(color: _hexToColor(hex), avoid: true)).toList(),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildBottomSaveButton() {
+    return GestureDetector(
+      onTap: _isSaving ? null : _saveProReport,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: double.infinity,
+        height: 70, // Fixed height for bottomNavigationBar
+        color: _isSaving ? Colors.black45 : Colors.black87,
+        child: Center(
+          child: _isSaving
+              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.white))
+              : const Text('GUARDAR', style: TextStyle(fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 3.0, color: Colors.white)),
+        ),
+      ),
+    );
+  }
+}
+
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  final TabBar _tabBar;
+  _SliverAppBarDelegate(this._tabBar);
+
+  @override
+  double get minExtent => _tabBar.preferredSize.height;
+  @override
+  double get maxExtent => _tabBar.preferredSize.height;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: Colors.transparent,
+      child: _tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
+    return false;
   }
 }
 

@@ -1,27 +1,31 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Acento (Primario)
-  static const Color primaryAccent = Color(0xFFC2547A);
-  
-  // Fondo Suave (Gradientes)
-  static const Color gradientPink = Color(0xFFFDE8F0);
-  static const Color gradientLavender = Color(0xFFE8E0F5);
-  static const Color gradientBlue = Color(0xFFE0EEFF);
-  
+  // Nueva Paleta de Colores
+  static const Color beigeFondo = Color(0xFFE5D3C5);
+  static const Color blancoOffWhite = Color(0xFFFFFFFF);
+  static const Color negroCarbon = Color(0xFF1A1A1A);
+  static const Color cremaSuave = Color(0xFFF9F1EA);
+  static const Color rosaPiel = Color(0xFFF2D5C4);
+  static const Color grisCalido = Color(0xFF8C8279);
+
+  // Mapeos y Variables Antiguas para mantener compatibilidad
+  static const Color primaryAccent = negroCarbon;
+  static const Color secondaryBackground = cremaSuave;
+
   // Glassmorphism y UI
   static const Color whiteGlassmorphism = Color(0x99FFFFFF); // Blanco con 60% opacidad
   static const Color borderGlassmorphism = Color(0x66FFFFFF); // Blanco con 40% opacidad
-  static const Color shadowGlow = Color(0x4DFDE8F0); // Sombra rosa suave (30% opacidad aprox)
+  static const Color shadowGlow = Color(0x331A1A1A); // Sombra suave oscura
   
-  // Gradiente lineal reusable
+  // Gradiente lineal para unificar el fondo cálido (Rosa Piel a Beige)
   static const LinearGradient backgroundGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      gradientPink,
-      gradientLavender,
-      gradientBlue,
+      beigeFondo,
+      cremaSuave,
+      rosaPiel,
     ],
   );
 }

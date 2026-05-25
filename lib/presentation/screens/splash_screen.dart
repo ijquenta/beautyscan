@@ -33,8 +33,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (mounted) {
         Navigator.pushReplacementNamed(
           context,
-          // loggedIn ? '/home' : '/onboarding',
-          '/onboarding', // Forzado para que puedas visualizarlo ahora mismo
+          loggedIn ? '/home' : '/login',
         );
       }
     });
