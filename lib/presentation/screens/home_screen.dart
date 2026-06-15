@@ -145,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Hola, ${_user?.name?.split(' ')[0] ?? 'Usuario'}',
+                        'Hola, ${_user?.name.split(' ')[0] ?? 'Usuario'}',
                         style: const TextStyle(
                           fontFamily: 'PlayfairDisplay',
                           fontSize: 36,

@@ -5,7 +5,6 @@ import '../../domain/models/colorimetry_result_model.dart';
 import '../../domain/models/hair_colorimetry_result.dart';
 import '../../data/repositories/colorimetry_repository.dart';
 import '../../data/services/hair_colorimetry_service.dart';
-import '../../data/services/gemini_service.dart';
 import '../components/atoms/beauty_background.dart';
 
 class AnalysisResultsScreen extends StatefulWidget {
@@ -18,7 +17,6 @@ class AnalysisResultsScreen extends StatefulWidget {
 class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
   final ColorimetryRepository _repo = ColorimetryRepository();
   final HairColorimetryService _hairService = HairColorimetryService();
-  final GeminiService _geminiService = GeminiService();
 
   ColorimetryResultModel? _result;
   HairColorimetryResult? _hairResult;
@@ -463,37 +461,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
     return false;
-  }
-}
-
-// ─── Section Divider ────────────────────────────────────────────────────────
-
-class _SectionDivider extends StatelessWidget {
-  final String label;
-  const _SectionDivider({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(32, 60, 32, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(height: 1, color: Colors.black12),
-          const SizedBox(height: 20),
-          Text(
-            label,
-            style: const TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 3.5,
-              color: Colors.black87,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 

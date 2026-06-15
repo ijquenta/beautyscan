@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants.dart';
 
 class BeautyTextField extends StatelessWidget {
   final TextEditingController controller;

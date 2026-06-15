@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../data/services/gemini_service.dart';
 import '../../data/repositories/colorimetry_repository.dart';
+import '../components/atoms/beauty_background.dart';
 
 class AnalysisScreen extends StatefulWidget {
   const AnalysisScreen({super.key});
@@ -15,8 +16,6 @@ class AnalysisScreen extends StatefulWidget {
 class _AnalysisScreenState extends State<AnalysisScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   int _currentStepIndex = 0;
-  String? _imagePath;
-  bool _isProcessing = true;
 
   final List<String> _steps = [
     'CALIBRANDO LUZ',
@@ -61,9 +60,6 @@ class _AnalysisScreenState extends State<AnalysisScreen> with SingleTickerProvid
       final fileName = 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final permanentFile = await File(tempPath).copy('${appDir.path}/$fileName');
       final persistentPath = permanentFile.path;
-
-      setState(() => _imagePath = persistentPath);
-
       final fileBytes = await permanentFile.readAsBytes();
       
       final geminiService = GeminiService();
@@ -106,8 +102,9 @@ class _AnalysisScreenState extends State<AnalysisScreen> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFB),
+    return BeautyBackground(
+      child: Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Stack(
           children: [
@@ -170,6 +167,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> with SingleTickerProvid
             ),
           ],
         ),
+      ),
       ),
     );
   }

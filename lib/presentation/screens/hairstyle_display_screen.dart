@@ -220,29 +220,3 @@ class _HairstyleDisplayScreenState extends State<HairstyleDisplayScreen> {
   }
 }
 
-class _MetaChip extends StatelessWidget {
-  final String label;
-  const _MetaChip({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white24),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontFamily: 'Inter',
-          fontSize: 8,
-          letterSpacing: 1.5,
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-}

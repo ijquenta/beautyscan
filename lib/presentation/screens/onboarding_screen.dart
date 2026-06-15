@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/constants.dart';
 import '../components/atoms/beauty_background.dart';
 
 class OnboardingScreen extends StatefulWidget {
