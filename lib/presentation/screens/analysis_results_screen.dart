@@ -7,6 +7,10 @@ import '../../domain/models/hair_colorimetry_result.dart';
 import '../../data/repositories/colorimetry_repository.dart';
 import '../../data/services/hair_colorimetry_service.dart';
 import '../components/atoms/beauty_background.dart';
+import '../../domain/models/hairstyle_model.dart';
+import '../../data/repositories/hairstyle_repository.dart';
+import '../../domain/models/hairstyle_result_model.dart';
+import '../../core/session_manager.dart';
 
 class AnalysisResultsScreen extends StatefulWidget {
   const AnalysisResultsScreen({super.key});
@@ -22,7 +26,7 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
   ColorimetryResultModel? _result;
   HairColorimetryResult? _hairResult;
   bool _isLoading = true;
-  bool _isSaving = false;
+  List<HairstyleResultModel> _generatedLooks = [];
 
   @override
   void didChangeDependencies() {
@@ -50,6 +54,7 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
         _hairResult = hair;
         _isLoading = false;
       });
+      _loadGeneratedLooks();
     } else {
       setState(() => _isLoading = false);
     }
@@ -61,30 +66,11 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
     return Color(int.parse(hex, radix: 16));
   }
 
-  Future<void> _saveProReport() async {
-    setState(() => _isSaving = true);
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _isSaving = false);
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.negroCarbon,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 18),
-              const SizedBox(width: 12),
-              Text(
-                'Informe guardado — ${_result?.clientName ?? ''}',
-                style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Colors.white),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
+  Future<void> _loadGeneratedLooks() async {
+    final userId = await SessionManager.getLoggedInUserId();
+    if (userId == null) return;
+    final looks = await HairstyleRepository().getResultsByUser(userId);
+    if (mounted) setState(() { _generatedLooks = looks; });
   }
 
   void _showFormulaSheet() {
@@ -93,6 +79,18 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const _FormulaSheet(),
+    );
+  }
+
+  void _showBlondeSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _BlondeSheet(
+        photoPath: _result!.photoPath,
+        colorimetry: _result!,
+      ),
     );
   }
 
@@ -124,7 +122,7 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
 
     return BeautyBackground(
       child: DefaultTabController(
-        length: 2,
+        length: 3,
         child: Scaffold(
           backgroundColor: Colors.transparent,
           body: SafeArea(
@@ -192,6 +190,7 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
                         tabs: const [
                           Tab(text: 'Capilar'),
                           Tab(text: 'Facial'),
+                          Tab(text: 'Peinados'),
                         ],
                       ),
                     ),
@@ -202,6 +201,7 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
                 children: [
                   _buildCapilarTab(),
                   _buildFacialTab(),
+                  _buildPeinadosTab(),
                 ],
               ),
             ),
@@ -209,6 +209,7 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
           bottomNavigationBar: Container(
             decoration: BoxDecoration(
               border: Border(top: BorderSide(color: Colors.black.withValues(alpha: 0.06))),
+              color: Colors.white.withValues(alpha: 0.5),
             ),
             child: SafeArea(
               child: Padding(
@@ -223,16 +224,21 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
                       onTap: () => Navigator.popUntil(context, ModalRoute.withName('/home')),
                     ),
                     _BottomNavItem(
-                      icon: _isSaving ? Icons.hourglass_empty_rounded : Icons.save_outlined,
-                      label: 'Guardar',
+                      icon: Icons.auto_fix_high_rounded,
+                      label: 'Probar peinados',
                       isActive: true,
-                      onTap: _isSaving ? null : _saveProReport,
+                      onTap: () {
+                        Navigator.pushNamed(context, '/hairstyle_processing', arguments: {
+                          'photoPath': _result?.photoPath,
+                          'colorimetry': _result,
+                        });
+                      },
                     ),
                     _BottomNavItem(
-                      icon: Icons.ios_share_rounded,
-                      label: 'Compartir',
+                      icon: Icons.history_rounded,
+                      label: 'Historial',
                       isActive: false,
-                      onTap: _saveProReport,
+                      onTap: () => Navigator.pushNamed(context, '/history'),
                     ),
                   ],
                 ),
@@ -299,7 +305,13 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
               crossAxisCount: 4, childAspectRatio: 1.0, crossAxisSpacing: 12, mainAxisSpacing: 12,
             ),
             delegate: SliverChildListDelegate(
-              _hairResult!.hairTonesToAvoid.map((hex) => _EditorialColor(color: _hexToColor(hex), avoid: true)).toList(),
+              _hairResult!.hairTonesToAvoid.map((hex) => Container(
+                decoration: BoxDecoration(
+                  color: _hexToColor(hex),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.black.withValues(alpha: 0.1), width: 0.5),
+                ),
+              )).toList(),
             ),
           ),
         ),
@@ -359,106 +371,13 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
         ),
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(32, 40, 32, 16),
-            child: _SectionHeader(icon: Icons.science_outlined, title: 'Fórmula de tintes'),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(32, 0, 32, 8),
-            child: GestureDetector(
+            padding: const EdgeInsets.fromLTRB(32, 40, 32, 60),
+            child: _ActionCard(
+              icon: Icons.colorize_rounded,
+              title: 'Calcular fórmula',
+              subtitle: 'Tinte, oxidante, cantidad y más',
               onTap: _showFormulaSheet,
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: AppColors.negroCarbon.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Icon(Icons.colorize_rounded, size: 22, color: Colors.black54),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text('Calcular fórmula', style: TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87)),
-                          SizedBox(height: 2),
-                          Text('Tinte, oxidante, cantidad y más', style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Colors.black45)),
-                        ],
-                      ),
-                    ),
-                    Icon(Icons.chevron_right_rounded, size: 22, color: Colors.black.withValues(alpha: 0.15)),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(32, 8, 32, 16),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/hairstyle_processing', arguments: {
-                  'photoPath': _result!.photoPath,
-                  'colorimetry': _result,
-                });
-              },
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                decoration: BoxDecoration(
-                  color: AppColors.negroCarbon,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.auto_fix_high_rounded, size: 16, color: Colors.white),
-                      SizedBox(width: 8),
-                      Text('Probar peinados', style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(32, 0, 32, 48),
-            child: GestureDetector(
-              onTap: _showStaticInfographic,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.negroCarbon.withValues(alpha: 0.3), width: 1.5),
-                  borderRadius: BorderRadius.circular(16),
-                  color: Colors.transparent,
-                ),
-                child: const Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.visibility_outlined, size: 16, color: AppColors.negroCarbon),
-                      SizedBox(width: 8),
-                      Text('Ver looks sugeridos', style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.negroCarbon)),
-                    ],
-                  ),
-                ),
-              ),
+              outlined: true,
             ),
           ),
         ),
@@ -529,17 +448,14 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(32, 44, 32, 20),
-            child: _SectionHeader(icon: Icons.palette_outlined, title: 'La paleta'),
+            child: _SectionHeader(icon: Icons.palette_outlined, title: 'Tu paleta'),
           ),
         ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(32, 0, 32, 40),
-          sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3, childAspectRatio: 1.0, crossAxisSpacing: 16, mainAxisSpacing: 16,
-            ),
-            delegate: SliverChildListDelegate(
-              _result!.recommendedColors.map((hex) => _EditorialColor(color: _hexToColor(hex))).toList(),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(32, 0, 32, 40),
+            child: _PieChart(
+              colors: _result!.recommendedColors.map((hex) => _hexToColor(hex)).toList(),
             ),
           ),
         ),
@@ -550,19 +466,373 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
               child: _SectionHeader(icon: Icons.block_outlined, title: 'Colores a evitar'),
             ),
           ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(32, 0, 32, 60),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3, childAspectRatio: 1.0, crossAxisSpacing: 16, mainAxisSpacing: 16,
-              ),
-              delegate: SliverChildListDelegate(
-                _result!.colorsToAvoid.map((hex) => _EditorialColor(color: _hexToColor(hex), avoid: true)).toList(),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(32, 0, 32, 60),
+              child: _PieChart(
+                colors: _result!.colorsToAvoid.map((hex) => _hexToColor(hex)).toList(),
+                isAvoid: true,
               ),
             ),
           ),
         ],
       ],
+    );
+  }
+
+  Widget _buildPeinadosTab() {
+    return CustomScrollView(
+      key: const PageStorageKey<String>('peinados'),
+      slivers: [
+        SliverToBoxAdapter(child: const SizedBox(height: 32)),
+        if (_generatedLooks.isNotEmpty) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(32, 0, 32, 20),
+              child: _SectionHeader(icon: Icons.check_circle_outline, title: 'Generados'),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: SizedBox(
+                height: 100,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _generatedLooks.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: 12),
+                  itemBuilder: (context, i) {
+                    final look = _generatedLooks[i];
+                    return GestureDetector(
+                      onTap: () => Navigator.pushNamed(context, '/hairstyle_display', arguments: {
+                        'style': HairstyleModel(
+                          id: look.hairstyleName,
+                          name: look.hairstyleName,
+                          description: look.hairstyleName,
+                          styleType: '',
+                          maintenanceLevel: 'Moderado',
+                          accentColor: AppColors.negroCarbon,
+                          stylistSteps: [],
+                          products: [],
+                          imagePath: '',
+                        ),
+                        'photoPath': look.resultImageUrl,
+                        'originalPhotoPath': look.originalPhotoPath,
+                      }),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Stack(
+                          children: [
+                            SizedBox(
+                              width: 86, height: 100,
+                              child: look.resultImageUrl.isNotEmpty && File(look.resultImageUrl).existsSync()
+                                  ? Image.file(File(look.resultImageUrl), width: 86, height: 100, fit: BoxFit.cover)
+                                  : Container(color: Colors.black12),
+                            ),
+                            Positioned(
+                              bottom: 0, left: 0, right: 0,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                                    colors: [Colors.transparent, Colors.black.withValues(alpha: 0.7)],
+                                  ),
+                                ),
+                                child: Text(
+                                  look.hairstyleName,
+                                  style: const TextStyle(fontFamily: 'Poppins', fontSize: 9, color: Colors.white),
+                                  maxLines: 1, overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(child: const SizedBox(height: 32)),
+        ],
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(32, 0, 32, 20),
+            child: _SectionHeader(icon: Icons.auto_fix_high_rounded, title: 'Probar con IA'),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(32, 0, 32, 60),
+            child: Column(
+              children: [
+                _ActionCard(
+                  icon: Icons.auto_fix_high_rounded,
+                  title: 'Probar peinados',
+                  subtitle: 'Simula cualquier estilo con IA',
+                  onTap: () {
+                    Navigator.pushNamed(context, '/hairstyle_processing', arguments: {
+                      'photoPath': _result!.photoPath,
+                      'colorimetry': _result,
+                    });
+                  },
+                ),
+                const SizedBox(height: 12),
+                _ActionCard(
+                  icon: Icons.visibility_outlined,
+                  title: 'Ver looks sugeridos',
+                  subtitle: 'Collage 2×2 con variaciones',
+                  onTap: _showStaticInfographic,
+                  outlined: true,
+                ),
+                const SizedBox(height: 12),
+                _ActionCard(
+                  icon: Icons.wb_sunny_rounded,
+                  title: 'Rubios IA',
+                  subtitle: 'Balayage, babylights, color melting y más',
+                  onTap: () => _showBlondeSheet(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final bool outlined;
+
+  const _ActionCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.outlined = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: outlined ? Colors.white.withValues(alpha: 0.6) : AppColors.negroCarbon,
+          borderRadius: BorderRadius.circular(16),
+          border: outlined ? Border.all(color: AppColors.negroCarbon.withValues(alpha: 0.2), width: 1) : null,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: outlined ? AppColors.negroCarbon.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, size: 20, color: outlined ? Colors.black54 : Colors.white),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontFamily: 'Poppins', fontSize: 15, fontWeight: FontWeight.w600,
+                      color: outlined ? Colors.black87 : Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontFamily: 'Poppins', fontSize: 10,
+                      color: outlined ? Colors.black45 : Colors.white.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, size: 20, color: outlined ? Colors.black.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.5)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BlondeSheet extends StatefulWidget {
+  final String photoPath;
+  final ColorimetryResultModel colorimetry;
+
+  const _BlondeSheet({required this.photoPath, required this.colorimetry});
+
+  @override
+  State<_BlondeSheet> createState() => _BlondeSheetState();
+}
+
+class _BlondeSheetState extends State<_BlondeSheet> {
+  double _percentage = 50;
+  int _selectedTechnique = 0;
+
+  final List<Map<String, String>> _techniques = [
+    {'name': 'Balayage', 'desc': 'Degradado natural a mano alzada, raíz más oscura a puntas claras'},
+    {'name': 'Babylights', 'desc': 'Mechas finas desde la raíz que imitan el reflejo natural del sol'},
+    {'name': 'Color Melting', 'desc': 'Fundido de tonos sin líneas marcadas para transición gradual'},
+    {'name': 'Power Blond', 'desc': 'Decoloración estratégica para un rubio intenso y uniforme'},
+    {'name': 'Bronde', 'desc': 'Fusión de castaño claro y rubio para dar luz a bases oscuras'},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(32, 16, 32, 32),
+      decoration: BoxDecoration(
+        color: AppColors.beigeFondo,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(2)),
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text('Rubios IA', style: TextStyle(fontFamily: 'Poppins', fontSize: 28, fontWeight: FontWeight.w700, color: Colors.black87, letterSpacing: -0.5)),
+          const SizedBox(height: 4),
+          const Text('Selecciona técnica y porcentaje de claridad', style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Colors.black45)),
+          const SizedBox(height: 28),
+          const Text('PORCENTAJE DE CLARIDAD', style: TextStyle(fontFamily: 'Poppins', fontSize: 9, fontWeight: FontWeight.w600, letterSpacing: 1.5, color: Colors.black38)),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const Text('10%', style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Colors.black38)),
+              Expanded(
+                child: SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    activeTrackColor: AppColors.negroCarbon,
+                    inactiveTrackColor: Colors.black.withValues(alpha: 0.1),
+                    thumbColor: AppColors.negroCarbon,
+                    overlayColor: AppColors.negroCarbon.withValues(alpha: 0.1),
+                    trackHeight: 3,
+                  ),
+                  child: Slider(
+                    value: _percentage,
+                    min: 10,
+                    max: 100,
+                    divisions: 9,
+                    label: '${_percentage.toInt()}%',
+                    onChanged: (v) => setState(() => _percentage = v),
+                  ),
+                ),
+              ),
+              const Text('100%', style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Colors.black38)),
+            ],
+          ),
+          Center(
+            child: Text('${_percentage.toInt()}%', style: const TextStyle(fontFamily: 'Poppins', fontSize: 24, fontWeight: FontWeight.w700, color: Colors.black87)),
+          ),
+          const SizedBox(height: 24),
+          const Text('TÉCNICA', style: TextStyle(fontFamily: 'Poppins', fontSize: 9, fontWeight: FontWeight.w600, letterSpacing: 1.5, color: Colors.black38)),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 100,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _techniques.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 10),
+              itemBuilder: (context, index) {
+                final t = _techniques[index];
+                final isSelected = index == _selectedTechnique;
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedTechnique = index),
+                  child: Container(
+                    width: 140,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: isSelected ? AppColors.negroCarbon : Colors.white.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: isSelected ? Colors.transparent : Colors.black.withValues(alpha: 0.08)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          t['name']!,
+                          style: TextStyle(
+                            fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.w600,
+                            color: isSelected ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Expanded(
+                          child: Text(
+                            t['desc']!,
+                            style: TextStyle(
+                              fontFamily: 'Poppins', fontSize: 8,
+                              color: isSelected ? Colors.white.withValues(alpha: 0.7) : Colors.black45,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 28),
+          GestureDetector(
+            onTap: () {
+              final technique = _techniques[_selectedTechnique];
+              final styleName = 'Rubio - ${technique['name']} ${_percentage.toInt()}%';
+              final styleDescription = 'Transforma el cabello a rubio usando técnica "${technique['name']}" con ${_percentage.toInt()}% de claridad. ${technique['desc']}';
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/hairstyle_processing', arguments: {
+                'photoPath': widget.photoPath,
+                'colorimetry': widget.colorimetry,
+                'style': HairstyleModel(
+                  id: 'rubio_ia',
+                  name: styleName,
+                  description: styleDescription,
+                  styleType: 'tinte',
+                  maintenanceLevel: 'Alto',
+                  accentColor: Colors.amber,
+                  stylistSteps: [],
+                  products: [],
+                  imagePath: '',
+                ),
+              });
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                color: AppColors.negroCarbon,
+                borderRadius: BorderRadius.circular(50),
+              ),
+              child: const Center(
+                child: Text('Generar rubio', style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -731,22 +1001,111 @@ class _EditorialMetric extends StatelessWidget {
   }
 }
 
-class _EditorialColor extends StatelessWidget {
-  final Color color;
-  final bool avoid;
-  const _EditorialColor({required this.color, this.avoid = false});
+class _PieChart extends StatelessWidget {
+  final List<Color> colors;
+  final bool isAvoid;
+  const _PieChart({required this.colors, this.isAvoid = false});
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1,
-      child: Container(
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(16),
-          border: avoid ? Border.all(color: Colors.black.withValues(alpha: 0.15), width: 1) : null,
-        ),
+    if (colors.isEmpty) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
       ),
+      child: Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            height: 200,
+            child: CustomPaint(
+              painter: _PieChartPainter(colors: colors),
+              child: Center(
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.beigeFondo,
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.9), width: 3),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      isAvoid ? Icons.block_outlined : Icons.palette_outlined,
+                      size: 28,
+                      color: Colors.black.withValues(alpha: 0.25),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: colors.map((c) => _ColorDot(color: c)).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PieChartPainter extends CustomPainter {
+  final List<Color> colors;
+  _PieChartPainter({required this.colors});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.shortestSide / 2 - 2;
+    final arcRect = Rect.fromCircle(center: center, radius: radius);
+    final sweepAngle = 2 * pi / colors.length;
+
+    for (int i = 0; i < colors.length; i++) {
+      final paint = Paint()
+        ..color = colors[i]
+        ..style = PaintingStyle.fill;
+      final startAngle = -pi / 2 + sweepAngle * i;
+      canvas.drawArc(arcRect, startAngle, sweepAngle * 0.95, true, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _PieChartPainter oldDelegate) {
+    return oldDelegate.colors != colors;
+  }
+}
+
+class _ColorDot extends StatelessWidget {
+  final Color color;
+  const _ColorDot({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 14,
+          height: 14,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.black.withValues(alpha: 0.1), width: 0.5),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          '#${color.value.toRadixString(16).substring(2).toUpperCase()}',
+          style: TextStyle(fontFamily: 'Poppins', fontSize: 9, color: Colors.black.withValues(alpha: 0.35), letterSpacing: 0.5),
+        ),
+      ],
     );
   }
 }
@@ -764,9 +1123,11 @@ class _RadialPaletteDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double size = 300;
-    const double imageSize = 160;
-    const double radius = size / 2 - 15;
+    const double size = 300.0;
+    const double imageSize = 130.0;
+    const double innerRadius = imageSize / 2 + 8;
+    const double outerRadius = size / 2 - 4;
+    final allColors = [...recommended, ...toAvoid];
 
     return Container(
       width: size,
@@ -781,61 +1142,73 @@ class _RadialPaletteDisplay extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
+          if (allColors.isNotEmpty)
+            CustomPaint(
+              size: const Size(size, size),
+              painter: _RingChartPainter(
+                colors: allColors,
+                innerRadius: innerRadius,
+                outerRadius: outerRadius,
+              ),
+            ),
           Container(
-            padding: const EdgeInsets.all(4),
-            decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 10, offset: const Offset(0, 4)),
+              ],
+            ),
             child: ClipOval(
               child: imagePath.isNotEmpty && File(imagePath).existsSync()
                   ? Image.file(File(imagePath), width: imageSize, height: imageSize, fit: BoxFit.cover)
                   : Container(width: imageSize, height: imageSize, color: Colors.black12),
             ),
           ),
-          if (recommended.isNotEmpty)
-            ...List.generate(recommended.length, (index) {
-              final double step = recommended.length > 1 ? pi / (recommended.length - 1) : 0;
-              final double angle = pi / 2 + step * index;
-              return Positioned(
-                left: size / 2 - 15 + radius * cos(angle),
-                top: size / 2 - 15 + radius * sin(angle),
-                child: _ColorPoint(color: recommended[index], size: 30),
-              );
-            }),
-          if (toAvoid.isNotEmpty)
-            ...List.generate(toAvoid.length, (index) {
-              final double step = toAvoid.length > 1 ? pi / (toAvoid.length - 1) : 0;
-              final double angle = pi / 2 - step * index;
-              return Positioned(
-                left: size / 2 - 12 + radius * cos(angle),
-                top: size / 2 - 12 + radius * sin(angle),
-                child: _ColorPoint(color: toAvoid[index], size: 24, isAvoid: true),
-              );
-            }),
         ],
       ),
     );
   }
 }
 
-class _ColorPoint extends StatelessWidget {
-  final Color color;
-  final double size;
-  final bool isAvoid;
-  const _ColorPoint({required this.color, required this.size, this.isAvoid = false});
+class _RingChartPainter extends CustomPainter {
+  final List<Color> colors;
+  final double innerRadius;
+  final double outerRadius;
+
+  _RingChartPainter({
+    required this.colors,
+    required this.innerRadius,
+    required this.outerRadius,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-        border: isAvoid ? Border.all(color: Colors.black.withValues(alpha: 0.2), width: 1.5) : null,
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 6, offset: const Offset(0, 2)),
-        ],
-      ),
-    );
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final sweepAngle = 2 * pi / colors.length;
+
+    for (int i = 0; i < colors.length; i++) {
+      final paint = Paint()
+        ..color = colors[i]
+        ..style = PaintingStyle.fill;
+      final startAngle = -pi / 2 + sweepAngle * i;
+      _drawArcRing(canvas, center, innerRadius, outerRadius, startAngle, sweepAngle * 0.92, paint);
+    }
+  }
+
+  void _drawArcRing(Canvas canvas, Offset center, double innerR, double outerR, double startAngle, double sweepAngle, Paint paint) {
+    final path = Path()
+      ..moveTo(center.dx + innerR * cos(startAngle), center.dy + innerR * sin(startAngle))
+      ..arcTo(Rect.fromCircle(center: center, radius: innerR), startAngle, sweepAngle, false)
+      ..arcTo(Rect.fromCircle(center: center, radius: outerR), startAngle + sweepAngle, -sweepAngle, false)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _RingChartPainter oldDelegate) {
+    return oldDelegate.colors != colors;
   }
 }
 

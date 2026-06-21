@@ -263,15 +263,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 12),
                       _ActionCard(
-                        icon: Icons.photo_library_outlined,
-                        title: 'Galería',
-                        subtitle: 'Explora tus imágenes guardadas',
-                        onTap: () => Navigator.pushNamed(context, '/gallery'),
-                      ),
-                      const SizedBox(height: 12),
-                      _ActionCard(
                         icon: Icons.folder_outlined,
-                        title: 'El Archivo',
+                        title: 'Historial',
                         subtitle: 'Historial completo de análisis',
                         onTap: () => Navigator.pushNamed(context, '/history'),
                       ),
