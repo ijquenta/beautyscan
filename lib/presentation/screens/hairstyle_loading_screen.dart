@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../components/atoms/beauty_background.dart';
+import '../../core/constants.dart';
 import '../../domain/models/hairstyle_model.dart';
 import '../../data/services/gemini_service.dart';
 import '../../domain/models/colorimetry_result_model.dart';
@@ -14,28 +14,16 @@ class HairstyleLoadingScreen extends StatefulWidget {
 }
 
 class _HairstyleLoadingScreenState extends State<HairstyleLoadingScreen>
-    with TickerProviderStateMixin {
-  late AnimationController _scannerController;
+    with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
   final GeminiService _geminiService = GeminiService();
 
-  final List<_ProcessingStep> _steps = [
-    _ProcessingStep(label: 'CARGANDO MODELO IA', done: true),
-    _ProcessingStep(label: 'ANALIZANDO ESTRUCTURA', done: true),
-    _ProcessingStep(label: 'SINTETIZANDO CABELLO', done: false),
-    _ProcessingStep(label: 'REFINADO EDITORIAL', done: false),
-  ];
+  String _statusText = 'Cargando modelo IA';
+  double _progress = 0.0;
 
   @override
   void initState() {
     super.initState();
-    // Animation for the sweeping scanner line
-    _scannerController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat(reverse: true);
-
-    // Subtle pulse for the background and text
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -49,7 +37,7 @@ class _HairstyleLoadingScreenState extends State<HairstyleLoadingScreen>
   Future<void> _startGeneration() async {
     final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     if (args == null) return;
-    
+
     final originalPhotoPath = args['photoPath'] as String?;
     final selectedStyle = args['style'] as HairstyleModel?;
 
@@ -64,14 +52,16 @@ class _HairstyleLoadingScreenState extends State<HairstyleLoadingScreen>
     }
 
     setState(() {
-      _steps[2] = _ProcessingStep(label: 'SINTETIZANDO CABELLO', done: true);
+      _statusText = 'Sintetizando cabello';
+      _progress = 0.4;
     });
 
     try {
       await Future.delayed(const Duration(seconds: 1));
       if (mounted) {
         setState(() {
-          _steps[3] = _ProcessingStep(label: 'ENVIANDO A NANO BANANA', done: true);
+          _statusText = 'Generando con IA';
+          _progress = 0.7;
         });
       }
 
@@ -89,27 +79,31 @@ class _HairstyleLoadingScreenState extends State<HairstyleLoadingScreen>
       }
 
       if (mounted && newPath != null) {
-        HapticFeedback.lightImpact();
-        Navigator.pushReplacementNamed(
-          context,
-          '/hairstyle_display',
-          arguments: {
-            'style': selectedStyle,
-            'photoPath': newPath,
-            'originalPhotoPath': originalPhotoPath,
-          },
-        );
+        setState(() => _progress = 1.0);
+        await Future.delayed(const Duration(milliseconds: 400));
+        if (mounted) {
+          HapticFeedback.lightImpact();
+          Navigator.pushReplacementNamed(
+            context,
+            '/hairstyle_display',
+            arguments: {
+              'style': selectedStyle,
+              'photoPath': newPath,
+              'originalPhotoPath': originalPhotoPath,
+            },
+          );
+        }
       } else if (mounted) {
-         Navigator.pop(context);
-         ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(content: Text('Error: falló la generación de imagen en Nano Banana.')),
-         );
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error: falló la generación de imagen.')),
+        );
       }
     } catch (e) {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al conectar con Nano Banana: $e')),
+          SnackBar(content: Text('Error: $e')),
         );
       }
     }
@@ -117,7 +111,6 @@ class _HairstyleLoadingScreenState extends State<HairstyleLoadingScreen>
 
   @override
   void dispose() {
-    _scannerController.dispose();
     _pulseController.dispose();
     super.dispose();
   }
@@ -127,167 +120,143 @@ class _HairstyleLoadingScreenState extends State<HairstyleLoadingScreen>
     final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final style = args?['style'] as HairstyleModel?;
     final photoPath = args?['photoPath'] as String?;
-    
-    return BeautyBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Background Image with dark overlay
-            if (photoPath != null)
-              Image.file(
-                File(photoPath),
-                fit: BoxFit.cover,
-              )
-            else
-              Container(color: Colors.black87),
-              
-            // Heavy glassmorphic/darkening overlay
-            Container(
-              color: Colors.black.withValues(alpha: 0.75),
-            ),
 
-            // Scanning Effect Overlay
+    return Scaffold(
+      backgroundColor: AppColors.beigeFondo,
+      body: SafeArea(
+        child: Stack(
+          children: [
             if (photoPath != null)
-              AnimatedBuilder(
-                animation: _scannerController,
+              Positioned.fill(
+                child: Container(
+                  margin: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(28),
+                    image: DecorationImage(
+                      image: FileImage(File(photoPath)),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(28),
+                      color: Colors.black.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ),
+              ),
+
+            Center(
+              child: AnimatedBuilder(
+                animation: _pulseController,
                 builder: (context, child) {
-                  return ClipRect(
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      heightFactor: _scannerController.value,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: FileImage(File(photoPath)),
-                            fit: BoxFit.cover,
-                            colorFilter: const ColorFilter.mode(
-                              Colors.white12,
-                              BlendMode.lighten,
-                            ),
-                          ),
-                        ),
-                        child: Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Container(
-                            height: 3,
-                            decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.white.withValues(alpha: 0.8),
-                                  blurRadius: 12,
-                                  spreadRadius: 2,
-                                )
-                              ],
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
+                  return Opacity(
+                    opacity: 0.7 + (_pulseController.value * 0.3),
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.auto_awesome_rounded, size: 36, color: Colors.white),
                       ),
                     ),
                   );
                 },
               ),
+            ),
 
-            // Bottom glass sheet for steps and text
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 48),
+                padding: const EdgeInsets.fromLTRB(32, 48, 32, 56),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
                       Colors.black,
-                      Colors.black.withValues(alpha: 0.8),
+                      Colors.black.withValues(alpha: 0.85),
                       Colors.transparent,
                     ],
-                    stops: const [0.0, 0.7, 1.0],
+                    stops: const [0.0, 0.5, 1.0],
                   ),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title and Description
                     AnimatedBuilder(
                       animation: _pulseController,
                       builder: (context, child) {
                         return Opacity(
                           opacity: 0.7 + (_pulseController.value * 0.3),
                           child: const Text(
-                            'Sintetizando.',
-                            style: TextStyle(
-                              fontFamily: 'PlayfairDisplay',
-                              fontSize: 48,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                              letterSpacing: -1.0,
-                              height: 1.0,
+                            'Creando tu look',
+                            style: TextStyle(fontFamily: 'Poppins', fontSize: 32, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: -0.8, height: 1.1),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Aplicando ${style?.name.replaceAll('\n', ' ') ?? 'estilo'} con IA.',
+                      style: const TextStyle(fontFamily: 'Poppins', color: Colors.white60, height: 1.4, fontSize: 13),
+                    ),
+                    const SizedBox(height: 32),
+                    AnimatedBuilder(
+                      animation: _pulseController,
+                      builder: (context, child) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(2),
+                          child: Container(
+                            height: 3,
+                            width: double.infinity,
+                            color: Colors.white.withValues(alpha: 0.15),
+                            child: FractionallySizedBox(
+                              alignment: Alignment.centerLeft,
+                              widthFactor: _progress + ((1 - _progress) * _pulseController.value * 0.3),
+                              child: Container(
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         );
-                      }
+                      },
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      'Aplicando el estilo ${(style?.name.replaceAll('\n', ' ') ?? '')} con alta precisión arquitectónica.',
-                      style: const TextStyle(
-                        fontFamily: 'Inter',
-                        color: Colors.white70,
-                        height: 1.6,
-                        fontSize: 13,
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 400),
+                      child: Text(
+                        _statusText,
+                        key: ValueKey(_statusText),
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 11,
+                          color: Colors.white.withValues(alpha: 0.6),
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 48),
-                    // Steps
-                    ..._steps.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final step = entry.value;
-                      final isActive =
-                          !step.done && (index == 0 || _steps[index - 1].done);
-                      
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              width: 24,
-                              child: step.done
-                                  ? const Text('✓',
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 12))
-                                  : isActive
-                                      ? const SizedBox(
-                                          width: 10,
-                                          height: 10,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 1.5,
-                                            color: Colors.white,
-                                          ),
-                                        )
-                                      : const SizedBox(),
-                            ),
-                            Text(
-                              step.label,
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 10,
-                                letterSpacing: 2.5,
-                                fontWeight: step.done || isActive
-                                    ? FontWeight.w600
-                                    : FontWeight.w400,
-                                color: step.done || isActive
-                                    ? Colors.white
-                                    : Colors.white38,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
+                  ],
+                ),
+              ),
+            ),
+
+            Positioned(
+              left: 32,
+              top: 16,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Row(
+                  children: [
+                    Icon(Icons.close_rounded, size: 18, color: Colors.white.withValues(alpha: 0.6)),
+                    const SizedBox(width: 6),
+                    Text('Cancelar', style: TextStyle(fontFamily: 'Poppins', color: Colors.white.withValues(alpha: 0.6), fontSize: 13)),
                   ],
                 ),
               ),
@@ -297,10 +266,4 @@ class _HairstyleLoadingScreenState extends State<HairstyleLoadingScreen>
       ),
     );
   }
-}
-
-class _ProcessingStep {
-  final String label;
-  final bool done;
-  _ProcessingStep({required this.label, required this.done});
 }

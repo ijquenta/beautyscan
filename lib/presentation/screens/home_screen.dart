@@ -35,7 +35,6 @@ class _HomeScreenState extends State<HomeScreen> {
       final results = await _colorimetryRepo.getResultsByUser(user.id!);
       if (mounted) {
         setState(() {
-          // Mostramos máximo los 3 últimos
           _recentResults = results.take(3).toList();
         });
       }
@@ -48,27 +47,30 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         bottomNavigationBar: Container(
-          decoration: const BoxDecoration(
-            border: Border(top: BorderSide(color: Colors.black12, width: 1)),
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: Colors.black.withValues(alpha: 0.06))),
           ),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _BottomNavButton(
-                    label: 'PRINCIPAL',
+                  _BottomNavItem(
+                    icon: Icons.home_rounded,
+                    label: 'Principal',
                     isActive: true,
                     onTap: () {},
                   ),
-                  _BottomNavButton(
-                    label: 'ANALIZAR',
+                  _BottomNavItem(
+                    icon: Icons.qr_code_scanner_rounded,
+                    label: 'Analizar',
                     isActive: false,
                     onTap: () => Navigator.pushNamed(context, '/scanner'),
                   ),
-                  _BottomNavButton(
-                    label: 'HISTORIAL',
+                  _BottomNavItem(
+                    icon: Icons.history_rounded,
+                    label: 'Historial',
                     isActive: false,
                     onTap: () => Navigator.pushNamed(context, '/history'),
                   ),
@@ -80,7 +82,6 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SafeArea(
           child: CustomScrollView(
             slivers: [
-              // Header
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(32, 20, 32, 0),
@@ -100,14 +101,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Image.asset('assets/icon/app_icon.png', fit: BoxFit.cover),
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 10),
                           const Text(
-                            'BEAUTYSCAN',
+                            'Beautyscan',
                             style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 10,
-                              letterSpacing: 3.0,
-                              fontWeight: FontWeight.w700,
+                              fontFamily: 'Poppins',
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
                               color: Colors.black87,
                             ),
                           ),
@@ -140,154 +140,171 @@ class _HomeScreenState extends State<HomeScreen> {
 
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 60, 32, 40),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Hola, ${_user?.name.split(' ')[0] ?? 'Usuario'}',
-                        style: const TextStyle(
-                          fontFamily: 'PlayfairDisplay',
-                          fontSize: 36,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.black54,
-                          letterSpacing: -0.5,
+                  padding: const EdgeInsets.fromLTRB(32, 48, 32, 12),
+                  child: Container(
+                    height: 340,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.negroCarbon.withValues(alpha: 0.10),
+                          blurRadius: 30,
+                          offset: const Offset(0, 15),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              'Descubre tu\nesencia.',
-                              style: TextStyle(
-                                fontFamily: 'PlayfairDisplay',
-                                fontSize: 36,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.negroCarbon,
-                                letterSpacing: -1.0,
-                                height: 1.0,
-                              ),
-                            ),
+                      ],
+                    ),
+                    child: Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(28),
+                          child: Image.asset(
+                            'assets/images/chica-principal.png',
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
                           ),
-                          Container(
-                            width: 140,
-                            height: 180,
+                        ),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(28),
+                          child: Container(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(24),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.negroCarbon.withValues(alpha: 0.15),
-                                  blurRadius: 30,
-                                  offset: const Offset(0, 15),
-                                )
-                              ],
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(24),
-                              child: Image.asset(
-                                'assets/images/chica-principal.png',
-                                fit: BoxFit.cover,
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  AppColors.negroCarbon.withValues(alpha: 0.75),
+                                  AppColors.negroCarbon.withValues(alpha: 0.15),
+                                  Colors.transparent,
+                                ],
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 40),
+                        ),
+                        Positioned(
+                          left: 24,
+                          right: 24,
+                          bottom: 24,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: const Text(
+                                  'Bienvenida',
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 2.0,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Hola, ${_user?.name.split(' ')[0] ?? 'Usuario'}',
+                                style: const TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              const Text(
+                                'Lo que la IA ve en ti.',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 34,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  letterSpacing: -1.0,
+                                  height: 1.0,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Análisis de colorimetría con inteligencia artificial.',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white.withValues(alpha: 0.7),
+                                  letterSpacing: 0.2,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
 
-                      GestureDetector(
+              // Quick actions
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 28, 32, 0),
+                  child: Column(
+                    children: [
+                      _ActionCard(
+                        icon: Icons.add_circle_outline_rounded,
+                        title: 'Nuevo Análisis',
+                        subtitle: 'Escanea y descubre tu colorimetría',
                         onTap: () => Navigator.pushNamed(context, '/scanner'),
-                        child: Container(
-                          width: double.infinity,
-                          decoration: const BoxDecoration(
-                            border: Border(bottom: BorderSide(color: Colors.black12, width: 1)),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 24),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: const [
-                              Text(
-                                'Nuevo Análisis',
-                                style: TextStyle(
-                                  fontFamily: 'PlayfairDisplay',
-                                  fontSize: 24,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                              Icon(Icons.arrow_forward_rounded, color: Colors.black54, size: 20),
-                            ],
-                          ),
-                        ),
                       ),
-
-                      GestureDetector(
+                      const SizedBox(height: 12),
+                      _ActionCard(
+                        icon: Icons.photo_library_outlined,
+                        title: 'Galería',
+                        subtitle: 'Explora tus imágenes guardadas',
                         onTap: () => Navigator.pushNamed(context, '/gallery'),
-                        child: Container(
-                          width: double.infinity,
-                          decoration: const BoxDecoration(
-                            border: Border(bottom: BorderSide(color: Colors.black12, width: 1)),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 24),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: const [
-                              Text(
-                                'Galería',
-                                style: TextStyle(
-                                  fontFamily: 'PlayfairDisplay',
-                                  fontSize: 24,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                              Icon(Icons.arrow_forward_rounded, color: Colors.black38, size: 20),
-                            ],
-                          ),
-                        ),
                       ),
-
-                      GestureDetector(
+                      const SizedBox(height: 12),
+                      _ActionCard(
+                        icon: Icons.folder_outlined,
+                        title: 'El Archivo',
+                        subtitle: 'Historial completo de análisis',
                         onTap: () => Navigator.pushNamed(context, '/history'),
-                        child: Container(
-                          width: double.infinity,
-                          decoration: const BoxDecoration(
-                            border: Border(bottom: BorderSide(color: Colors.black12, width: 1)),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 24),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: const [
-                              Text(
-                                'El Archivo',
-                                style: TextStyle(
-                                  fontFamily: 'PlayfairDisplay',
-                                  fontSize: 24,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                              Icon(Icons.arrow_forward_rounded, color: Colors.black38, size: 20),
-                            ],
-                          ),
-                        ),
                       ),
                     ],
                   ),
                 ),
               ),
 
-              // Últimos análisis
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 20, 32, 10),
-                  child: const Text(
-                    'RECIENTE',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 2.0,
-                      color: Colors.black38,
-                    ),
+                  padding: const EdgeInsets.fromLTRB(32, 44, 32, 16),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 3,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(2),
+                          color: AppColors.negroCarbon.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      const Text(
+                        'Reciente',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 2.0,
+                          color: Colors.black38,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -298,15 +315,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   delegate: SliverChildListDelegate(
                     _recentResults.isEmpty
                       ? [
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Text(
-                              'Sin análisis recientes',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 10,
-                                color: Colors.black38,
-                                letterSpacing: 1.5,
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'Sin análisis recientes',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 10,
+                                  color: Colors.black38,
+                                  letterSpacing: 1.5,
+                                ),
                               ),
                             ),
                           ),
@@ -315,11 +338,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           final i = entry.key;
                           final r = entry.value;
                           return [
-                            if (i > 0) const SizedBox(height: 16),
-                            _EditorialLogCard(
+                            if (i > 0) const SizedBox(height: 12),
+                            _RecentAnalysisCard(
                               title: r.clientName,
                               subtitle: r.season,
-                              category: 'Colorimetría',
                               date: _formatDate(r.createdAt),
                               onTap: () => Navigator.pushNamed(
                                 context,
@@ -355,17 +377,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _EditorialLogCard extends StatelessWidget {
+class _RecentAnalysisCard extends StatelessWidget {
   final String title;
   final String? subtitle;
-  final String category;
   final String date;
   final VoidCallback onTap;
 
-  const _EditorialLogCard({
+  const _RecentAnalysisCard({
     required this.title,
     this.subtitle,
-    required this.category,
     required this.date,
     required this.onTap,
   });
@@ -375,60 +395,70 @@ class _EditorialLogCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        color: Colors.transparent,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.7),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.9), width: 1),
+        ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              date.toUpperCase(),
-              style: const TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 9,
-                fontWeight: FontWeight.w400,
-                color: Colors.black38,
-                letterSpacing: 1.0,
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.negroCarbon.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Center(
+                child: Icon(Icons.palette_outlined, color: Colors.black54, size: 20),
               ),
             ),
-            const SizedBox(width: 24),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Título: nombre del cliente
                   Text(
                     title,
                     style: const TextStyle(
-                      fontFamily: 'PlayfairDisplay',
-                      fontSize: 16,
+                      fontFamily: 'Poppins',
+                      fontSize: 15,
                       color: Colors.black87,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 2),
-                    // Subtítulo: temporada
                     Text(
                       subtitle!,
                       style: const TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 10,
+                        fontFamily: 'Poppins',
+                        fontSize: 11,
                         color: Colors.black54,
-                        letterSpacing: 0.5,
+                        letterSpacing: 0.3,
                       ),
                     ),
                   ],
-                  const SizedBox(height: 4),
-                  Text(
-                    category.toUpperCase(),
-                    style: const TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 9,
-                      color: Colors.black38,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
                 ],
               ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  date.toUpperCase(),
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 8,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black38,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Icon(Icons.chevron_right_rounded, color: Colors.black.withValues(alpha: 0.2), size: 18),
+              ],
             ),
           ],
         ),
@@ -437,12 +467,14 @@ class _EditorialLogCard extends StatelessWidget {
   }
 }
 
-class _BottomNavButton extends StatelessWidget {
+class _BottomNavItem extends StatelessWidget {
+  final IconData icon;
   final String label;
   final bool isActive;
   final VoidCallback onTap;
 
-  const _BottomNavButton({
+  const _BottomNavItem({
+    required this.icon,
     required this.label,
     required this.isActive,
     required this.onTap,
@@ -453,17 +485,103 @@ class _BottomNavButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 10,
-            letterSpacing: 2.0,
-            fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-            color: isActive ? Colors.black87 : Colors.black38,
-          ),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.negroCarbon.withValues(alpha: 0.06) : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: isActive ? Colors.black87 : Colors.black38,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 10,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                color: isActive ? Colors.black87 : Colors.black38,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _ActionCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.65),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.9), width: 1),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: AppColors.negroCarbon.withValues(alpha: 0.04),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, size: 24, color: Colors.black54),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 10,
+                      color: Colors.black45,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: Colors.black.withValues(alpha: 0.2), size: 22),
+          ],
         ),
       ),
     );

@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../domain/models/colorimetry_result_model.dart';
 import '../../domain/models/hairstyle_model.dart';
 import '../repositories/user_repository.dart';
+import '../../core/session_manager.dart';
 
 class GeminiService {
   final _userRepo = UserRepository();
@@ -90,6 +91,10 @@ class GeminiService {
     HairstyleModel style, {
     ColorimetryResultModel? colorimetry,
   }) async {
+    if (!await SessionManager.isImageGenerationEnabled()) {
+      debugPrint('Generación de imágenes desactivada por el usuario.');
+      return null;
+    }
     final apiKey = dotenv.env['API_KEY'] ?? '';
     if (apiKey.isEmpty) {
       throw Exception('Gemini API key not found in env variables.');
@@ -182,6 +187,10 @@ class GeminiService {
     String originalPhotoPath, {
     ColorimetryResultModel? colorimetry,
   }) async {
+    if (!await SessionManager.isImageGenerationEnabled()) {
+      debugPrint('Generación de imágenes desactivada por el usuario.');
+      return null;
+    }
     final apiKey = dotenv.env['API_KEY'] ?? '';
     if (apiKey.isEmpty) {
       throw Exception('Gemini API key not found in env variables.');

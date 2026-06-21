@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../components/organisms/before_after_slider.dart';
+import '../../core/constants.dart';
 import '../../domain/models/hairstyle_model.dart';
 
 class HairstyleDisplayScreen extends StatefulWidget {
@@ -12,9 +12,8 @@ class HairstyleDisplayScreen extends StatefulWidget {
 
 class _HairstyleDisplayScreenState extends State<HairstyleDisplayScreen> {
   String? _originalPhotoPath;
-  String? _photoPath; // Nuevo path generado
+  String? _photoPath;
   HairstyleModel? _style;
-  final TextEditingController _feedbackController = TextEditingController();
 
   @override
   void didChangeDependencies() {
@@ -30,193 +29,235 @@ class _HairstyleDisplayScreenState extends State<HairstyleDisplayScreen> {
   }
 
   @override
-  void dispose() {
-    _feedbackController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final style = _style;
     final photoPath = _photoPath;
     final originalPath = _originalPhotoPath;
 
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Fullscreen Image / Slider
-          BeforeAfterSlider(
-            beforeImage: originalPath != null
-                ? FileImage(File(originalPath)) as ImageProvider
-                : const NetworkImage(
-                    'https://images.unsplash.com/photo-1549471013-3364d7ce4668?auto=format&fit=crop&q=80&w=800',
-                  ),
-            afterImage: photoPath != null
-                ? FileImage(File(photoPath)) as ImageProvider
-                : const NetworkImage(
-                    'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&q=80&w=800',
-                  ),
-          ),
-
-          // Top Gradient overlay for AppBar readability
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 120,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withValues(alpha: 0.8),
-                    Colors.transparent,
+      backgroundColor: AppColors.beigeFondo,
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(32, 20, 32, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Row(
+                        children: [
+                          Icon(Icons.arrow_back_rounded, size: 18, color: Colors.black.withValues(alpha: 0.5)),
+                          const SizedBox(width: 6),
+                          const Text('Volver', style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black54)),
+                        ],
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pushNamed(context, '/hairstyle_detail', arguments: style),
+                      child: Row(
+                        children: [
+                          const Text('Detalles', style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: Colors.black54)),
+                          Icon(Icons.chevron_right_rounded, size: 18, color: Colors.black.withValues(alpha: 0.3)),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-          ),
 
-          // Custom Transparent AppBar
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 10,
-            left: 20,
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white24),
-                ),
-                child: const Text(
-                  'VOLVER',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 10,
-                    letterSpacing: 2.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(32, 32, 32, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Resultado', style: TextStyle(fontFamily: 'Poppins', fontSize: 9, fontWeight: FontWeight.w600, color: Colors.black45)),
+                    const SizedBox(height: 8),
+                    Text(
+                      style != null ? style.name.replaceAll('\n', ' ') : 'Simulación',
+                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 32, fontWeight: FontWeight.w700, color: AppColors.negroCarbon, letterSpacing: -0.8, height: 1.0),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
 
-          // Bottom Glassmorphic Panel
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 40),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    Colors.black,
-                    Colors.black.withValues(alpha: 0.8),
-                    Colors.black.withValues(alpha: 0.0),
-                  ],
-                  stops: const [0.0, 0.6, 1.0],
-                ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'RESULTADO',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 3.0,
-                      color: Colors.white.withValues(alpha: 0.5),
-                    ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(32, 8, 32, 8),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    style != null ? style.name.replaceAll('\n', ' ') : 'Simulación.',
-                    style: const TextStyle(
-                      fontFamily: 'PlayfairDisplay',
-                      fontSize: 40,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      letterSpacing: -1.0,
-                      height: 1.0,
-                    ),
-                  ),
-                  // Actions
-                  Row(
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => Navigator.pushNamed(
-                            context,
-                            '/hairstyle_detail',
-                            arguments: style,
-                          ),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 18),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.white38),
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'DETALLES',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 2.0,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: AspectRatio(
+                          aspectRatio: 3 / 4,
+                          child: _buildImage(originalPath, esOriginal: true),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => Navigator.popUntil(context, ModalRoute.withName('/home')),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 18),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'GUARDAR',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 2.0,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                          ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.person_outline_rounded, size: 12, color: Colors.black.withValues(alpha: 0.25)),
+                            const SizedBox(width: 6),
+                            Text('Original', style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Colors.black.withValues(alpha: 0.35))),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ],
+
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(32, 8, 32, 8),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
+                    boxShadow: [
+                      BoxShadow(color: AppColors.negroCarbon.withValues(alpha: 0.08), blurRadius: 20, offset: const Offset(0, 8)),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: AspectRatio(
+                          aspectRatio: 3 / 4,
+                          child: _buildImage(photoPath, esOriginal: false),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.auto_awesome_rounded, size: 12, color: AppColors.negroCarbon.withValues(alpha: 0.35)),
+                            const SizedBox(width: 6),
+                            Text('Generado por IA', style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Colors.black.withValues(alpha: 0.5))),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(32, 20, 32, 48),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Navigator.popUntil(context, ModalRoute.withName('/home')),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          decoration: BoxDecoration(
+                            color: AppColors.negroCarbon,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.save_outlined, size: 16, color: Colors.white),
+                                SizedBox(width: 8),
+                                Text('Guardar', style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              backgroundColor: AppColors.negroCarbon,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                              content: const Text('Imagen compartida', style: TextStyle(fontFamily: 'Poppins')),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: AppColors.negroCarbon.withValues(alpha: 0.3)),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.ios_share_rounded, size: 16, color: AppColors.negroCarbon),
+                                SizedBox(width: 8),
+                                Text('Compartir', style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.negroCarbon)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImage(String? path, {required bool esOriginal}) {
+    if (path != null && File(path).existsSync()) {
+      return Image.file(
+        File(path),
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        errorBuilder: (context, error, stackTrace) => _imageError(),
+      );
+    }
+    return _imageError();
+  }
+
+  Widget _imageError() {
+    return Container(
+      color: Colors.black.withValues(alpha: 0.05),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.broken_image_outlined, size: 32, color: Colors.black.withValues(alpha: 0.15)),
+            const SizedBox(height: 8),
+            Text('Imagen no disponible', style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Colors.black.withValues(alpha: 0.2))),
+          ],
+        ),
       ),
     );
   }
 }
-

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/constants.dart';
 
 class BeautyTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -28,11 +29,11 @@ class BeautyTextField extends StatelessWidget {
       validator: validator,
       keyboardType: keyboardType,
       textCapitalization: textCapitalization,
-      cursorColor: Colors.black87,
-      cursorWidth: 1,
+      cursorColor: AppColors.negroCarbon,
+      cursorWidth: 1.5,
       style: const TextStyle(
-        fontFamily: 'PlayfairDisplay', // Or Inter, but Playfair gives luxury
-        fontSize: 18,
+        fontFamily: 'Poppins',
+        fontSize: 16,
         color: Colors.black87,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.5,
@@ -40,32 +41,49 @@ class BeautyTextField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: const TextStyle(
-          fontFamily: 'Inter',
+          fontFamily: 'Poppins',
           color: Colors.black38,
           fontSize: 14,
-          fontWeight: FontWeight.w300,
+          fontWeight: FontWeight.w400,
         ),
         filled: true,
-        fillColor: Colors.transparent,
+        fillColor: Colors.white.withValues(alpha: 0.85),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 0,
-          vertical: 16,
+          horizontal: 20,
+          vertical: 18,
         ),
         suffixIcon: suffixIcon,
-        border: UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.1), width: 1),
+        border: OutlineInputBorder(
+          borderRadius: AppConstants.pillBorderRadius,
+          borderSide: BorderSide.none,
         ),
-        enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.1), width: 1),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: AppConstants.pillBorderRadius,
+          borderSide: BorderSide(
+            color: Colors.white.withValues(alpha: 0.9),
+            width: 1,
+          ),
         ),
-        focusedBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.black87, width: 1),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: AppConstants.pillBorderRadius,
+          borderSide: const BorderSide(
+            color: AppColors.negroCarbon,
+            width: 1.5,
+          ),
         ),
-        errorBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.redAccent.withValues(alpha: 0.5), width: 1),
+        errorBorder: OutlineInputBorder(
+          borderRadius: AppConstants.pillBorderRadius,
+          borderSide: BorderSide(
+            color: Colors.redAccent.withValues(alpha: 0.6),
+            width: 1,
+          ),
         ),
-        focusedErrorBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.redAccent, width: 1),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: AppConstants.pillBorderRadius,
+          borderSide: const BorderSide(
+            color: Colors.redAccent,
+            width: 1.5,
+          ),
         ),
       ),
     );

@@ -85,9 +85,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
             child: const Padding(
               padding: EdgeInsets.only(left: 32, top: 20),
               child: Text(
-                'VOLVER',
+                'Volver',
                 style: TextStyle(
-                  fontFamily: 'Inter',
+                  fontFamily: 'Poppins',
                   fontSize: 10,
                   letterSpacing: 2.0,
                   fontWeight: FontWeight.bold,
@@ -111,7 +111,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     Text(
                       'EL ARCHIVO',
                       style: TextStyle(
-                        fontFamily: 'Inter',
+                        fontFamily: 'Poppins',
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 3.0,
@@ -122,7 +122,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     Text(
                       'Tu historia\nde estilo.',
                       style: TextStyle(
-                        fontFamily: 'PlayfairDisplay',
+                        fontFamily: 'Poppins',
                         fontSize: 48,
                         fontWeight: FontWeight.w700,
                         color: Colors.black87,
@@ -138,7 +138,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Row(
-                  children: ['TODOS', 'COLORES', 'PEINADOS']
+                  children: ['Todos', 'Colores', 'Peinados']
                       .asMap()
                       .entries
                       .map((entry) {
@@ -161,7 +161,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         child: Text(
                           label,
                           style: TextStyle(
-                            fontFamily: 'Inter',
+                            fontFamily: 'Poppins',
                             fontSize: 10,
                             letterSpacing: 2.0,
                             fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
@@ -180,14 +180,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
               Expanded(
                 child: _isLoading 
                   ? const Center(
-                      child: Text('CARGANDO...', style: TextStyle(fontFamily: 'Inter', letterSpacing: 2.0)),
+                      child: Text('CARGANDO...', style: TextStyle(fontFamily: 'Poppins', letterSpacing: 2.0)),
                     )
                   : _filtered.isEmpty
                     ? const Center(
                         child: Text(
                           'ARCHIVO VACÍO',
                           style: TextStyle(
-                            fontFamily: 'Inter',
+                            fontFamily: 'Poppins',
                             fontSize: 10,
                             letterSpacing: 3.0,
                             color: Colors.black38,
@@ -212,7 +212,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     child: Text(
                                       entry.date,
                                       style: const TextStyle(
-                                        fontFamily: 'Inter',
+                                        fontFamily: 'Poppins',
                                         fontSize: 9,
                                         fontWeight: FontWeight.w400,
                                         color: Colors.black38,
@@ -228,7 +228,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         Text(
                                           entry.clientName,
                                           style: const TextStyle(
-                                            fontFamily: 'PlayfairDisplay',
+                                            fontFamily: 'Poppins',
                                             fontSize: 20,
                                             color: Colors.black87,
                                             fontWeight: FontWeight.w600,
@@ -239,7 +239,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         Text(
                                           entry.season,
                                           style: const TextStyle(
-                                            fontFamily: 'Inter',
+                                            fontFamily: 'Poppins',
                                             fontSize: 11,
                                             color: Colors.black54,
                                             letterSpacing: 0.5,
@@ -249,7 +249,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         Text(
                                           entry.type.toUpperCase(),
                                           style: const TextStyle(
-                                            fontFamily: 'Inter',
+                                            fontFamily: 'Poppins',
                                             fontSize: 9,
                                             color: Colors.black38,
                                             letterSpacing: 2.0,

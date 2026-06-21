@@ -67,7 +67,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       SnackBar(
         content: Text(
           message,
-          style: const TextStyle(fontFamily: 'Inter', fontSize: 10, letterSpacing: 2.0, fontWeight: FontWeight.w600, color: Colors.white),
+          style: const TextStyle(fontFamily: 'Poppins', fontSize: 10, letterSpacing: 2.0, fontWeight: FontWeight.w600, color: Colors.white),
         ),
         backgroundColor: Colors.black87,
         behavior: SnackBarBehavior.floating,
@@ -99,9 +99,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: const Padding(
               padding: EdgeInsets.only(left: 32, top: 20),
               child: Text(
-                'VOLVER',
+                'Volver',
                 style: TextStyle(
-                  fontFamily: 'Inter',
+                  fontFamily: 'Poppins',
                   fontSize: 10,
                   letterSpacing: 2.0,
                   fontWeight: FontWeight.bold,
@@ -144,7 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       child: Text(
                                         _initials,
                                         style: const TextStyle(
-                                          fontFamily: 'PlayfairDisplay',
+                                          fontFamily: 'Poppins',
                                           fontSize: 48,
                                           color: Colors.black54,
                                         ),
@@ -159,9 +159,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: GestureDetector(
                           onTap: _pickPhoto,
                           child: const Text(
-                            'ACTUALIZAR',
+                            'Actualizar',
                             style: TextStyle(
-                              fontFamily: 'Inter',
+                              fontFamily: 'Poppins',
                               fontSize: 9,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 2.0,
@@ -175,9 +175,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                       // User Info
                       const Text(
-                        'PERFIL',
+                        'Perfil',
                         style: TextStyle(
-                          fontFamily: 'Inter',
+                          fontFamily: 'Poppins',
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 3.0,
@@ -188,7 +188,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Text(
                         _user?.name ?? 'Usuario',
                         style: const TextStyle(
-                          fontFamily: 'PlayfairDisplay',
+                          fontFamily: 'Poppins',
                           fontSize: 36,
                           fontWeight: FontWeight.w700,
                           color: Colors.black87,
@@ -198,7 +198,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Text(
                         _user?.email ?? '',
                         style: const TextStyle(
-                          fontFamily: 'Inter',
+                          fontFamily: 'Poppins',
                           fontSize: 14,
                           color: Colors.black54,
                           letterSpacing: 0.5,
@@ -211,9 +211,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          _StatItem(value: '${_colorimetryCount + _hairstyleCount}', label: 'ANÁLISIS'),
-                          _StatItem(value: '$_colorimetryCount', label: 'COLORES'),
-                          _StatItem(value: '$_hairstyleCount', label: 'PEINADOS'),
+                          _StatItem(value: '${_colorimetryCount + _hairstyleCount}', label: 'Análisis'),
+                          _StatItem(value: '$_colorimetryCount', label: 'Colores'),
+                          _StatItem(value: '$_hairstyleCount', label: 'Peinados'),
                         ],
                       ),
 
@@ -232,7 +232,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: const Text(
                             'Configuración',
                             style: TextStyle(
-                              fontFamily: 'PlayfairDisplay',
+                              fontFamily: 'Poppins',
                               fontSize: 24,
                               color: Colors.black87,
                             ),
@@ -255,7 +255,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: const Text(
                             'Cerrar sesión',
                             style: TextStyle(
-                              fontFamily: 'PlayfairDisplay',
+                              fontFamily: 'Poppins',
                               fontSize: 24,
                               color: Colors.black54,
                             ),
@@ -285,7 +285,7 @@ class _StatItem extends StatelessWidget {
         Text(
           value,
           style: const TextStyle(
-            fontFamily: 'PlayfairDisplay',
+            fontFamily: 'Poppins',
             fontSize: 28,
             fontWeight: FontWeight.w600,
             color: Colors.black87,
@@ -295,7 +295,7 @@ class _StatItem extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            fontFamily: 'Inter',
+            fontFamily: 'Poppins',
             fontSize: 9,
             fontWeight: FontWeight.w500,
             letterSpacing: 2.0,

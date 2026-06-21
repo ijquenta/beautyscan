@@ -67,7 +67,7 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
           backgroundColor: Colors.transparent,
           body: Center(
             child: Text('CARGANDO...',
-                style: TextStyle(fontFamily: 'Inter', letterSpacing: 2.0)),
+                style: TextStyle(fontFamily: 'Poppins', letterSpacing: 2.0)),
           ),
         ),
       );
@@ -96,9 +96,9 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
             child: const Padding(
               padding: EdgeInsets.only(left: 32, top: 20),
               child: Text(
-                'VOLVER',
+                'Volver',
                 style: TextStyle(
-                  fontFamily: 'Inter',
+                  fontFamily: 'Poppins',
                   fontSize: 10,
                   letterSpacing: 2.0,
                   fontWeight: FontWeight.bold,
@@ -122,10 +122,10 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
                     children: [
                       Text(
                         clientName != null
-                            ? 'ANÁLISIS · ${clientName.toUpperCase()}'
-                            : 'TEMPORADA',
+                            ? 'Análisis · ${clientName.toUpperCase()}'
+                            : 'Temporada',
                         style: const TextStyle(
-                          fontFamily: 'Inter',
+                          fontFamily: 'Poppins',
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 3.0,
@@ -136,7 +136,7 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
                       Text(
                         season.replaceAll(' ', '\n'),
                         style: const TextStyle(
-                          fontFamily: 'PlayfairDisplay',
+                          fontFamily: 'Poppins',
                           fontSize: 52,
                           fontWeight: FontWeight.w700,
                           color: Colors.black87,
@@ -148,7 +148,7 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
                       Text(
                         makeupTips,
                         style: const TextStyle(
-                          fontFamily: 'Inter',
+                          fontFamily: 'Poppins',
                           color: Colors.black54,
                           fontSize: 14,
                           height: 1.5,
@@ -164,10 +164,10 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
                   child: Row(
                     children: [
                       Expanded(
-                          child: _buildCharacteristic('SUBTONO', undertone)),
+                          child: _buildCharacteristic('Subtono', undertone)),
                       const SizedBox(width: 24),
                       Expanded(
-                          child: _buildCharacteristic('TONO DE PIEL', skinTone)),
+                          child: _buildCharacteristic('Tono de piel', skinTone)),
                     ],
                   ),
                 ),
@@ -178,7 +178,7 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
                     children: [
                       Expanded(
                         child: _buildCharacteristic(
-                            'SATURACIÓN',
+                            'Saturación',
                             undertone.toLowerCase().contains('cálido')
                                 ? 'Alta – Viva'
                                 : 'Media – Suave'),
@@ -186,7 +186,7 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
                       const SizedBox(width: 24),
                       Expanded(
                         child: _buildCharacteristic(
-                            'CONTRASTE',
+                            'Contraste',
                             undertone.toLowerCase().contains('frío')
                                 ? 'Claro – Medio'
                                 : 'Medio – Bajo'),
@@ -198,11 +198,11 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
                 const SizedBox(height: 48),
 
                 // ─── Paleta Favorecedora ──────────────────────────────────
-                _buildSectionTitle('FAVORECEDORES'),
+                _buildSectionTitle('Favorecedores'),
                 const SizedBox(height: 24),
                 _buildPaletteRow(
                   recColors.take(5).map(_hexToColor).toList(),
-                  'TONOS RECOMENDADOS',
+                  'Tonos recomendados',
                 ),
 
                 const SizedBox(height: 48),
@@ -211,7 +211,7 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
                 const SizedBox(height: 24),
                 _buildPaletteRow(
                   avoidColors.take(5).map(_hexToColor).toList(),
-                  'TONOS A EVITAR',
+                  'Tonos a evitar',
                   isAvoid: true,
                 ),
 
@@ -228,9 +228,9 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
                         Container(height: 1, color: Colors.black12),
                         const SizedBox(height: 24),
                         const Text(
-                          'COLORIMETRÍA CAPILAR',
+                          'Colorimetría capilar',
                           style: TextStyle(
-                            fontFamily: 'Inter',
+                            fontFamily: 'Poppins',
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 3.5,
@@ -241,7 +241,7 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
                         const Text(
                           'Tonos de tinte recomendados según tu perfil cromático.',
                           style: TextStyle(
-                            fontFamily: 'Inter',
+                            fontFamily: 'Poppins',
                             fontSize: 12,
                             color: Colors.black45,
                             height: 1.5,
@@ -280,7 +280,7 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
                               .map((l) => Text(
                                     l,
                                     style: const TextStyle(
-                                      fontFamily: 'Inter',
+                                      fontFamily: 'Poppins',
                                       fontSize: 9,
                                       letterSpacing: 1.5,
                                       color: Colors.black54,
@@ -304,7 +304,7 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
                       child: Text(
                         _hairResult!.stylistNote,
                         style: const TextStyle(
-                          fontFamily: 'Inter',
+                          fontFamily: 'Poppins',
                           fontSize: 12,
                           color: Colors.black54,
                           height: 1.6,
@@ -348,7 +348,7 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
       child: Text(
         title,
         style: const TextStyle(
-          fontFamily: 'Inter',
+          fontFamily: 'Poppins',
           fontSize: 10,
           fontWeight: FontWeight.bold,
           letterSpacing: 3.0,
@@ -365,7 +365,7 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
         Text(
           label,
           style: const TextStyle(
-            fontFamily: 'Inter',
+            fontFamily: 'Poppins',
             fontSize: 9,
             letterSpacing: 2.0,
             color: Colors.black45,
@@ -375,7 +375,7 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
         Text(
           value,
           style: const TextStyle(
-            fontFamily: 'PlayfairDisplay',
+            fontFamily: 'Poppins',
             fontWeight: FontWeight.w600,
             fontSize: 18,
             color: Colors.black87,
@@ -401,7 +401,7 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
           Text(
             label,
             style: TextStyle(
-              fontFamily: 'Inter',
+              fontFamily: 'Poppins',
               fontSize: 9,
               letterSpacing: 2.0,
               color: isAvoid ? Colors.black87 : Colors.black54,
@@ -428,7 +428,7 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
             child: Text(
               text,
               style: const TextStyle(
-                fontFamily: 'Inter',
+                fontFamily: 'Poppins',
                 fontSize: 13,
                 color: Colors.black54,
                 height: 1.5,

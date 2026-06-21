@@ -66,9 +66,9 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  'BEAUTYSCAN',
+                  'Beautyscan',
                   style: TextStyle(
-                    fontFamily: 'Inter',
+                    fontFamily: 'Poppins',
                     fontSize: 14,
                     letterSpacing: 4.0,
                     fontWeight: FontWeight.w700,
@@ -79,7 +79,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 const Text(
                   'Tu asesor de imagen con IA',
                   style: TextStyle(
-                    fontFamily: 'Inter',
+                    fontFamily: 'Poppins',
                     fontSize: 10,
                     letterSpacing: 2.0,
                     fontWeight: FontWeight.w400,

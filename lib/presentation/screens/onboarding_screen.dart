@@ -44,9 +44,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: const Padding(
                 padding: EdgeInsets.only(right: 32, top: 20),
                 child: Text(
-                  'OMITIR',
+                  'Omitir',
                   style: TextStyle(
-                    fontFamily: 'Inter',
+                    fontFamily: 'Poppins',
                     fontSize: 10,
                     letterSpacing: 2.0,
                     fontWeight: FontWeight.bold,
@@ -110,9 +110,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       color: Colors.black87,
                       child: Center(
                         child: Text(
-                          _currentPage == 2 ? 'COMENZAR' : 'SIGUIENTE',
+                          _currentPage == 2 ? 'Comenzar' : 'Siguiente',
                           style: const TextStyle(
-                            fontFamily: 'Inter',
+                            fontFamily: 'Poppins',
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 3.0,
@@ -142,7 +142,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Text(
               graphicNumber,
               style: const TextStyle(
-                fontFamily: 'PlayfairDisplay',
+                fontFamily: 'Poppins',
                 fontSize: 64,
                 fontWeight: FontWeight.w400,
                 color: Colors.black12,
@@ -153,7 +153,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Text(
               title,
               style: const TextStyle(
-                fontFamily: 'PlayfairDisplay',
+                fontFamily: 'Poppins',
                 fontSize: 48,
                 fontWeight: FontWeight.w700,
                 color: Colors.black87,
@@ -165,7 +165,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Text(
               subtitle,
               style: const TextStyle(
-                fontFamily: 'Inter',
+                fontFamily: 'Poppins',
                 fontSize: 14,
                 height: 1.6,
                 color: Colors.black54,

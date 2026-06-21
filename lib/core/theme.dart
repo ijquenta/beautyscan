@@ -12,50 +12,50 @@ class AppTheme {
       ),
       useMaterial3: true,
 
-      fontFamily: 'Inter',
+      fontFamily: 'Poppins',
       textTheme: const TextTheme(
         // Headings con Playfair Display
         displayLarge: TextStyle(
-          fontFamily: 'PlayfairDisplay',
+          fontFamily: 'Poppins',
           fontWeight: FontWeight.bold,
           color: AppColors.negroCarbon,
         ),
         displayMedium: TextStyle(
-          fontFamily: 'PlayfairDisplay',
+          fontFamily: 'Poppins',
           fontWeight: FontWeight.bold,
           color: AppColors.negroCarbon,
         ),
         displaySmall: TextStyle(
-          fontFamily: 'PlayfairDisplay',
+          fontFamily: 'Poppins',
           fontWeight: FontWeight.w600,
           color: AppColors.negroCarbon,
         ),
         headlineLarge: TextStyle(
-          fontFamily: 'PlayfairDisplay',
+          fontFamily: 'Poppins',
           fontWeight: FontWeight.w600,
           color: AppColors.negroCarbon,
         ),
         headlineMedium: TextStyle(
-          fontFamily: 'PlayfairDisplay',
+          fontFamily: 'Poppins',
           fontWeight: FontWeight.w600,
           color: AppColors.negroCarbon,
         ),
         headlineSmall: TextStyle(
-          fontFamily: 'PlayfairDisplay',
+          fontFamily: 'Poppins',
           fontWeight: FontWeight.w600,
           color: AppColors.negroCarbon,
         ),
         titleLarge: TextStyle(
-          fontFamily: 'PlayfairDisplay',
+          fontFamily: 'Poppins',
           fontWeight: FontWeight.w600,
           color: AppColors.negroCarbon,
         ),
 
         // Cuerpos de texto asumen defecto (Inter)
-        bodyLarge: TextStyle(fontFamily: 'Inter', color: AppColors.negroCarbon),
-        bodyMedium: TextStyle(fontFamily: 'Inter', color: AppColors.negroCarbon),
-        bodySmall: TextStyle(fontFamily: 'Inter', color: AppColors.grisCalido),
-        labelLarge: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600),
+        bodyLarge: TextStyle(fontFamily: 'Poppins', color: AppColors.negroCarbon),
+        bodyMedium: TextStyle(fontFamily: 'Poppins', color: AppColors.negroCarbon),
+        bodySmall: TextStyle(fontFamily: 'Poppins', color: AppColors.grisCalido),
+        labelLarge: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
       ),
 
       // Estilo de Componentes
@@ -66,7 +66,7 @@ class AppTheme {
         centerTitle: true,
         iconTheme: IconThemeData(color: AppColors.negroCarbon),
         titleTextStyle: TextStyle(
-          fontFamily: 'PlayfairDisplay',
+          fontFamily: 'Poppins',
           fontWeight: FontWeight.w600,
           color: AppColors.negroCarbon,
           fontSize: 20,
@@ -87,7 +87,7 @@ class AppTheme {
           textStyle: const TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 16,
-            fontFamily: 'Inter',
+            fontFamily: 'Poppins',
           ),
         ),
       ),

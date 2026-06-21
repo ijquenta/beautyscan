@@ -15,10 +15,10 @@ class _ScannerScreenState extends State<ScannerScreen> {
     try {
       final XFile? photo = await _picker.pickImage(source: source);
       final XFile? finalPhoto = photo;
-      
+
       if (finalPhoto != null) {
         if (!mounted) return;
-        
+
         final clientName = await _askClientName(context);
         if (clientName != null && mounted) {
           Navigator.pushReplacementNamed(
@@ -44,48 +44,55 @@ class _ScannerScreenState extends State<ScannerScreen> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFFFBFBFB),
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-          title: const Text(
-            'DATOS DEL ANÁLISIS',
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 10,
-              letterSpacing: 3.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.black38,
-            ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: Column(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(Icons.person_outline_rounded, color: Colors.black54, size: 22),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Nombre de la clienta',
+                style: TextStyle(fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
+              ),
+            ],
           ),
           content: TextField(
             controller: controller,
             textCapitalization: TextCapitalization.words,
             cursorColor: Colors.black87,
-            style: const TextStyle(
-              fontFamily: 'PlayfairDisplay',
-              fontSize: 24,
-              color: Colors.black87,
-            ),
-            decoration: const InputDecoration(
-              hintText: 'Nombre de la clienta',
-              hintStyle: TextStyle(
-                fontFamily: 'PlayfairDisplay',
-                fontSize: 24,
-                color: Colors.black26,
+            autofocus: true,
+            style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, color: Colors.black87),
+            decoration: InputDecoration(
+              hintText: 'Ej: Ana García',
+              hintStyle: const TextStyle(fontFamily: 'Poppins', fontSize: 16, color: Colors.black26),
+              filled: true,
+              fillColor: Colors.black.withValues(alpha: 0.04),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: const BorderSide(color: Colors.black87, width: 1.5),
               ),
-              border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black12)),
-              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
             ),
           ),
+          actionsAlignment: MainAxisAlignment.spaceBetween,
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, null),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
               child: const Text(
-                'CANCELAR',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 10,
-                  letterSpacing: 2.0,
-                  color: Colors.black54,
-                ),
+                'Cancelar',
+                style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: Colors.black45),
               ),
             ),
             TextButton(
@@ -93,15 +100,14 @@ class _ScannerScreenState extends State<ScannerScreen> {
                 final text = controller.text.trim();
                 Navigator.pop(context, text.isNotEmpty ? text : 'Cliente Anónimo');
               },
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.black87,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
               child: const Text(
-                'CONTINUAR',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 10,
-                  letterSpacing: 2.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+                'Comenzar',
+                style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white),
               ),
             ),
           ],
@@ -117,18 +123,15 @@ class _ScannerScreenState extends State<ScannerScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // BACKGROUND IMAGE
           Image.asset(
             'assets/images/foto-chica.png',
             fit: BoxFit.cover,
           ),
-          
-          // Subtle dark overlay to ensure UI elements are visible
+
           Container(
             color: Colors.black.withValues(alpha: 0.3),
           ),
 
-          // Subtle overlays (gradients)
           Positioned(
             top: 0,
             left: 0,
@@ -167,7 +170,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
             ),
           ),
 
-          // Header
           Positioned(
             top: 60,
             left: 32,
@@ -177,48 +179,66 @@ class _ScannerScreenState extends State<ScannerScreen> {
               children: [
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: const Text(
-                    'CERRAR',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 2.0,
-                    ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.close_rounded, color: Colors.white.withValues(alpha: 0.8), size: 20),
+                      const SizedBox(width: 6),
+                      const Text(
+                        'Cerrar',
+                        style: TextStyle(fontFamily: 'Poppins', color: Colors.white, fontSize: 14, fontWeight: FontWeight.w400),
+                      ),
+                    ],
                   ),
                 ),
-                const Text(
-                  'ROSTRO EN LUZ NATURAL',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    color: Colors.white70,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w400,
-                    letterSpacing: 1.5,
-                  ),
+                Row(
+                  children: [
+                    Icon(Icons.wb_sunny_rounded, color: Colors.white.withValues(alpha: 0.5), size: 12),
+                    const SizedBox(width: 6),
+                    const Text(
+                      'Rostro en luz natural',
+                      style: TextStyle(fontFamily: 'Poppins', color: Colors.white60, fontSize: 11, fontWeight: FontWeight.w300),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
 
-          // Framing brackets
           Center(
-            child: SizedBox(
-              width: 250,
-              height: 350,
+            child: Container(
+              width: 260,
+              height: 360,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
+              ),
               child: Stack(
-                children: const [
-                  _CornerBracket(alignment: Alignment.topLeft),
-                  _CornerBracket(alignment: Alignment.topRight),
-                  _CornerBracket(alignment: Alignment.bottomLeft),
-                  _CornerBracket(alignment: Alignment.bottomRight),
+                children: [
+                  Positioned(
+                    top: -1,
+                    left: -1,
+                    child: _CornerBracket(alignment: const Alignment(-1, -1)),
+                  ),
+                  Positioned(
+                    top: -1,
+                    right: -1,
+                    child: _CornerBracket(alignment: const Alignment(1, -1)),
+                  ),
+                  Positioned(
+                    bottom: -1,
+                    left: -1,
+                    child: _CornerBracket(alignment: const Alignment(-1, 1)),
+                  ),
+                  Positioned(
+                    bottom: -1,
+                    right: -1,
+                    child: _CornerBracket(alignment: const Alignment(1, 1)),
+                  ),
                 ],
               ),
             ),
           ),
 
-          // Controls
           Positioned(
             bottom: 60,
             left: 0,
@@ -229,30 +249,39 @@ class _ScannerScreenState extends State<ScannerScreen> {
               children: [
                 GestureDetector(
                   onTap: () => _pickImage(ImageSource.gallery),
-                  child: const Text(
-                    'GALERÍA',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: 2.0,
-                    ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(Icons.photo_library_outlined, color: Colors.white, size: 20),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Galería',
+                        style: TextStyle(fontFamily: 'Poppins', color: Colors.white, fontSize: 11, fontWeight: FontWeight.w400),
+                      ),
+                    ],
                   ),
                 ),
                 GestureDetector(
                   onTap: () => _pickImage(ImageSource.camera),
                   child: Container(
-                    width: 70,
-                    height: 70,
+                    width: 76,
+                    height: 76,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 1.5),
+                      border: Border.all(color: Colors.white, width: 2),
                     ),
                     child: Center(
                       child: Container(
-                        width: 58,
-                        height: 58,
+                        width: 62,
+                        height: 62,
                         decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.white,
@@ -262,16 +291,25 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   ),
                 ),
                 GestureDetector(
-                   onTap: () => Navigator.pushNamed(context, '/gallery'),
-                  child: const Text(
-                    'HISTORIAL',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: 2.0,
-                    ),
+                  onTap: () => Navigator.pushNamed(context, '/gallery'),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(Icons.history_rounded, color: Colors.white, size: 20),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Historial',
+                        style: TextStyle(fontFamily: 'Poppins', color: Colors.white, fontSize: 11, fontWeight: FontWeight.w400),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -289,18 +327,15 @@ class _CornerBracket extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: alignment,
-      child: Container(
-        width: 16,
-        height: 16,
-        decoration: BoxDecoration(
-          border: Border(
-            top: alignment.y < 0 ? const BorderSide(color: Colors.white54, width: 1) : BorderSide.none,
-            bottom: alignment.y > 0 ? const BorderSide(color: Colors.white54, width: 1) : BorderSide.none,
-            left: alignment.x < 0 ? const BorderSide(color: Colors.white54, width: 1) : BorderSide.none,
-            right: alignment.x > 0 ? const BorderSide(color: Colors.white54, width: 1) : BorderSide.none,
-          ),
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        border: Border(
+          top: alignment.y < 0 ? const BorderSide(color: Colors.white, width: 2) : BorderSide.none,
+          bottom: alignment.y > 0 ? const BorderSide(color: Colors.white, width: 2) : BorderSide.none,
+          left: alignment.x < 0 ? const BorderSide(color: Colors.white, width: 2) : BorderSide.none,
+          right: alignment.x > 0 ? const BorderSide(color: Colors.white, width: 2) : BorderSide.none,
         ),
       ),
     );

@@ -70,10 +70,10 @@ class _LoginScreenState extends State<LoginScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return Dialog(
-              backgroundColor: const Color(0xFFFBFBFB),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+              backgroundColor: Colors.white.withValues(alpha: 0.95),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
               child: Padding(
-                padding: const EdgeInsets.all(32),
+                  padding: const EdgeInsets.all(28),
                 child: Form(
                   key: resetFormKey,
                   child: Column(
@@ -83,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const Text(
                         'Recuperar\nContraseña',
                         style: TextStyle(
-                          fontFamily: 'PlayfairDisplay',
+                          fontFamily: 'Poppins',
                           fontSize: 32,
                           color: Colors.black87,
                           fontWeight: FontWeight.w700,
@@ -135,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   behavior: SnackBarBehavior.floating,
                                   content: Text(
                                     'Contraseña actualizada',
-                                    style: TextStyle(fontFamily: 'Inter', color: Colors.white),
+                                    style: TextStyle(fontFamily: 'Poppins', color: Colors.white),
                                   ),
                                 ),
                               );
@@ -172,11 +172,28 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.black,
+                      ),
+                      child: ClipOval(
+                        child: Image.asset(
+                          'assets/icon/app_icon.png',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                   Text(
                     'Entrar.',
                     style: TextStyle(
-                      fontFamily: 'PlayfairDisplay',
+                      fontFamily: 'Poppins',
                       fontSize: 48,
                       color: Colors.black87,
                       fontWeight: FontWeight.w700,
@@ -187,7 +204,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     'Es un placer verte de nuevo.',
                     style: TextStyle(
-                      fontFamily: 'Inter',
+                      fontFamily: 'Poppins',
                       fontSize: 14,
                       color: Colors.black45,
                       fontWeight: FontWeight.w400,
@@ -220,9 +237,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: Padding(
                               padding: const EdgeInsets.all(12),
                               child: Text(
-                                _isPasswordVisible ? 'CERRAR' : 'VER',
+                                _isPasswordVisible ? 'Cerrar' : 'Ver',
                                 style: const TextStyle(
-                                  fontFamily: 'Inter',
+                                  fontFamily: 'Poppins',
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 1.5,
@@ -245,9 +262,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: GestureDetector(
                       onTap: _showForgotPasswordDialog,
                       child: const Text(
-                        'OLVIDASTE TU CONTRASEÑA',
+                        'Olvidaste tu contraseña',
                         style: TextStyle(
-                          fontFamily: 'Inter',
+                          fontFamily: 'Poppins',
                           fontSize: 10,
                           letterSpacing: 1.5,
                           fontWeight: FontWeight.w600,
@@ -272,9 +289,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: GestureDetector(
                       onTap: () => Navigator.pushReplacementNamed(context, '/register'),
                       child: const Text(
-                        'CREAR CUENTA',
+                        'Crear cuenta',
                         style: TextStyle(
-                          fontFamily: 'Inter',
+                          fontFamily: 'Poppins',
                           fontSize: 11,
                           letterSpacing: 2,
                           fontWeight: FontWeight.w600,

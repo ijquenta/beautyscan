@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/constants.dart';
 import '../../data/repositories/colorimetry_repository.dart';
 import '../../data/repositories/user_repository.dart';
 import '../components/atoms/beauty_background.dart';
@@ -14,10 +15,10 @@ class _GalleryScreenState extends State<GalleryScreen> {
   int _selectedFilter = 0;
   bool _isLoading = true;
   List<_GalleryItem> _items = [];
-  
+
   final ColorimetryRepository _colorimetryRepo = ColorimetryRepository();
   final UserRepository _userRepo = UserRepository();
-  final List<String> _filters = ['TODAS', 'COLORIMETRÍA', 'PEINADOS'];
+  final List<String> _filters = ['Todas', 'Colorimetría', 'Peinados'];
 
   @override
   void initState() {
@@ -29,16 +30,16 @@ class _GalleryScreenState extends State<GalleryScreen> {
     final user = await _userRepo.getCurrentUser();
     if (user != null) {
       final colorimetryData = await _colorimetryRepo.getResultsByUser(user.id!);
-      
+
       final mappedItems = colorimetryData.map((c) {
-        Color baseColor = Colors.black87; // fallback
+        Color baseColor = Colors.black87;
         if (c.recommendedColors.isNotEmpty) {
           baseColor = _hexToColor(c.recommendedColors.first);
         }
-        
+
         return _GalleryItem(
           id: c.id!,
-          type: 'COLORIMETRÍA',
+          type: 'Colorimetría',
           clientName: c.clientName,
           season: c.season,
           date: _formatDate(c.createdAt),
@@ -71,7 +72,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
   String _formatDate(String isoString) {
     try {
       final dt = DateTime.parse(isoString);
-      return '${dt.day} ${_getMonth(dt.month)}'.toUpperCase();
+      return '${dt.day} ${_getMonth(dt.month)}';
     } catch (_) {
       return '';
     }
@@ -84,7 +85,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   List<_GalleryItem> get _filtered {
     if (_selectedFilter == 0) return _items;
-    final filterType = _selectedFilter == 1 ? 'COLORIMETRÍA' : 'PEINADO';
+    final filterType = _selectedFilter == 1 ? 'Colorimetría' : 'Peinado';
     return _items.where((i) => i.type == filterType).toList();
   }
 
@@ -100,16 +101,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
             onTap: () => Navigator.pop(context),
             child: const Padding(
               padding: EdgeInsets.only(left: 32, top: 20),
-              child: Text(
-                'VOLVER',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 10,
-                  letterSpacing: 2.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
+              child: Text('Volver', style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black54)),
             ),
           ),
           leadingWidth: 100,
@@ -119,82 +111,17 @@ class _GalleryScreenState extends State<GalleryScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(32, 20, 32, 24),
+                padding: const EdgeInsets.fromLTRB(32, 4, 32, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
-                    Text(
-                      'EL ARCHIVO',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 3.0,
-                        color: Colors.black38,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Galería.',
-                      style: TextStyle(
-                        fontFamily: 'PlayfairDisplay',
-                        fontSize: 48,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black87,
-                        letterSpacing: -1.0,
-                        height: 1.0,
-                      ),
-                    ),
+                    Text('El Archivo', style: TextStyle(fontFamily: 'Poppins', fontSize: 9, fontWeight: FontWeight.w600, color: Colors.black45)),
+                    SizedBox(height: 12),
+                    Text('Galería.', style: TextStyle(fontFamily: 'Poppins', fontSize: 40, fontWeight: FontWeight.w700, color: AppColors.negroCarbon, letterSpacing: -1.0, height: 1.0)),
                   ],
                 ),
               ),
 
-              // Busqueda y Filtros minimalistas
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Container(
-                  decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Colors.black12, width: 1.5)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'BUSCAR...',
-                            hintStyle: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 10,
-                              letterSpacing: 2.0,
-                              color: Colors.black38,
-                            ),
-                          ),
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 10,
-                            letterSpacing: 2.0,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                      const Text(
-                        'BUSCAR',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2.0,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 32),
-              
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Row(
@@ -205,24 +132,22 @@ class _GalleryScreenState extends State<GalleryScreen> {
                     return GestureDetector(
                       onTap: () => setState(() => _selectedFilter = i),
                       child: Container(
-                        margin: const EdgeInsets.only(right: 24),
-                        padding: const EdgeInsets.only(bottom: 4),
+                        margin: const EdgeInsets.only(right: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: isActive ? Colors.black87 : Colors.transparent,
-                              width: 1.5,
-                            ),
+                          color: isActive ? AppColors.negroCarbon : Colors.transparent,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: isActive ? Colors.transparent : Colors.black.withValues(alpha: 0.1),
                           ),
                         ),
                         child: Text(
                           label,
                           style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 10,
-                            letterSpacing: 2.0,
-                            fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-                            color: isActive ? Colors.black87 : Colors.black38,
+                            fontFamily: 'Poppins',
+                            fontSize: 11,
+                            fontWeight: isActive ? FontWeight.w500 : FontWeight.w400,
+                            color: isActive ? Colors.white : Colors.black54,
                           ),
                         ),
                       ),
@@ -231,22 +156,20 @@ class _GalleryScreenState extends State<GalleryScreen> {
                 ),
               ),
 
-              const SizedBox(height: 48),
+              const SizedBox(height: 28),
 
-              // Lista Galeria Minimalista
               Expanded(
-                child: _isLoading 
-                  ? const Center(child: Text('CARGANDO...', style: TextStyle(fontFamily: 'Inter', letterSpacing: 2.0)))
+                child: _isLoading
+                  ? const Center(child: CircularProgressIndicator(color: AppColors.negroCarbon))
                   : _filtered.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'GALERÍA VACÍA',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 10,
-                            letterSpacing: 3.0,
-                            color: Colors.black38,
-                          ),
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.folder_open_outlined, size: 40, color: Colors.black.withValues(alpha: 0.1)),
+                            const SizedBox(height: 12),
+                            const Text('Galería vacía', style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Colors.black38)),
+                          ],
                         ),
                       )
                     : ListView.builder(
@@ -257,76 +180,72 @@ class _GalleryScreenState extends State<GalleryScreen> {
                           return GestureDetector(
                             onTap: () => Navigator.pushNamed(context, item.route, arguments: item.id),
                             child: Container(
-                              margin: const EdgeInsets.only(bottom: 32),
-                              color: Colors.transparent,
+                              margin: const EdgeInsets.only(bottom: 16),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.65),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
+                              ),
                               child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Container(
-                                    width: 60,
-                                    height: 60,
-                                    color: item.color.withValues(alpha: 0.1),
+                                    width: 52,
+                                    height: 52,
+                                    decoration: BoxDecoration(
+                                      color: item.color.withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
                                     child: Center(
                                       child: Container(
                                         width: 20,
                                         height: 20,
-                                        color: item.color,
+                                        decoration: BoxDecoration(
+                                          color: item.color,
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 24),
+                                  const SizedBox(width: 16),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        // Título: Nombre del cliente
                                         Text(
                                           item.clientName,
-                                          style: const TextStyle(
-                                            fontFamily: 'PlayfairDisplay',
-                                            fontSize: 20,
-                                            color: Colors.black87,
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w600),
                                         ),
-                                        const SizedBox(height: 4),
-                                        // Subtítulo: Temporada cromática
+                                        const SizedBox(height: 2),
                                         Text(
                                           item.season,
-                                          style: const TextStyle(
-                                            fontFamily: 'Inter',
-                                            fontSize: 11,
-                                            color: Colors.black54,
-                                            letterSpacing: 0.5,
-                                          ),
+                                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Colors.black54),
                                         ),
-                                        const SizedBox(height: 6),
+                                        const SizedBox(height: 4),
                                         Row(
                                           children: [
-                                            Text(
-                                              item.type,
-                                              style: const TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontSize: 9,
-                                                color: Colors.black38,
-                                                letterSpacing: 2.0,
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.negroCarbon.withValues(alpha: 0.05),
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                              child: Text(
+                                                item.type,
+                                                style: const TextStyle(fontFamily: 'Poppins', fontSize: 8, fontWeight: FontWeight.w600, color: Colors.black45),
                                               ),
                                             ),
-                                            const SizedBox(width: 16),
+                                            const SizedBox(width: 10),
                                             Text(
                                               item.date,
-                                              style: const TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontSize: 9,
-                                                color: Colors.black38,
-                                                letterSpacing: 1.0,
-                                              ),
+                                              style: const TextStyle(fontFamily: 'Poppins', fontSize: 9, color: Colors.black38),
                                             ),
                                           ],
                                         ),
                                       ],
                                     ),
                                   ),
+                                  Icon(Icons.chevron_right_rounded, size: 20, color: Colors.black.withValues(alpha: 0.15)),
                                 ],
                               ),
                             ),

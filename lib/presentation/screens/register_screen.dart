@@ -78,7 +78,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Text(
                     'Registro.',
                     style: TextStyle(
-                      fontFamily: 'PlayfairDisplay',
+                      fontFamily: 'Poppins',
                       fontSize: 48,
                       color: Colors.black87,
                       fontWeight: FontWeight.w700,
@@ -89,7 +89,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Text(
                     'Un nuevo comienzo.',
                     style: TextStyle(
-                      fontFamily: 'Inter',
+                      fontFamily: 'Poppins',
                       fontSize: 14,
                       color: Colors.black45,
                       fontWeight: FontWeight.w400,
@@ -132,9 +132,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: Padding(
                         padding: const EdgeInsets.all(12),
                         child: Text(
-                          _isPasswordVisible ? 'CERRAR' : 'VER',
+                                _isPasswordVisible ? 'Cerrar' : 'Ver',
                           style: const TextStyle(
-                            fontFamily: 'Inter',
+                            fontFamily: 'Poppins',
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1.5,
@@ -163,7 +163,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 48),
 
                   BeautyButton(
-                    text: 'REGISTRARSE',
+                    text: 'Registrarse',
                     isLoading: _isLoading,
                     onPressed: _onRegisterPressed,
                   ),
@@ -174,9 +174,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: GestureDetector(
                       onTap: () => Navigator.pushReplacementNamed(context, '/login'),
                       child: const Text(
-                        'VOLVER AL INICIO',
+                        'Volver al inicio',
                         style: TextStyle(
-                          fontFamily: 'Inter',
+                          fontFamily: 'Poppins',
                           fontSize: 11,
                           letterSpacing: 2,
                           fontWeight: FontWeight.w600,

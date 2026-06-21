@@ -10,6 +10,23 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  bool _imageGenerationEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final enabled = await SessionManager.isImageGenerationEnabled();
+    setState(() => _imageGenerationEnabled = enabled);
+  }
+
+  Future<void> _toggleImageGeneration(bool value) async {
+    await SessionManager.setImageGenerationEnabled(value);
+    setState(() => _imageGenerationEnabled = value);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +41,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: const Padding(
               padding: EdgeInsets.only(left: 32, top: 20),
               child: Text(
-                'VOLVER',
+                'Volver',
                 style: TextStyle(
-                  fontFamily: 'Inter',
+                  fontFamily: 'Poppins',
                   fontSize: 10,
                   letterSpacing: 2.0,
                   fontWeight: FontWeight.bold,
@@ -47,9 +64,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     Text(
-                      'PREFERENCIAS',
+                      'Preferencias',
                       style: TextStyle(
-                        fontFamily: 'Inter',
+                        fontFamily: 'Poppins',
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 3.0,
@@ -60,7 +77,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Text(
                       'Tu cuenta.',
                       style: TextStyle(
-                        fontFamily: 'PlayfairDisplay',
+                        fontFamily: 'Poppins',
                         fontSize: 48,
                         fontWeight: FontWeight.w700,
                         color: Colors.black87,
@@ -72,10 +89,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
 
-              // Opciones Minimizadas
-              _buildSettingAction('EDITAR PERFIL'),
-              _buildSettingAction('CAMBIAR CONTRASEÑA'),
-              _buildSettingAction('CORREO DE LA CUENTA', isSubtitle: true),
+              _buildSettingAction('Editar perfil'),
+              _buildSettingAction('Cambiar contraseña'),
+              _buildSettingAction('Correo de la cuenta', isSubtitle: true),
+
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 32),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: const BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Colors.black12, width: 1.0)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Generación de imágenes',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 10,
+                        letterSpacing: 2.0,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    Switch(
+                      value: _imageGenerationEnabled,
+                      onChanged: _toggleImageGeneration,
+                      activeThumbColor: Colors.black87,
+                      activeTrackColor: Colors.black26,
+                      inactiveThumbColor: Colors.black38,
+                      inactiveTrackColor: Colors.black12,
+                    ),
+                  ],
+                ),
+              ),
 
               const Spacer(),
 
@@ -98,9 +145,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 24),
                   child: const Center(
                     child: Text(
-                      'CERRAR SESIÓN',
+                      'Cerrar sesión',
                       style: TextStyle(
-                        fontFamily: 'Inter',
+                        fontFamily: 'Poppins',
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 3.0,
@@ -132,7 +179,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Text(
               label,
               style: TextStyle(
-                fontFamily: 'Inter',
+                fontFamily: 'Poppins',
                 fontSize: 10,
                 letterSpacing: 2.0,
                 fontWeight: isSubtitle ? FontWeight.w400 : FontWeight.w700,

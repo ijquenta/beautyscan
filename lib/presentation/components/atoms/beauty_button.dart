@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/constants.dart';
 
 class BeautyButton extends StatelessWidget {
   final String text;
@@ -14,17 +15,27 @@ class BeautyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDisabled = onPressed == null && !isLoading;
     return Container(
       width: double.infinity,
       height: 56,
       decoration: BoxDecoration(
-        color: onPressed == null && !isLoading 
-            ? const Color(0xFFF0F0F0) 
-            : Colors.black87, // Solid black, sharp editorial look
+        color: isDisabled ? const Color(0xFFF0F0F0) : AppColors.negroCarbon,
+        borderRadius: AppConstants.pillBorderRadius,
+        boxShadow: isDisabled
+            ? null
+            : [
+                BoxShadow(
+                  color: AppColors.shadowGlow,
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
+          borderRadius: AppConstants.pillBorderRadius,
           onTap: isLoading ? null : onPressed,
           child: Center(
             child: isLoading
@@ -37,10 +48,10 @@ class BeautyButton extends StatelessWidget {
                     ),
                   )
                 : Text(
-                    text.toUpperCase(),
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      color: onPressed == null && !isLoading ? Colors.black38 : Colors.white,
+                    text,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      color: Colors.white,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 2.5,

@@ -26,9 +26,9 @@ class _HairstyleProcessingScreenState extends State<HairstyleProcessingScreen> {
             child: const Padding(
               padding: EdgeInsets.only(left: 32, top: 20),
               child: Text(
-                'VOLVER',
+                'Volver',
                 style: TextStyle(
-                  fontFamily: 'Inter',
+                  fontFamily: 'Poppins',
                   fontSize: 10,
                   letterSpacing: 2.0,
                   fontWeight: FontWeight.bold,
@@ -50,7 +50,7 @@ class _HairstyleProcessingScreenState extends State<HairstyleProcessingScreen> {
                 child: Text(
                   'Catálogo.',
                   style: TextStyle(
-                    fontFamily: 'PlayfairDisplay',
+                    fontFamily: 'Poppins',
                     fontSize: 48,
                     fontWeight: FontWeight.w700,
                     color: Colors.black87,
@@ -65,7 +65,7 @@ class _HairstyleProcessingScreenState extends State<HairstyleProcessingScreen> {
                 child: Text(
                   'Elige un estilo para la simulación fotorrealista.',
                   style: TextStyle(
-                    fontFamily: 'Inter',
+                    fontFamily: 'Poppins',
                     color: Colors.black54,
                     height: 1.6,
                     fontSize: 13,
@@ -154,7 +154,7 @@ class _HairstyleProcessingScreenState extends State<HairstyleProcessingScreen> {
                                   Text(
                                     style.name.replaceAll('\\n', ' '),
                                     style: TextStyle(
-                                      fontFamily: 'PlayfairDisplay',
+                                      fontFamily: 'Poppins',
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
@@ -164,7 +164,7 @@ class _HairstyleProcessingScreenState extends State<HairstyleProcessingScreen> {
                                   Text(
                                     style.styleType.toUpperCase(),
                                     style: TextStyle(
-                                      fontFamily: 'Inter',
+                                      fontFamily: 'Poppins',
                                       fontSize: 9,
                                       letterSpacing: 2.0,
                                       fontWeight: FontWeight.w600,
@@ -212,9 +212,9 @@ class _HairstyleProcessingScreenState extends State<HairstyleProcessingScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 24),
                   child: const Center(
                     child: Text(
-                      'VER RESULTADO',
+                      'Ver resultado',
                       style: TextStyle(
-                        fontFamily: 'Inter',
+                        fontFamily: 'Poppins',
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 3.0,
