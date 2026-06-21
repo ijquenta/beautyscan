@@ -14,7 +14,6 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  int _selectedTab = 0;
   bool _isLoading = true;
   final _searchController = TextEditingController();
   String _searchQuery = '';
@@ -85,20 +84,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   List<_HistoryItem> get _filtered {
-    var items = _allItems;
-    if (_selectedTab == 1) {
-      items = items.where((e) => e.type == _ItemType.colorimetry).toList();
-    } else if (_selectedTab == 2) {
-      items = items.where((e) => e.type == _ItemType.hairstyle).toList();
-    }
-    if (_searchQuery.isNotEmpty) {
-      final query = _searchQuery.toLowerCase();
-      items = items.where((e) =>
-        e.clientName.toLowerCase().contains(query) ||
-        e.subtitle.toLowerCase().contains(query)
-      ).toList();
-    }
-    return items;
+    if (_searchQuery.isEmpty) return _allItems;
+    final query = _searchQuery.toLowerCase();
+    return _allItems.where((e) =>
+      e.clientName.toLowerCase().contains(query) ||
+      e.subtitle.toLowerCase().contains(query)
+    ).toList();
   }
 
   String _formatDate(String isoString) {
@@ -171,12 +162,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   children: [
                     const Text(
                       'Historial',
-                      style: TextStyle(fontFamily: 'Poppins', fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 3.0, color: Colors.black38),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Tu historia\nde estilo.',
-                      style: TextStyle(fontFamily: 'Poppins', fontSize: 48, fontWeight: FontWeight.w700, color: Colors.black87, letterSpacing: -1.0, height: 1.0),
+                      style: TextStyle(fontFamily: 'Poppins', fontSize: 22, fontWeight: FontWeight.w700, color: Colors.black87, letterSpacing: -1.0, height: 1.0),
                     ),
                     const SizedBox(height: 24),
                     TextField(
@@ -200,39 +186,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
               ),
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Row(
-                  children: ['Todos', 'Colores', 'Peinados']
-                      .asMap()
-                      .entries
-                      .map((entry) {
-                    final i = entry.key;
-                    final label = entry.value;
-                    final isActive = i == _selectedTab;
-                    return GestureDetector(
-                      onTap: () => setState(() => _selectedTab = i),
-                      child: Container(
-                        margin: const EdgeInsets.only(right: 24),
-                        padding: const EdgeInsets.only(bottom: 4),
-                        decoration: BoxDecoration(
-                          border: Border(bottom: BorderSide(color: isActive ? Colors.black87 : Colors.transparent, width: 1.5)),
-                        ),
-                        child: Text(
-                          label,
-                          style: TextStyle(
-                            fontFamily: 'Poppins', fontSize: 10, letterSpacing: 2.0,
-                            fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-                            color: isActive ? Colors.black87 : Colors.black38,
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
 
               Expanded(
                 child: _isLoading
