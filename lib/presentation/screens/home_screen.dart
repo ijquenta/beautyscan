@@ -74,6 +74,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     isActive: false,
                     onTap: () => Navigator.pushNamed(context, '/history'),
                   ),
+                  _BottomNavItem(
+                    icon: Icons.photo_library_outlined,
+                    label: 'Galería',
+                    isActive: false,
+                    onTap: () => Navigator.pushNamed(context, '/gallery'),
+                  ),
                 ],
               ),
             ),

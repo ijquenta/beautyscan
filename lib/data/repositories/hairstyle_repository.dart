@@ -13,6 +13,11 @@ class HairstyleRepository {
     return data.map((json) => HairstyleResultModel.fromMap(json)).toList();
   }
 
+  Future<List<HairstyleResultModel>> getResultsByColorimetry(int colorimetryId) async {
+    final data = await _dbHelper.getHairstyleResultsByColorimetry(colorimetryId);
+    return data.map((json) => HairstyleResultModel.fromMap(json)).toList();
+  }
+
   Future<HairstyleResultModel?> getResultById(int id) async {
     final data = await _dbHelper.getHairstyleResultById(id);
     if (data != null) {

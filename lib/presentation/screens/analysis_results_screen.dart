@@ -10,7 +10,6 @@ import '../components/atoms/beauty_background.dart';
 import '../../domain/models/hairstyle_model.dart';
 import '../../data/repositories/hairstyle_repository.dart';
 import '../../domain/models/hairstyle_result_model.dart';
-import '../../core/session_manager.dart';
 
 class AnalysisResultsScreen extends StatefulWidget {
   const AnalysisResultsScreen({super.key});
@@ -67,9 +66,8 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
   }
 
   Future<void> _loadGeneratedLooks() async {
-    final userId = await SessionManager.getLoggedInUserId();
-    if (userId == null) return;
-    final looks = await HairstyleRepository().getResultsByUser(userId);
+    if (_result?.id == null) return;
+    final looks = await HairstyleRepository().getResultsByColorimetry(_result!.id!);
     if (mounted) setState(() { _generatedLooks = looks; });
   }
 
@@ -82,23 +80,45 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
     );
   }
 
-  void _showBlondeSheet() {
-    showModalBottomSheet(
+  Future<void> _showBlondeSheet() async {
+    final result = await showModalBottomSheet<Map<String, dynamic>>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _BlondeSheet(
+      builder: (ctx) => _BlondeSheet(
         photoPath: _result!.photoPath,
         colorimetry: _result!,
       ),
     );
+    if (result != null && mounted) {
+      final technique = result['technique'] as Map<String, String>;
+      final percentage = result['percentage'] as double;
+      final styleName = 'Rubio - ${technique['name']} ${percentage.toInt()}%';
+      final styleDescription = 'Transforma el cabello a rubio usando técnica "${technique['name']}" con ${percentage.toInt()}% de claridad. ${technique['desc']}';
+      await Navigator.pushNamed(context, '/hairstyle_loading', arguments: {
+        'photoPath': _result!.photoPath,
+        'colorimetry': _result,
+        'style': HairstyleModel(
+          id: 'rubio_ia',
+          name: styleName,
+          description: styleDescription,
+          styleType: 'tinte',
+          maintenanceLevel: 'Alto',
+          accentColor: Colors.amber,
+          stylistSteps: [],
+          products: [],
+          imagePath: '',
+        ),
+      });
+      _loadGeneratedLooks();
+    }
   }
 
   void _showStaticInfographic() {
     Navigator.pushNamed(context, '/lookbook', arguments: {
-      'photoPath': _result?.photoPath ?? '',
+      'photoPath': _result!.photoPath,
       'colorimetry': _result,
-    });
+    }).then((_) => _loadGeneratedLooks());
   }
 
   @override
@@ -215,24 +235,13 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _BottomNavItem(
                       icon: Icons.home_rounded,
                       label: 'Inicio',
                       isActive: false,
                       onTap: () => Navigator.popUntil(context, ModalRoute.withName('/home')),
-                    ),
-                    _BottomNavItem(
-                      icon: Icons.auto_fix_high_rounded,
-                      label: 'Probar peinados',
-                      isActive: true,
-                      onTap: () {
-                        Navigator.pushNamed(context, '/hairstyle_processing', arguments: {
-                          'photoPath': _result?.photoPath,
-                          'colorimetry': _result,
-                        });
-                      },
                     ),
                     _BottomNavItem(
                       icon: Icons.history_rounded,
@@ -576,7 +585,7 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
                     Navigator.pushNamed(context, '/hairstyle_processing', arguments: {
                       'photoPath': _result!.photoPath,
                       'colorimetry': _result,
-                    });
+                    }).then((_) => _loadGeneratedLooks());
                   },
                 ),
                 const SizedBox(height: 12),
@@ -798,27 +807,10 @@ class _BlondeSheetState extends State<_BlondeSheet> {
           ),
           const SizedBox(height: 28),
           GestureDetector(
-            onTap: () {
-              final technique = _techniques[_selectedTechnique];
-              final styleName = 'Rubio - ${technique['name']} ${_percentage.toInt()}%';
-              final styleDescription = 'Transforma el cabello a rubio usando técnica "${technique['name']}" con ${_percentage.toInt()}% de claridad. ${technique['desc']}';
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/hairstyle_processing', arguments: {
-                'photoPath': widget.photoPath,
-                'colorimetry': widget.colorimetry,
-                'style': HairstyleModel(
-                  id: 'rubio_ia',
-                  name: styleName,
-                  description: styleDescription,
-                  styleType: 'tinte',
-                  maintenanceLevel: 'Alto',
-                  accentColor: Colors.amber,
-                  stylistSteps: [],
-                  products: [],
-                  imagePath: '',
-                ),
-              });
-            },
+            onTap: () => Navigator.pop(context, {
+              'technique': _techniques[_selectedTechnique],
+              'percentage': _percentage,
+            }),
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16),

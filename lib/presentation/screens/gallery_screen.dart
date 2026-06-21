@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/constants.dart';
 import '../../data/repositories/colorimetry_repository.dart';
+import '../../data/repositories/hairstyle_repository.dart';
+import '../../domain/models/hairstyle_model.dart';
 import '../../data/repositories/user_repository.dart';
 import '../components/atoms/beauty_background.dart';
 
@@ -17,6 +19,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
   List<_GalleryItem> _items = [];
 
   final ColorimetryRepository _colorimetryRepo = ColorimetryRepository();
+  final HairstyleRepository _hairstyleRepo = HairstyleRepository();
   final UserRepository _userRepo = UserRepository();
   final List<String> _filters = ['Todas', 'Colorimetría', 'Peinados'];
 
@@ -30,27 +33,55 @@ class _GalleryScreenState extends State<GalleryScreen> {
     final user = await _userRepo.getCurrentUser();
     if (user != null) {
       final colorimetryData = await _colorimetryRepo.getResultsByUser(user.id!);
+      final hairstyleData = await _hairstyleRepo.getResultsByUser(user.id!);
 
-      final mappedItems = colorimetryData.map((c) {
-        Color baseColor = Colors.black87;
-        if (c.recommendedColors.isNotEmpty) {
-          baseColor = _hexToColor(c.recommendedColors.first);
-        }
-
-        return _GalleryItem(
-          id: c.id!,
-          type: 'Colorimetría',
-          clientName: c.clientName,
-          season: c.season,
-          date: _formatDate(c.createdAt),
-          color: baseColor,
-          route: '/analysis_results',
-        );
-      }).toList();
+      final items = <_GalleryItem>[
+        ...colorimetryData.map((c) {
+          Color baseColor = Colors.black87;
+          if (c.recommendedColors.isNotEmpty) {
+            baseColor = _hexToColor(c.recommendedColors.first);
+          }
+          return _GalleryItem(
+            id: c.id!,
+            type: 'Colorimetría',
+            clientName: c.clientName,
+            subtitle: c.season,
+            date: _formatDate(c.createdAt),
+            color: baseColor,
+            route: '/analysis_results',
+          );
+        }),
+        ...hairstyleData.map((h) {
+          return _GalleryItem(
+            id: h.id!,
+            type: 'Peinado',
+            clientName: h.personName.isNotEmpty ? h.personName : h.hairstyleName,
+            subtitle: h.personName.isNotEmpty ? h.hairstyleName : '',
+            date: _formatDate(h.createdAt),
+            color: Colors.black87,
+            route: '/hairstyle_display',
+            routeArgs: {
+              'style': HairstyleModel(
+                id: h.hairstyleName,
+                name: h.hairstyleName,
+                description: h.hairstyleName,
+                styleType: '',
+                maintenanceLevel: 'Moderado',
+                accentColor: Colors.black87,
+                stylistSteps: [],
+                products: [],
+                imagePath: '',
+              ),
+              'photoPath': h.resultImageUrl,
+              'originalPhotoPath': h.originalPhotoPath,
+            },
+          );
+        }),
+      ];
 
       if (mounted) {
         setState(() {
-          _items = mappedItems;
+          _items = items;
           _isLoading = false;
         });
       }
@@ -178,7 +209,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                         itemBuilder: (context, index) {
                           final item = _filtered[index];
                           return GestureDetector(
-                            onTap: () => Navigator.pushNamed(context, item.route, arguments: item.id),
+                            onTap: () => Navigator.pushNamed(context, item.route, arguments: item.routeArgs ?? item.id),
                             child: Container(
                               margin: const EdgeInsets.only(bottom: 16),
                               padding: const EdgeInsets.all(16),
@@ -218,7 +249,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
-                                          item.season,
+                                          item.subtitle,
                                           style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Colors.black54),
                                         ),
                                         const SizedBox(height: 4),
@@ -265,18 +296,20 @@ class _GalleryItem {
   final int id;
   final String type;
   final String clientName;
-  final String season;
+  final String subtitle;
   final String date;
   final Color color;
   final String route;
+  final Map<String, dynamic>? routeArgs;
 
   const _GalleryItem({
     required this.id,
     required this.type,
     required this.clientName,
-    required this.season,
+    required this.subtitle,
     required this.date,
     required this.color,
     required this.route,
+    this.routeArgs,
   });
 }

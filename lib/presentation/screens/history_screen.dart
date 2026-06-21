@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../../data/repositories/colorimetry_repository.dart';
 import '../../data/repositories/hairstyle_repository.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../domain/models/hairstyle_model.dart';
@@ -20,7 +19,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   List<_HistoryItem> _allItems = [];
 
-  final ColorimetryRepository _colorimetryRepo = ColorimetryRepository();
   final HairstyleRepository _hairstyleRepo = HairstyleRepository();
   final UserRepository _userRepo = UserRepository();
 
@@ -39,27 +37,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Future<void> _loadData() async {
     final user = await _userRepo.getCurrentUser();
     if (user != null) {
-      final colorimetryData = await _colorimetryRepo.getResultsByUser(user.id!);
       final hairstyleData = await _hairstyleRepo.getResultsByUser(user.id!);
 
       final items = <_HistoryItem>[];
-
-      for (final c in colorimetryData) {
-        items.add(_HistoryItem(
-          id: c.id!,
-          type: _ItemType.colorimetry,
-          clientName: c.clientName,
-          photoPath: c.photoPath,
-          subtitle: '${c.recommendedColors.length} colores · ${c.undertone}',
-          createdAt: c.createdAt,
-          route: '/analysis_results',
-        ));
-      }
 
       for (final h in hairstyleData) {
         items.add(_HistoryItem(
           id: h.id!,
           type: _ItemType.hairstyle,
+          personName: h.personName,
           clientName: h.hairstyleName,
           photoPath: h.resultImageUrl,
           subtitle: 'Peinado generado con IA',
@@ -114,19 +100,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   void _openItem(_HistoryItem item) {
-    if (item.type == _ItemType.colorimetry) {
-      Navigator.pushNamed(context, item.route, arguments: item.id);
-    } else {
-      final style = HairstyleModel.catalog.where(
-        (s) => s.name.replaceAll('\n', ' ') == item.clientName,
-      ).firstOrNull;
-      Navigator.pushNamed(context, item.route, arguments: {
-        'style': style,
-        'photoPath': item.photoPath,
-        'originalPhotoPath': item.photoPath,
-        'fromHistory': true,
-      });
-    }
+    Navigator.pushNamed(context, item.route, arguments: {
+      'style': HairstyleModel(
+        id: item.clientName,
+        name: item.clientName,
+        description: item.clientName,
+        styleType: '',
+        maintenanceLevel: 'Moderado',
+        accentColor: Colors.black87,
+        stylistSteps: [],
+        products: [],
+        imagePath: '',
+      ),
+      'photoPath': item.photoPath,
+      'originalPhotoPath': item.photoPath,
+      'fromHistory': true,
+    });
   }
 
   @override
@@ -222,11 +211,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 }
 
-enum _ItemType { colorimetry, hairstyle }
+enum _ItemType { hairstyle }
 
 class _HistoryItem {
   final int id;
   final _ItemType type;
+  final String personName;
   final String clientName;
   final String photoPath;
   final String subtitle;
@@ -236,6 +226,7 @@ class _HistoryItem {
   const _HistoryItem({
     required this.id,
     required this.type,
+    required this.personName,
     required this.clientName,
     required this.photoPath,
     required this.subtitle,
@@ -286,15 +277,24 @@ class _HistoryCard extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.clientName,
-                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (item.personName.isNotEmpty) ...[
+                        Text(
+                          item.personName,
+                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Colors.black45),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                      ],
+                      Text(
+                        item.clientName,
+                        style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     const SizedBox(height: 4),
                     Text(
                       item.subtitle,
@@ -315,16 +315,14 @@ class _HistoryCard extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: item.type == _ItemType.colorimetry
-                                ? Colors.black.withValues(alpha: 0.05)
-                                : Colors.black.withValues(alpha: 0.08),
+                            color: Colors.black.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(50),
                           ),
-                          child: Text(
-                            item.type == _ItemType.colorimetry ? 'Colorimetría' : 'Peinado',
+                          child: const Text(
+                            'Peinado',
                             style: TextStyle(
                               fontFamily: 'Poppins', fontSize: 8, letterSpacing: 0.5,
-                              color: Colors.black.withValues(alpha: 0.4),
+                              color: Colors.black45,
                             ),
                           ),
                         ),

@@ -80,10 +80,12 @@ class _HairstyleLoadingScreenState extends State<HairstyleLoadingScreen> {
           if (user != null) {
             await HairstyleRepository().saveResult(HairstyleResultModel(
               userId: user.id!,
+              colorimetryResultId: colorimetry?.id,
               originalPhotoPath: originalPhotoPath,
               hairstyleName: selectedStyle.name.replaceAll('\n', ' '),
               resultImageUrl: newPath,
               createdAt: DateTime.now().toIso8601String(),
+              personName: colorimetry?.clientName ?? '',
             ));
           }
           HapticFeedback.lightImpact();

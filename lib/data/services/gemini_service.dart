@@ -103,6 +103,7 @@ class GeminiService {
     try {
       final imageBytes = await File(originalPhotoPath).readAsBytes();
       final styleName = style.name.replaceAll('\n', ' ');
+      final styleDesc = style.description.replaceAll('\n', ' ');
       
       String colorContext = '';
       if (colorimetry != null) {
@@ -110,7 +111,7 @@ class GeminiService {
       }
 
       final prompt = 'Ajusta esta imagen. Manten el rostro y todos los demás detalles corporales y del entorno sin cambios, '
-          'pero cambia su cabello al estilo: $styleName.$colorContext '
+          'pero cambia su cabello al estilo: $styleName. $styleDesc.$colorContext '
           'Asegúrate de que el resultado se vea profesional y fotorrealista.';
 
       // To use the specific image generation model via raw REST HTTP because Dart SDK lacks responseModalities

@@ -17,7 +17,7 @@ class DatabaseHelper {
     final path = p.join(dbPath, 'beautyscan.db');
     return openDatabase(
       path,
-      version: 2,
+      version: 4,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -59,10 +59,12 @@ class DatabaseHelper {
       CREATE TABLE hairstyle_results (
         id                    INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id               INTEGER NOT NULL,
+        colorimetry_result_id INTEGER,
         original_photo_path   TEXT    NOT NULL,
         hairstyle_name        TEXT    NOT NULL,
         result_image_url      TEXT    NOT NULL,
         created_at            TEXT    NOT NULL,
+        person_name           TEXT    NOT NULL DEFAULT '',
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       )
     ''');
@@ -70,8 +72,13 @@ class DatabaseHelper {
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      // Agregar nombre de clienta al historial
       await db.execute('ALTER TABLE colorimetry_results ADD COLUMN client_name TEXT NOT NULL DEFAULT ""');
+    }
+    if (oldVersion < 3) {
+      await db.execute('ALTER TABLE hairstyle_results ADD COLUMN person_name TEXT NOT NULL DEFAULT ""');
+    }
+    if (oldVersion < 4) {
+      await db.execute('ALTER TABLE hairstyle_results ADD COLUMN colorimetry_result_id INTEGER');
     }
   }
 
@@ -155,6 +162,16 @@ class DatabaseHelper {
       'hairstyle_results',
       where: 'user_id = ?',
       whereArgs: [userId],
+      orderBy: 'created_at DESC',
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getHairstyleResultsByColorimetry(int colorimetryId) async {
+    final db = await database;
+    return db.query(
+      'hairstyle_results',
+      where: 'colorimetry_result_id = ?',
+      whereArgs: [colorimetryId],
       orderBy: 'created_at DESC',
     );
   }

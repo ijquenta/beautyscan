@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import '../../core/constants.dart';
 import '../../domain/models/hairstyle_model.dart';
 import '../../domain/models/colorimetry_result_model.dart';
+import '../../domain/models/hairstyle_result_model.dart';
 import '../../data/services/gemini_service.dart';
+import '../../data/repositories/hairstyle_repository.dart';
+import '../../core/session_manager.dart';
 import '../components/atoms/beauty_background.dart';
 
 class LookbookScreen extends StatefulWidget {
@@ -15,6 +18,7 @@ class LookbookScreen extends StatefulWidget {
 
 class _LookbookScreenState extends State<LookbookScreen> {
   final GeminiService _geminiService = GeminiService();
+  final HairstyleRepository _hairstyleRepo = HairstyleRepository();
   final List<_LookResult> _results = [];
   bool _isGenerating = true;
   String? _photoPath;
@@ -59,6 +63,18 @@ class _LookbookScreenState extends State<LookbookScreen> {
       );
       if (mounted && path != null) {
         setState(() => _results[index] = _LookResult(style: style, path: path, status: 'ok'));
+        final userId = await SessionManager.getLoggedInUserId();
+        if (userId != null) {
+          _hairstyleRepo.saveResult(HairstyleResultModel(
+            userId: userId,
+            colorimetryResultId: _colorimetry?.id,
+            originalPhotoPath: _photoPath!,
+            hairstyleName: style.name.replaceAll('\n', ' '),
+            resultImageUrl: path,
+            createdAt: DateTime.now().toIso8601String(),
+            personName: _colorimetry?.clientName ?? '',
+          ));
+        }
       } else if (mounted) {
         setState(() => _results[index] = _LookResult(style: style, status: 'Error'));
       }
