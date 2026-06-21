@@ -19,6 +19,7 @@ import 'package:beautyscan/presentation/screens/settings_screen.dart';
 import 'package:beautyscan/presentation/screens/hairstyle_detail_screen.dart';
 import 'package:beautyscan/presentation/screens/colorimetry_detail_screen.dart';
 import 'package:beautyscan/presentation/screens/hairstyle_loading_screen.dart';
+import 'package:beautyscan/presentation/screens/lookbook_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,6 +56,7 @@ class BeautyScanApp extends StatelessWidget {
         '/settings': (c) => const SettingsScreen(),
         '/hairstyle_detail': (c) => const HairstyleDetailScreen(),
         '/colorimetry_detail': (c) => const ColorimetryDetailScreen(),
+        '/lookbook': (c) => const LookbookScreen(),
       },
     );
   }
