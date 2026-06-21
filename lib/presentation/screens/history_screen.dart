@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../data/repositories/colorimetry_repository.dart';
+import '../../data/repositories/hairstyle_repository.dart';
 import '../../data/repositories/user_repository.dart';
+import '../../domain/models/hairstyle_model.dart';
 import '../components/atoms/beauty_background.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -13,9 +16,13 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   int _selectedTab = 0;
   bool _isLoading = true;
-  List<_HistoryEntry> _entries = [];
-  
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  List<_HistoryItem> _allItems = [];
+
   final ColorimetryRepository _colorimetryRepo = ColorimetryRepository();
+  final HairstyleRepository _hairstyleRepo = HairstyleRepository();
   final UserRepository _userRepo = UserRepository();
 
   @override
@@ -24,24 +31,49 @@ class _HistoryScreenState extends State<HistoryScreen> {
     _loadData();
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadData() async {
     final user = await _userRepo.getCurrentUser();
     if (user != null) {
       final colorimetryData = await _colorimetryRepo.getResultsByUser(user.id!);
-      
-      final mappedEntries = colorimetryData.map((c) => _HistoryEntry(
-        id: c.id!,
-        type: 'Colorimetría',
-        clientName: c.clientName,
-        season: c.season,
-        detail: 'Subtono ${c.undertone}',
-        date: _formatDate(c.createdAt),
-        route: '/analysis_results',
-      )).toList();
+      final hairstyleData = await _hairstyleRepo.getResultsByUser(user.id!);
+
+      final items = <_HistoryItem>[];
+
+      for (final c in colorimetryData) {
+        items.add(_HistoryItem(
+          id: c.id!,
+          type: _ItemType.colorimetry,
+          clientName: c.clientName,
+          photoPath: c.photoPath,
+          subtitle: '${c.recommendedColors.length} colores · ${c.undertone}',
+          createdAt: c.createdAt,
+          route: '/analysis_results',
+        ));
+      }
+
+      for (final h in hairstyleData) {
+        items.add(_HistoryItem(
+          id: h.id!,
+          type: _ItemType.hairstyle,
+          clientName: h.hairstyleName,
+          photoPath: h.resultImageUrl,
+          subtitle: 'Peinado generado con IA',
+          createdAt: h.createdAt,
+          route: '/hairstyle_display',
+        ));
+      }
+
+      items.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
       if (mounted) {
         setState(() {
-          _entries = mappedEntries;
+          _allItems = items;
           _isLoading = false;
         });
       }
@@ -52,28 +84,64 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
+  List<_HistoryItem> get _filtered {
+    var items = _allItems;
+    if (_selectedTab == 1) {
+      items = items.where((e) => e.type == _ItemType.colorimetry).toList();
+    } else if (_selectedTab == 2) {
+      items = items.where((e) => e.type == _ItemType.hairstyle).toList();
+    }
+    if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
+      items = items.where((e) =>
+        e.clientName.toLowerCase().contains(query) ||
+        e.subtitle.toLowerCase().contains(query)
+      ).toList();
+    }
+    return items;
+  }
+
   String _formatDate(String isoString) {
     try {
       final dt = DateTime.parse(isoString);
-      return '${dt.day} ${_getMonth(dt.month)}'.toUpperCase();
+      final months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
     } catch (_) {
       return '';
     }
   }
 
-  String _getMonth(int m) {
-    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    return months[m - 1];
+  String _formatTime(String isoString) {
+    try {
+      final dt = DateTime.parse(isoString);
+      final h = dt.hour.toString().padLeft(2, '0');
+      final m = dt.minute.toString().padLeft(2, '0');
+      return '$h:$m';
+    } catch (_) {
+      return '';
+    }
   }
 
-  List<_HistoryEntry> get _filtered {
-    if (_selectedTab == 0) return _entries;
-    final type = _selectedTab == 1 ? 'Colorimetría' : 'Peinado IA';
-    return _entries.where((e) => e.type == type).toList();
+  void _openItem(_HistoryItem item) {
+    if (item.type == _ItemType.colorimetry) {
+      Navigator.pushNamed(context, item.route, arguments: item.id);
+    } else {
+      final style = HairstyleModel.catalog.where(
+        (s) => s.name.replaceAll('\n', ' ') == item.clientName,
+      ).firstOrNull;
+      Navigator.pushNamed(context, item.route, arguments: {
+        'style': style,
+        'photoPath': item.photoPath,
+        'originalPhotoPath': item.photoPath,
+        'fromHistory': true,
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final filtered = _filtered;
+
     return BeautyBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -86,13 +154,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               padding: EdgeInsets.only(left: 32, top: 20),
               child: Text(
                 'Volver',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 10,
-                  letterSpacing: 2.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+                style: TextStyle(fontFamily: 'Poppins', fontSize: 10, letterSpacing: 2.0, fontWeight: FontWeight.bold, color: Colors.black87),
               ),
             ),
           ),
@@ -102,39 +164,42 @@ class _HistoryScreenState extends State<HistoryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Typography
               Padding(
-                padding: const EdgeInsets.fromLTRB(32, 20, 32, 40),
+                padding: const EdgeInsets.fromLTRB(32, 20, 32, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      'EL ARCHIVO',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 3.0,
-                        color: Colors.black38,
-                      ),
+                  children: [
+                    const Text(
+                      'Historial',
+                      style: TextStyle(fontFamily: 'Poppins', fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 3.0, color: Colors.black38),
                     ),
-                    SizedBox(height: 16),
-                    Text(
+                    const SizedBox(height: 16),
+                    const Text(
                       'Tu historia\nde estilo.',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 48,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black87,
-                        letterSpacing: -1.0,
-                        height: 1.0,
+                      style: TextStyle(fontFamily: 'Poppins', fontSize: 48, fontWeight: FontWeight.w700, color: Colors.black87, letterSpacing: -1.0, height: 1.0),
+                    ),
+                    const SizedBox(height: 24),
+                    TextField(
+                      controller: _searchController,
+                      onChanged: (v) => setState(() => _searchQuery = v),
+                      cursorColor: Colors.black87,
+                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 13, color: Colors.black87),
+                      decoration: InputDecoration(
+                        hintText: 'Buscar por nombre...',
+                        hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: Colors.black.withValues(alpha: 0.3)),
+                        prefixIcon: Icon(Icons.search_rounded, size: 18, color: Colors.black.withValues(alpha: 0.3)),
+                        filled: true,
+                        fillColor: Colors.white.withValues(alpha: 0.7),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(50), borderSide: BorderSide.none),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(50), borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.9), width: 1)),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(50), borderSide: const BorderSide(color: Colors.black87, width: 1)),
                       ),
                     ),
                   ],
                 ),
               ),
 
-              // Typographical Filters
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Row(
@@ -151,19 +216,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         margin: const EdgeInsets.only(right: 24),
                         padding: const EdgeInsets.only(bottom: 4),
                         decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: isActive ? Colors.black87 : Colors.transparent,
-                              width: 1.5,
-                            ),
-                          ),
+                          border: Border(bottom: BorderSide(color: isActive ? Colors.black87 : Colors.transparent, width: 1.5)),
                         ),
                         child: Text(
                           label,
                           style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 10,
-                            letterSpacing: 2.0,
+                            fontFamily: 'Poppins', fontSize: 10, letterSpacing: 2.0,
                             fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
                             color: isActive ? Colors.black87 : Colors.black38,
                           ),
@@ -174,94 +232,31 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
 
-              // List
               Expanded(
-                child: _isLoading 
-                  ? const Center(
-                      child: Text('CARGANDO...', style: TextStyle(fontFamily: 'Poppins', letterSpacing: 2.0)),
-                    )
-                  : _filtered.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'ARCHIVO VACÍO',
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 10,
-                            letterSpacing: 3.0,
-                            color: Colors.black38,
-                          ),
+                child: _isLoading
+                  ? const Center(child: Text('Cargando...', style: TextStyle(fontFamily: 'Poppins', letterSpacing: 2.0, color: Colors.black38)))
+                  : filtered.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.inbox_rounded, size: 40, color: Colors.black.withValues(alpha: 0.15)),
+                            const SizedBox(height: 16),
+                            Text(
+                              _searchQuery.isNotEmpty ? 'Sin resultados' : 'Aún no hay registros',
+                              style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, letterSpacing: 1.0, color: Colors.black38),
+                            ),
+                          ],
                         ),
                       )
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
-                        itemCount: _filtered.length,
+                        itemCount: filtered.length,
                         itemBuilder: (context, index) {
-                          final entry = _filtered[index];
-                          return GestureDetector(
-                            onTap: () => Navigator.pushNamed(context, entry.route, arguments: entry.id),
-                            child: Container(
-                              margin: const EdgeInsets.only(bottom: 32),
-                              color: Colors.transparent, // tap area
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(
-                                    width: 70,
-                                    child: Text(
-                                      entry.date,
-                                      style: const TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w400,
-                                        color: Colors.black38,
-                                        letterSpacing: 1.0,
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        // Título: nombre del cliente
-                                        Text(
-                                          entry.clientName,
-                                          style: const TextStyle(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 20,
-                                            color: Colors.black87,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        // Subtítulo: temporada cromática
-                                        Text(
-                                          entry.season,
-                                          style: const TextStyle(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 11,
-                                            color: Colors.black54,
-                                            letterSpacing: 0.5,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          entry.type.toUpperCase(),
-                                          style: const TextStyle(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 9,
-                                            color: Colors.black38,
-                                            letterSpacing: 2.0,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
+                          final item = filtered[index];
+                          return _HistoryCard(item: item, formatDate: _formatDate, formatTime: _formatTime, onTap: () => _openItem(item));
                         },
                       ),
               ),
@@ -273,22 +268,123 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 }
 
-class _HistoryEntry {
+enum _ItemType { colorimetry, hairstyle }
+
+class _HistoryItem {
   final int id;
-  final String type;
+  final _ItemType type;
   final String clientName;
-  final String season;
-  final String detail;
-  final String date;
+  final String photoPath;
+  final String subtitle;
+  final String createdAt;
   final String route;
 
-  const _HistoryEntry({
+  const _HistoryItem({
     required this.id,
     required this.type,
     required this.clientName,
-    required this.season,
-    required this.detail,
-    required this.date,
+    required this.photoPath,
+    required this.subtitle,
+    required this.createdAt,
     required this.route,
   });
+}
+
+class _HistoryCard extends StatelessWidget {
+  final _HistoryItem item;
+  final String Function(String) formatDate;
+  final String Function(String) formatTime;
+  final VoidCallback onTap;
+
+  const _HistoryCard({
+    required this.item,
+    required this.formatDate,
+    required this.formatTime,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.75),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.9), width: 1),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
+              child: SizedBox(
+                width: 80,
+                height: 80,
+                child: Image.file(
+                  File(item.photoPath),
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    child: Icon(Icons.image_outlined, size: 28, color: Colors.black.withValues(alpha: 0.2)),
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.clientName,
+                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      item.subtitle,
+                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Colors.black45),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today_rounded, size: 10, color: Colors.black.withValues(alpha: 0.25)),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${formatDate(item.createdAt)} · ${formatTime(item.createdAt)}',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 9, color: Colors.black.withValues(alpha: 0.3)),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: item.type == _ItemType.colorimetry
+                                ? Colors.black.withValues(alpha: 0.05)
+                                : Colors.black.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: Text(
+                            item.type == _ItemType.colorimetry ? 'Colorimetría' : 'Peinado',
+                            style: TextStyle(
+                              fontFamily: 'Poppins', fontSize: 8, letterSpacing: 0.5,
+                              color: Colors.black.withValues(alpha: 0.4),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

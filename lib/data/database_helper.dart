@@ -142,6 +142,34 @@ class DatabaseHelper {
     return result.isNotEmpty ? result.first : null;
   }
 
+  // ─── HAIRSTYLE RESULTS ────────────────────────────────────
+
+  Future<int> insertHairstyleResult(Map<String, dynamic> data) async {
+    final db = await database;
+    return db.insert('hairstyle_results', data);
+  }
+
+  Future<List<Map<String, dynamic>>> getHairstyleResultsByUser(int userId) async {
+    final db = await database;
+    return db.query(
+      'hairstyle_results',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+      orderBy: 'created_at DESC',
+    );
+  }
+
+  Future<Map<String, dynamic>?> getHairstyleResultById(int id) async {
+    final db = await database;
+    final result = await db.query(
+      'hairstyle_results',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    return result.isNotEmpty ? result.first : null;
+  }
+
   // ─── STATS ───────────────────────────────────────────────
 
   Future<int> countColorimetryResults(int userId) async {
