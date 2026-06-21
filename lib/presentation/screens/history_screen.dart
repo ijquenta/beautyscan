@@ -266,25 +266,23 @@ class _HistoryCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.75),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.9), width: 1),
         ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
-              child: SizedBox(
+        clipBehavior: Clip.antiAlias,
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
                 width: 80,
-                height: 80,
                 child: Image.file(
                   File(item.photoPath),
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (_, _, _) => Container(
                     color: Colors.black.withValues(alpha: 0.05),
                     child: Icon(Icons.image_outlined, size: 28, color: Colors.black.withValues(alpha: 0.2)),
                   ),
                 ),
               ),
-            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
@@ -338,6 +336,7 @@ class _HistoryCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
