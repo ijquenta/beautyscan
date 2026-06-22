@@ -1,5 +1,5 @@
 /// Resultado del análisis de colorimetría capilar.
-/// Derivado del skinTone + undertone del análisis facial existente (Opción A).
+/// Generado por IA a partir del análisis facial o con fallback determinista.
 class HairColorimetryResult {
   final String skinTone;
   final String undertone;
@@ -20,6 +20,15 @@ class HairColorimetryResult {
   /// Nota técnica del colorista.
   final String stylistNote;
 
+  /// Nivel de fórmula recomendado (1-10) para el FormulaSheet.
+  final String recommendedFormulaLevel;
+
+  /// Tono de fórmula recomendado (0=Cenizo, 3=Dorado, 4=Cobre, etc.).
+  final String recommendedFormulaTone;
+
+  /// Volumen de oxidante recomendado (10, 20, 30, 40).
+  final String recommendedOxidant;
+
   const HairColorimetryResult({
     required this.skinTone,
     required this.undertone,
@@ -29,5 +38,8 @@ class HairColorimetryResult {
     required this.suggestedHairLabels,
     required this.hairCareAdvice,
     required this.stylistNote,
+    this.recommendedFormulaLevel = '7',
+    this.recommendedFormulaTone = '0',
+    this.recommendedOxidant = '20',
   });
 }

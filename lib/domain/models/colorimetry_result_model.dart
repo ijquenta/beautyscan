@@ -29,7 +29,7 @@ class ColorimetryResultModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      if (id != null) 'id': id,
       'user_id': userId,
       'client_name': clientName,
       'photo_path': photoPath,

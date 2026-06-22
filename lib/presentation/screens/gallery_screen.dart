@@ -1,9 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../core/constants.dart';
-import '../../data/repositories/colorimetry_repository.dart';
 import '../../data/repositories/hairstyle_repository.dart';
-import '../../domain/models/hairstyle_model.dart';
 import '../../data/repositories/user_repository.dart';
+import '../../domain/models/hairstyle_model.dart';
 import '../components/atoms/beauty_background.dart';
 
 class GalleryScreen extends StatefulWidget {
@@ -14,14 +14,11 @@ class GalleryScreen extends StatefulWidget {
 }
 
 class _GalleryScreenState extends State<GalleryScreen> {
-  int _selectedFilter = 0;
   bool _isLoading = true;
   List<_GalleryItem> _items = [];
 
-  final ColorimetryRepository _colorimetryRepo = ColorimetryRepository();
   final HairstyleRepository _hairstyleRepo = HairstyleRepository();
   final UserRepository _userRepo = UserRepository();
-  final List<String> _filters = ['Todas', 'Colorimetría', 'Peinados'];
 
   @override
   void initState() {
@@ -32,52 +29,17 @@ class _GalleryScreenState extends State<GalleryScreen> {
   Future<void> _loadData() async {
     final user = await _userRepo.getCurrentUser();
     if (user != null) {
-      final colorimetryData = await _colorimetryRepo.getResultsByUser(user.id!);
       final hairstyleData = await _hairstyleRepo.getResultsByUser(user.id!);
 
-      final items = <_GalleryItem>[
-        ...colorimetryData.map((c) {
-          Color baseColor = Colors.black87;
-          if (c.recommendedColors.isNotEmpty) {
-            baseColor = _hexToColor(c.recommendedColors.first);
-          }
-          return _GalleryItem(
-            id: c.id!,
-            type: 'Colorimetría',
-            clientName: c.clientName,
-            subtitle: c.season,
-            date: _formatDate(c.createdAt),
-            color: baseColor,
-            route: '/analysis_results',
-          );
-        }),
-        ...hairstyleData.map((h) {
-          return _GalleryItem(
-            id: h.id!,
-            type: 'Peinado',
-            clientName: h.personName.isNotEmpty ? h.personName : h.hairstyleName,
-            subtitle: h.personName.isNotEmpty ? h.hairstyleName : '',
-            date: _formatDate(h.createdAt),
-            color: Colors.black87,
-            route: '/hairstyle_display',
-            routeArgs: {
-              'style': HairstyleModel(
-                id: h.hairstyleName,
-                name: h.hairstyleName,
-                description: h.hairstyleName,
-                styleType: '',
-                maintenanceLevel: 'Moderado',
-                accentColor: Colors.black87,
-                stylistSteps: [],
-                products: [],
-                imagePath: '',
-              ),
-              'photoPath': h.resultImageUrl,
-              'originalPhotoPath': h.originalPhotoPath,
-            },
-          );
-        }),
-      ];
+      final items = hairstyleData.map((h) {
+        return _GalleryItem(
+          id: h.id!,
+          clientName: h.personName.isNotEmpty ? h.personName : h.hairstyleName,
+          subtitle: h.personName.isNotEmpty ? h.hairstyleName : '',
+          date: _formatDate(h.createdAt),
+          photoPath: h.resultImageUrl,
+        );
+      }).toList();
 
       if (mounted) {
         setState(() {
@@ -90,14 +52,6 @@ class _GalleryScreenState extends State<GalleryScreen> {
         setState(() => _isLoading = false);
       }
     }
-  }
-
-  Color _hexToColor(String hex) {
-    hex = hex.replaceAll('#', '');
-    if (hex.length == 6) {
-      hex = 'FF$hex';
-    }
-    return Color(int.parse(hex, radix: 16));
   }
 
   String _formatDate(String isoString) {
@@ -114,10 +68,106 @@ class _GalleryScreenState extends State<GalleryScreen> {
     return months[m - 1];
   }
 
-  List<_GalleryItem> get _filtered {
-    if (_selectedFilter == 0) return _items;
-    final filterType = _selectedFilter == 1 ? 'Colorimetría' : 'Peinado';
-    return _items.where((i) => i.type == filterType).toList();
+  Widget _buildCard(_GalleryItem item) {
+    final hasPhoto = item.photoPath.isNotEmpty && File(item.photoPath).existsSync();
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, '/hairstyle_display', arguments: {
+          'style': HairstyleModel(
+            id: item.clientName,
+            name: item.clientName,
+            description: item.clientName,
+            styleType: '',
+            maintenanceLevel: 'Moderado',
+            accentColor: AppColors.negroCarbon,
+            stylistSteps: [],
+            products: [],
+            imagePath: '',
+          ),
+          'photoPath': item.photoPath,
+          'originalPhotoPath': item.photoPath,
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.75),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.9), width: 1),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: 80,
+                child: hasPhoto
+                    ? Image.file(File(item.photoPath), fit: BoxFit.cover, errorBuilder: (_, __, ___) => _imagePlaceholder())
+                    : _imagePlaceholder(),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.clientName,
+                        style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      if (item.subtitle.isNotEmpty)
+                        Text(
+                          item.subtitle,
+                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Colors.black54),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(Icons.calendar_today_rounded, size: 10, color: Colors.black.withValues(alpha: 0.25)),
+                          const SizedBox(width: 4),
+                          Text(
+                            item.date,
+                            style: TextStyle(fontFamily: 'Poppins', fontSize: 9, color: Colors.black.withValues(alpha: 0.3)),
+                          ),
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: const Text(
+                              'Look IA',
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 8, letterSpacing: 0.5, color: Colors.black45),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _imagePlaceholder() {
+    return Container(
+      color: Colors.black.withValues(alpha: 0.05),
+      child: Center(
+        child: Icon(Icons.image_outlined, size: 28, color: Colors.black.withValues(alpha: 0.2)),
+      ),
+    );
   }
 
   @override
@@ -131,8 +181,19 @@ class _GalleryScreenState extends State<GalleryScreen> {
           leading: GestureDetector(
             onTap: () => Navigator.pop(context),
             child: const Padding(
-              padding: EdgeInsets.only(left: 32, top: 20),
-              child: Text('Volver', style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black54)),
+              padding: EdgeInsets.only(left: 24, top: 20),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.arrow_back_rounded, size: 18, color: Colors.black54),
+                    SizedBox(width: 6),
+                    Text('Volver', style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black54)),
+                  ],
+                ),
+              ),
             ),
           ),
           leadingWidth: 100,
@@ -142,144 +203,80 @@ class _GalleryScreenState extends State<GalleryScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(32, 4, 32, 24),
+                padding: const EdgeInsets.fromLTRB(32, 20, 32, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
-                    Text('El Archivo', style: TextStyle(fontFamily: 'Poppins', fontSize: 9, fontWeight: FontWeight.w600, color: Colors.black45)),
-                    SizedBox(height: 12),
-                    Text('Galería.', style: TextStyle(fontFamily: 'Poppins', fontSize: 40, fontWeight: FontWeight.w700, color: AppColors.negroCarbon, letterSpacing: -1.0, height: 1.0)),
+                    Text('Historial Looks Generados', style: TextStyle(fontFamily: 'Poppins', fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.negroCarbon, letterSpacing: -1.0, height: 1.0)),
+                    SizedBox(height: 8),
+                    Text('Tus peinados y collages creados con IA', style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: Colors.black54)),
                   ],
                 ),
               ),
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Row(
-                  children: _filters.asMap().entries.map((entry) {
-                    final i = entry.key;
-                    final label = entry.value;
-                    final isActive = i == _selectedFilter;
-                    return GestureDetector(
-                      onTap: () => setState(() => _selectedFilter = i),
-                      child: Container(
-                        margin: const EdgeInsets.only(right: 12),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isActive ? AppColors.negroCarbon : Colors.transparent,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: isActive ? Colors.transparent : Colors.black.withValues(alpha: 0.1),
-                          ),
-                        ),
-                        child: Text(
-                          label,
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 11,
-                            fontWeight: isActive ? FontWeight.w500 : FontWeight.w400,
-                            color: isActive ? Colors.white : Colors.black54,
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-
-              const SizedBox(height: 28),
-
               Expanded(
                 child: _isLoading
                   ? const Center(child: CircularProgressIndicator(color: AppColors.negroCarbon))
-                  : _filtered.isEmpty
+                  : _items.isEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.folder_open_outlined, size: 40, color: Colors.black.withValues(alpha: 0.1)),
                             const SizedBox(height: 12),
-                            const Text('Galería vacía', style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Colors.black38)),
+                            const Text('Aún no hay looks generados', style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Colors.black38)),
                           ],
                         ),
                       )
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
-                        itemCount: _filtered.length,
+                        itemCount: _items.length,
                         itemBuilder: (context, index) {
-                          final item = _filtered[index];
-                          return GestureDetector(
-                            onTap: () => Navigator.pushNamed(context, item.route, arguments: item.routeArgs ?? item.id),
-                            child: Container(
+                          final item = _items[index];
+                          return Dismissible(
+                            key: ValueKey(item.id),
+                            direction: DismissDirection.endToStart,
+                            confirmDismiss: (_) async {
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  backgroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                  title: const Text('Eliminar look', style: TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600)),
+                                  content: Text('¿Seguro que quieres eliminar "${item.clientName}"?', style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Colors.black54)),
+                                  actions: [
+                                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar', style: TextStyle(fontFamily: 'Poppins', fontSize: 12))),
+                                    TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Eliminar', style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Colors.redAccent))),
+                                  ],
+                                ),
+                              );
+                              if (confirm == true) {
+                                await _hairstyleRepo.deleteResult(item.id);
+                                _loadData();
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      backgroundColor: AppColors.negroCarbon,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                      content: const Text('Look eliminado', style: TextStyle(fontFamily: 'Poppins', fontSize: 12)),
+                                    ),
+                                  );
+                                }
+                              }
+                              return false;
+                            },
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 24),
                               margin: const EdgeInsets.only(bottom: 16),
-                              padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.65),
+                                color: Colors.redAccent,
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
                               ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 52,
-                                    height: 52,
-                                    decoration: BoxDecoration(
-                                      color: item.color.withValues(alpha: 0.12),
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                    child: Center(
-                                      child: Container(
-                                        width: 20,
-                                        height: 20,
-                                        decoration: BoxDecoration(
-                                          color: item.color,
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          item.clientName,
-                                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w600),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          item.subtitle,
-                                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Colors.black54),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                              decoration: BoxDecoration(
-                                                color: AppColors.negroCarbon.withValues(alpha: 0.05),
-                                                borderRadius: BorderRadius.circular(10),
-                                              ),
-                                              child: Text(
-                                                item.type,
-                                                style: const TextStyle(fontFamily: 'Poppins', fontSize: 8, fontWeight: FontWeight.w600, color: Colors.black45),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 10),
-                                            Text(
-                                              item.date,
-                                              style: const TextStyle(fontFamily: 'Poppins', fontSize: 9, color: Colors.black38),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Icon(Icons.chevron_right_rounded, size: 20, color: Colors.black.withValues(alpha: 0.15)),
-                                ],
-                              ),
+                              child: const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 22),
                             ),
+                            child: _buildCard(item),
                           );
                         },
                       ),
@@ -294,22 +291,16 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
 class _GalleryItem {
   final int id;
-  final String type;
   final String clientName;
   final String subtitle;
   final String date;
-  final Color color;
-  final String route;
-  final Map<String, dynamic>? routeArgs;
+  final String photoPath;
 
   const _GalleryItem({
     required this.id,
-    required this.type,
     required this.clientName,
     required this.subtitle,
     required this.date,
-    required this.color,
-    required this.route,
-    this.routeArgs,
+    required this.photoPath,
   });
 }

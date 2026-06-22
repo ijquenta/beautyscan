@@ -54,32 +54,31 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _BottomNavItem(
+                  Expanded(child: _BottomNavItem(
                     icon: Icons.home_rounded,
-                    label: 'Principal',
+                    label: 'Inicio',
                     isActive: true,
                     onTap: () {},
-                  ),
-                  _BottomNavItem(
+                  )),
+                  Expanded(child: _BottomNavItem(
                     icon: Icons.qr_code_scanner_rounded,
                     label: 'Analizar',
                     isActive: false,
                     onTap: () => Navigator.pushNamed(context, '/scanner'),
-                  ),
-                  _BottomNavItem(
+                  )),
+                  Expanded(child: _BottomNavItem(
                     icon: Icons.history_rounded,
-                    label: 'Historial',
+                    label: 'Historial Colorimetria',
                     isActive: false,
                     onTap: () => Navigator.pushNamed(context, '/history'),
-                  ),
-                  _BottomNavItem(
+                  )),
+                  Expanded(child: _BottomNavItem(
                     icon: Icons.photo_library_outlined,
-                    label: 'Galería',
+                    label: 'Historial Looks',
                     isActive: false,
                     onTap: () => Navigator.pushNamed(context, '/gallery'),
-                  ),
+                  )),
                 ],
               ),
             ),
@@ -270,10 +269,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 12),
                       _ActionCard(
                         icon: Icons.folder_outlined,
-                        title: 'Historial',
-                        subtitle: 'Historial completo de análisis',
+                        title: 'Historial Colorimetria',
+                        subtitle: 'Historial completo de análisis de colorimetria con IA',
                         onTap: () => Navigator.pushNamed(context, '/history'),
                       ),
+                      const SizedBox(height: 12),
+                      _ActionCard(
+                        icon: Icons.auto_awesome_mosaic_outlined,
+                        title: 'Historial Looks Generados',
+                        subtitle: 'Tus peinados y collages generados con IA',
+                        onTap: () => Navigator.pushNamed(context, '/gallery'),
+                      ),
+
                     ],
                   ),
                 ),
@@ -486,7 +493,7 @@ class _BottomNavItem extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
         decoration: BoxDecoration(
           color: isActive ? AppColors.negroCarbon.withValues(alpha: 0.06) : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
@@ -535,24 +542,24 @@ class _ActionCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.65),
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: Colors.white.withValues(alpha: 0.9), width: 1),
         ),
         child: Row(
           children: [
             Container(
-              width: 50,
-              height: 50,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
                 color: AppColors.negroCarbon.withValues(alpha: 0.04),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(icon, size: 24, color: Colors.black54),
+              child: Icon(icon, size: 22, color: Colors.black54),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -561,7 +568,7 @@ class _ActionCard extends StatelessWidget {
                     title,
                     style: const TextStyle(
                       fontFamily: 'Poppins',
-                      fontSize: 17,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
                     ),
@@ -579,7 +586,7 @@ class _ActionCard extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: Colors.black.withValues(alpha: 0.2), size: 22),
+            Icon(Icons.chevron_right_rounded, color: Colors.black.withValues(alpha: 0.2), size: 20),
           ],
         ),
       ),

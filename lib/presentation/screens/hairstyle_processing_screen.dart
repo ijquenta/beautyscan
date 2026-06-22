@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/constants.dart';
 import '../components/atoms/beauty_background.dart';
 import '../../domain/models/hairstyle_model.dart';
 
@@ -24,15 +25,17 @@ class _HairstyleProcessingScreenState extends State<HairstyleProcessingScreen> {
           leading: GestureDetector(
             onTap: () => Navigator.pop(context),
             child: const Padding(
-              padding: EdgeInsets.only(left: 32, top: 20),
-              child: Text(
-                'Volver',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 10,
-                  letterSpacing: 2.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+              padding: EdgeInsets.only(left: 24, top: 20),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.arrow_back_rounded, size: 18, color: Colors.black54),
+                    SizedBox(width: 6),
+                    Text('Volver', style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black54)),
+                  ],
                 ),
               ),
             ),
@@ -182,43 +185,46 @@ class _HairstyleProcessingScreenState extends State<HairstyleProcessingScreen> {
                 ),
               ),
 
-              GestureDetector(
-                onTap: () {
-                  final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-                  final originalPhotoPath = args?['photoPath'] as String?;
+              Padding(
+                padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
+                child: GestureDetector(
+                  onTap: () {
+                    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+                    final originalPhotoPath = args?['photoPath'] as String?;
 
-                  if (originalPhotoPath == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Error: No photo provided.')),
+                    if (originalPhotoPath == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Error: No photo provided.')),
+                      );
+                      return;
+                    }
+
+                    Navigator.pushNamed(
+                      context,
+                      '/hairstyle_loading',
+                      arguments: {
+                        'style': _styles[_selectedIndex],
+                        'photoPath': originalPhotoPath,
+                        'colorimetry': args?['colorimetry'],
+                      },
                     );
-                    return;
-                  }
-
-                  Navigator.pushNamed(
-                    context,
-                    '/hairstyle_loading',
-                    arguments: {
-                      'style': _styles[_selectedIndex],
-                      'photoPath': originalPhotoPath,
-                      'colorimetry': args?['colorimetry'],
-                    },
-                  );
-                },
-                child: Container(
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    border: Border(top: BorderSide(color: Colors.black12, width: 1)),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: const Center(
-                    child: Text(
-                      'Ver resultado',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 3.0,
-                        color: Colors.black87,
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    decoration: BoxDecoration(
+                      color: AppColors.negroCarbon,
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Simular peinado',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),

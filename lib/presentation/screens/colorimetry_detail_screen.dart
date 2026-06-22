@@ -38,11 +38,7 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
   Future<void> _loadData(int id) async {
     final data = await _repo.getResultById(id);
     if (data != null) {
-      final hair = _hairService.generateFromColorimetry(
-        skinTone: data.skinTone,
-        undertone: data.undertone,
-        season: data.season,
-      );
+      final hair = await _hairService.generateFromColorimetry(data);
       setState(() {
         _result = data;
         _hairResult = hair;

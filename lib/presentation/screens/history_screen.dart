@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../../data/repositories/hairstyle_repository.dart';
+import '../../core/constants.dart';
+import '../../data/repositories/colorimetry_repository.dart';
 import '../../data/repositories/user_repository.dart';
-import '../../domain/models/hairstyle_model.dart';
 import '../components/atoms/beauty_background.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -19,7 +19,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   List<_HistoryItem> _allItems = [];
 
-  final HairstyleRepository _hairstyleRepo = HairstyleRepository();
+  final ColorimetryRepository _colorimetryRepo = ColorimetryRepository();
   final UserRepository _userRepo = UserRepository();
 
   @override
@@ -37,22 +37,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Future<void> _loadData() async {
     final user = await _userRepo.getCurrentUser();
     if (user != null) {
-      final hairstyleData = await _hairstyleRepo.getResultsByUser(user.id!);
+      final colorimetryData = await _colorimetryRepo.getResultsByUser(user.id!);
 
-      final items = <_HistoryItem>[];
-
-      for (final h in hairstyleData) {
-        items.add(_HistoryItem(
-          id: h.id!,
-          type: _ItemType.hairstyle,
-          personName: h.personName,
-          clientName: h.hairstyleName,
-          photoPath: h.resultImageUrl,
-          subtitle: 'Peinado generado con IA',
-          createdAt: h.createdAt,
-          route: '/hairstyle_display',
-        ));
-      }
+      final items = colorimetryData.map((c) {
+        Color baseColor = Colors.black87;
+        if (c.recommendedColors.isNotEmpty) {
+          baseColor = _hexToColor(c.recommendedColors.first);
+        }
+        return _HistoryItem(
+          id: c.id!,
+          clientName: c.clientName,
+          subtitle: c.season,
+          photoPath: c.photoPath,
+          color: baseColor,
+          createdAt: c.createdAt,
+        );
+      }).toList();
 
       items.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
@@ -78,6 +78,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
     ).toList();
   }
 
+  Color _hexToColor(String hex) {
+    hex = hex.replaceAll('#', '');
+    if (hex.length == 6) hex = 'FF$hex';
+    return Color(int.parse(hex, radix: 16));
+  }
+
   String _formatDate(String isoString) {
     try {
       final dt = DateTime.parse(isoString);
@@ -100,22 +106,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   void _openItem(_HistoryItem item) {
-    Navigator.pushNamed(context, item.route, arguments: {
-      'style': HairstyleModel(
-        id: item.clientName,
-        name: item.clientName,
-        description: item.clientName,
-        styleType: '',
-        maintenanceLevel: 'Moderado',
-        accentColor: Colors.black87,
-        stylistSteps: [],
-        products: [],
-        imagePath: '',
-      ),
-      'photoPath': item.photoPath,
-      'originalPhotoPath': item.photoPath,
-      'fromHistory': true,
-    });
+    Navigator.pushNamed(context, '/analysis_results', arguments: item.id);
   }
 
   @override
@@ -131,10 +122,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
           leading: GestureDetector(
             onTap: () => Navigator.pop(context),
             child: const Padding(
-              padding: EdgeInsets.only(left: 32, top: 20),
-              child: Text(
-                'Volver',
-                style: TextStyle(fontFamily: 'Poppins', fontSize: 10, letterSpacing: 2.0, fontWeight: FontWeight.bold, color: Colors.black87),
+              padding: EdgeInsets.only(left: 24, top: 20),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.arrow_back_rounded, size: 18, color: Colors.black54),
+                    SizedBox(width: 6),
+                    Text('Volver', style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black54)),
+                  ],
+                ),
               ),
             ),
           ),
@@ -150,8 +149,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Historial',
-                      style: TextStyle(fontFamily: 'Poppins', fontSize: 22, fontWeight: FontWeight.w700, color: Colors.black87, letterSpacing: -1.0, height: 1.0),
+                      'Historial Colorimetría',
+                      style: TextStyle(fontFamily: 'Poppins', fontSize: 28, fontWeight: FontWeight.w700, color: Colors.black87, letterSpacing: -1.0, height: 1.0),
                     ),
                     const SizedBox(height: 24),
                     TextField(
@@ -160,7 +159,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       cursorColor: Colors.black87,
                       style: const TextStyle(fontFamily: 'Poppins', fontSize: 13, color: Colors.black87),
                       decoration: InputDecoration(
-                        hintText: 'Buscar por nombre...',
+                        hintText: 'Buscar cliente o temporada...',
                         hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: Colors.black.withValues(alpha: 0.3)),
                         prefixIcon: Icon(Icons.search_rounded, size: 18, color: Colors.black.withValues(alpha: 0.3)),
                         filled: true,
@@ -199,7 +198,51 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         itemCount: filtered.length,
                         itemBuilder: (context, index) {
                           final item = filtered[index];
-                          return _HistoryCard(item: item, formatDate: _formatDate, formatTime: _formatTime, onTap: () => _openItem(item));
+                          return Dismissible(
+                            key: ValueKey(item.id),
+                            direction: DismissDirection.endToStart,
+                            confirmDismiss: (_) async {
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  backgroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                  title: const Text('Eliminar peinado', style: TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600)),
+                                  content: const Text('¿Seguro que quieres eliminar este peinado del historial?', style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Colors.black54)),
+                                  actions: [
+                                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar', style: TextStyle(fontFamily: 'Poppins', fontSize: 12))),
+                                    TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Eliminar', style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Colors.redAccent))),
+                                  ],
+                                ),
+                              );
+                              if (confirm == true) {
+                                await _colorimetryRepo.deleteResult(item.id);
+                                _loadData();
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      backgroundColor: AppColors.negroCarbon,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                      content: const Text('Peinado eliminado', style: TextStyle(fontFamily: 'Poppins', fontSize: 12)),
+                                    ),
+                                  );
+                                }
+                              }
+                              return false;
+                            },
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 24),
+                              margin: const EdgeInsets.only(bottom: 20),
+                              decoration: BoxDecoration(
+                                color: Colors.redAccent,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 22),
+                            ),
+                            child: _HistoryCard(item: item, formatDate: _formatDate, formatTime: _formatTime, onTap: () => _openItem(item)),
+                          );
                         },
                       ),
               ),
@@ -211,27 +254,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 }
 
-enum _ItemType { hairstyle }
+enum _ItemType { colorimetry }
 
 class _HistoryItem {
   final int id;
-  final _ItemType type;
-  final String personName;
   final String clientName;
-  final String photoPath;
   final String subtitle;
+  final String photoPath;
+  final Color color;
   final String createdAt;
-  final String route;
 
   const _HistoryItem({
     required this.id,
-    required this.type,
-    required this.personName,
     required this.clientName,
-    required this.photoPath,
     required this.subtitle,
+    required this.photoPath,
+    required this.color,
     required this.createdAt,
-    required this.route,
   });
 }
 
@@ -248,6 +287,30 @@ class _HistoryCard extends StatelessWidget {
     required this.onTap,
   });
 
+  Widget _imageWithFallback(_HistoryItem item) {
+    final hasPhoto = item.photoPath.isNotEmpty && File(item.photoPath).existsSync();
+    if (hasPhoto) {
+      return Image.file(
+        File(item.photoPath),
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => _imagePlaceholder(item),
+      );
+    }
+    return _imagePlaceholder(item);
+  }
+
+  Widget _imagePlaceholder(_HistoryItem item) {
+    return Container(
+      color: item.color.withValues(alpha: 0.12),
+      child: Center(
+        child: Container(
+          width: 20, height: 20,
+          decoration: BoxDecoration(color: item.color, borderRadius: BorderRadius.circular(6)),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -257,6 +320,7 @@ class _HistoryCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.75),
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.9), width: 1),
         ),
         clipBehavior: Clip.antiAlias,
         child: IntrinsicHeight(
@@ -265,14 +329,7 @@ class _HistoryCard extends StatelessWidget {
             children: [
               SizedBox(
                 width: 80,
-                child: Image.file(
-                  File(item.photoPath),
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => Container(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    child: Icon(Icons.image_outlined, size: 28, color: Colors.black.withValues(alpha: 0.2)),
-                  ),
-                ),
+                child: _imageWithFallback(item),
               ),
             Expanded(
               child: Padding(
@@ -280,25 +337,16 @@ class _HistoryCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (item.personName.isNotEmpty) ...[
-                        Text(
-                          item.personName,
-                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Colors.black45),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                      ],
                       Text(
                         item.clientName,
                         style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       item.subtitle,
-                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Colors.black45),
+                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Colors.black54),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -308,7 +356,7 @@ class _HistoryCard extends StatelessWidget {
                         Icon(Icons.calendar_today_rounded, size: 10, color: Colors.black.withValues(alpha: 0.25)),
                         const SizedBox(width: 4),
                         Text(
-                          '${formatDate(item.createdAt)} · ${formatTime(item.createdAt)}',
+                          formatDate(item.createdAt),
                           style: TextStyle(fontFamily: 'Poppins', fontSize: 9, color: Colors.black.withValues(alpha: 0.3)),
                         ),
                         const Spacer(),
@@ -319,7 +367,7 @@ class _HistoryCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(50),
                           ),
                           child: const Text(
-                            'Peinado',
+                            'Colorimetría',
                             style: TextStyle(
                               fontFamily: 'Poppins', fontSize: 8, letterSpacing: 0.5,
                               color: Colors.black45,

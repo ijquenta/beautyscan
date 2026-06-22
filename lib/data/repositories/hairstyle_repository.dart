@@ -25,4 +25,8 @@ class HairstyleRepository {
     }
     return null;
   }
+
+  Future<void> deleteResult(int id) async {
+    await _dbHelper.deleteHairstyleResult(id);
+  }
 }

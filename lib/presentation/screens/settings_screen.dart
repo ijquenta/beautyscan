@@ -39,15 +39,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           leading: GestureDetector(
             onTap: () => Navigator.pop(context),
             child: const Padding(
-              padding: EdgeInsets.only(left: 32, top: 20),
-              child: Text(
-                'Volver',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 10,
-                  letterSpacing: 2.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+              padding: EdgeInsets.only(left: 24, top: 20),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.arrow_back_rounded, size: 18, color: Colors.black54),
+                    SizedBox(width: 6),
+                    Text('Volver', style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black54)),
+                  ],
                 ),
               ),
             ),

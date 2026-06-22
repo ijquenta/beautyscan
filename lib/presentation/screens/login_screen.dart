@@ -236,15 +236,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             onTap: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
                             child: Padding(
                               padding: const EdgeInsets.all(12),
-                              child: Text(
-                                _isPasswordVisible ? 'Cerrar' : 'Ver',
-                                style: const TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.5,
-                                  color: Colors.black45,
-                                ),
+                              child: Icon(
+                                _isPasswordVisible ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                                size: 18,
+                                color: Colors.black45,
                               ),
                             ),
                           )

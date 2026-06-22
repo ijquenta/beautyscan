@@ -51,7 +51,7 @@ class AppTheme {
           color: AppColors.negroCarbon,
         ),
 
-        // Cuerpos de texto asumen defecto (Inter)
+        // Cuerpos de texto
         bodyLarge: TextStyle(fontFamily: 'Poppins', color: AppColors.negroCarbon),
         bodyMedium: TextStyle(fontFamily: 'Poppins', color: AppColors.negroCarbon),
         bodySmall: TextStyle(fontFamily: 'Poppins', color: AppColors.grisCalido),

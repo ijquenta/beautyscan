@@ -184,7 +184,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                       Icon(Icons.close_rounded, color: Colors.white.withValues(alpha: 0.8), size: 20),
                       const SizedBox(width: 6),
                       const Text(
-                        'Cerrar',
+                        'Volver',
                         style: TextStyle(fontFamily: 'Poppins', color: Colors.white, fontSize: 14, fontWeight: FontWeight.w400),
                       ),
                     ],

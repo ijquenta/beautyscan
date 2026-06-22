@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../core/constants.dart';
 import '../../domain/models/hairstyle_model.dart';
+import '../components/molecules/formula_sheet.dart';
 
 class HairstyleDisplayScreen extends StatefulWidget {
   const HairstyleDisplayScreen({super.key});
@@ -33,6 +34,7 @@ class _HairstyleDisplayScreenState extends State<HairstyleDisplayScreen> {
     final style = _style;
     final photoPath = _photoPath;
     final originalPath = _originalPhotoPath;
+    final isBlonde = style?.id == 'rubio_ia';
 
     return Scaffold(
       backgroundColor: AppColors.beigeFondo,
@@ -153,7 +155,7 @@ class _HairstyleDisplayScreenState extends State<HairstyleDisplayScreen> {
                           children: [
                             Icon(Icons.auto_awesome_rounded, size: 12, color: AppColors.negroCarbon.withValues(alpha: 0.35)),
                             const SizedBox(width: 6),
-                            Text('Generado por IA', style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Colors.black.withValues(alpha: 0.5))),
+                            Text(isBlonde ? 'Generado por Rubios IA' : 'Generado por IA', style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Colors.black.withValues(alpha: 0.5))),
                           ],
                         ),
                       ),
@@ -194,13 +196,11 @@ class _HairstyleDisplayScreenState extends State<HairstyleDisplayScreen> {
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              backgroundColor: AppColors.negroCarbon,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                              content: const Text('Imagen compartida', style: TextStyle(fontFamily: 'Poppins')),
-                            ),
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => const FormulaSheet(),
                           );
                         },
                         child: Container(
@@ -213,9 +213,9 @@ class _HairstyleDisplayScreenState extends State<HairstyleDisplayScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.ios_share_rounded, size: 16, color: AppColors.negroCarbon),
+                                Icon(Icons.colorize_rounded, size: 16, color: AppColors.negroCarbon),
                                 SizedBox(width: 8),
-                                Text('Compartir', style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.negroCarbon)),
+                                Text('Calcular fórmula', style: TextStyle(fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.negroCarbon)),
                               ],
                             ),
                           ),

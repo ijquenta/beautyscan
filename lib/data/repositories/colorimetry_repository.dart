@@ -20,4 +20,8 @@ class ColorimetryRepository {
     }
     return null;
   }
+
+  Future<void> deleteResult(int id) async {
+    await _dbHelper.deleteColorimetryResult(id);
+  }
 }

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../core/constants.dart';
 import '../../core/session_manager.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../domain/models/user_model.dart';
@@ -58,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final newPath = await _repo.updatePhoto(_user!.id!, picked.path);
     if (newPath != null && mounted) {
       setState(() => _user = _user!.copyWith(profilePhoto: newPath));
-      _showSnack('RETRATO ACTUALIZADO');
+      _showSnack('Retrato actualizado');
     }
   }
 
@@ -69,10 +70,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           message,
           style: const TextStyle(fontFamily: 'Poppins', fontSize: 10, letterSpacing: 2.0, fontWeight: FontWeight.w600, color: Colors.white),
         ),
-        backgroundColor: Colors.black87,
+        backgroundColor: AppColors.negroCarbon,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)), // sharp edges
-        margin: const EdgeInsets.only(bottom: 24, left: 24, right: 24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
     );
   }
@@ -97,15 +97,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           leading: GestureDetector(
             onTap: () => Navigator.pop(context),
             child: const Padding(
-              padding: EdgeInsets.only(left: 32, top: 20),
-              child: Text(
-                'Volver',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 10,
-                  letterSpacing: 2.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+              padding: EdgeInsets.only(left: 24, top: 20),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.arrow_back_rounded, size: 18, color: Colors.black54),
+                    SizedBox(width: 6),
+                    Text('Volver', style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black54)),
+                  ],
                 ),
               ),
             ),

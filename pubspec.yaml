@@ -64,11 +64,6 @@ flutter:
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section.
   fonts:
-    - family: Inter
-      fonts:
-        - asset: assets/fonts/Inter-VariableFont_opsz,wght.ttf
-        - asset: assets/fonts/Inter-Italic-VariableFont_opsz,wght.ttf
-          style: italic
     - family: Poppins
       fonts:
         - asset: assets/fonts/Poppins-Thin.ttf
