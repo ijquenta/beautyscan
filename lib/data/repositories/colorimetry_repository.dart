@@ -21,6 +21,10 @@ class ColorimetryRepository {
     return null;
   }
 
+  Future<void> updateHairResult(int id, String hairResultJson) async {
+    await _dbHelper.updateColorimetryResult(id, {'hair_result_json': hairResultJson});
+  }
+
   Future<void> deleteResult(int id) async {
     await _dbHelper.deleteColorimetryResult(id);
   }

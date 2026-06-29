@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../core/constants.dart';
 import '../../data/services/gemini_service.dart';
+import '../../data/services/hair_colorimetry_service.dart';
 import '../../data/repositories/colorimetry_repository.dart';
 
 class AnalysisScreen extends StatefulWidget {
@@ -14,14 +15,15 @@ class AnalysisScreen extends StatefulWidget {
 
 class _AnalysisScreenState extends State<AnalysisScreen> {
   final GeminiService _geminiService = GeminiService();
-  String _statusText = 'Calibrando luz';
+  final HairColorimetryService _hairService = HairColorimetryService();
+  String _statusText = 'Analizando colorimetría facial';
   double _progress = 0.0;
 
   final List<String> _steps = [
-    'Calibrando luz',
-    'Detectando subtono',
-    'Evaluando contraste',
-    'Sintetizando paleta',
+    'Analizando colorimetría facial',
+    'Generando paleta de colores',
+    'Analizando colorimetría capilar',
+    'Preparando recomendaciones',
   ];
 
   @override
@@ -65,6 +67,12 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
 
       final savedId = await colorimetryRepo.saveResult(resultModel);
 
+      setState(() => _progress = 0.5);
+
+      final hairResult = await _hairService.generateFromColorimetry(resultModel);
+
+      await colorimetryRepo.updateHairResult(savedId, hairResult.toJsonString());
+
       sub.cancel();
 
       if (mounted) {
@@ -74,7 +82,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
           Navigator.pushReplacementNamed(
             context,
             '/analysis_results',
-            arguments: savedId,
+            arguments: {'id': savedId, 'hairResult': hairResult},
           );
         }
       }

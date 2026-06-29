@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'hair_colorimetry_result.dart';
+
 class ColorimetryResultModel {
   final int? id;
   final int userId;
@@ -12,6 +14,7 @@ class ColorimetryResultModel {
   final List<String> colorsToAvoid; // Hex codes without #
   final String? makeupTips;
   final String createdAt;
+  final String? hairResultJson;
 
   const ColorimetryResultModel({
     this.id,
@@ -25,7 +28,17 @@ class ColorimetryResultModel {
     required this.colorsToAvoid,
     this.makeupTips,
     required this.createdAt,
+    this.hairResultJson,
   });
+
+  HairColorimetryResult? get hairResult {
+    if (hairResultJson == null) return null;
+    try {
+      return HairColorimetryResult.fromJsonString(hairResultJson!);
+    } catch (_) {
+      return null;
+    }
+  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -40,6 +53,7 @@ class ColorimetryResultModel {
       'colors_to_avoid': jsonEncode(colorsToAvoid),
       'makeup_tips': makeupTips,
       'created_at': createdAt,
+      if (hairResultJson != null) 'hair_result_json': hairResultJson,
     };
   }
 
@@ -56,6 +70,7 @@ class ColorimetryResultModel {
       colorsToAvoid: List<String>.from(jsonDecode(map['colors_to_avoid'] as String)),
       makeupTips: map['makeup_tips'] as String?,
       createdAt: map['created_at'] as String,
+      hairResultJson: map['hair_result_json'] as String?,
     );
   }
 }

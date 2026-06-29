@@ -17,7 +17,7 @@ class DatabaseHelper {
     final path = p.join(dbPath, 'beautyscan.db');
     return openDatabase(
       path,
-      version: 6,
+      version: 7,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onConfigure: (db) async => await db.execute('PRAGMA foreign_keys = ON'),
@@ -104,6 +104,10 @@ class DatabaseHelper {
         await txn.execute('ALTER TABLE hairstyle_results_v6 RENAME TO hairstyle_results');
       });
     }
+    if (oldVersion < 7) {
+      await db.execute(
+          'ALTER TABLE colorimetry_results ADD COLUMN hair_result_json TEXT');
+    }
   }
 
   // ─── USERS ───────────────────────────────────────────────
@@ -171,6 +175,11 @@ class DatabaseHelper {
       limit: 1,
     );
     return result.isNotEmpty ? result.first : null;
+  }
+
+  Future<int> updateColorimetryResult(int id, Map<String, dynamic> values) async {
+    final db = await database;
+    return db.update('colorimetry_results', values, where: 'id = ?', whereArgs: [id]);
   }
 
   // ─── HAIRSTYLE RESULTS ────────────────────────────────────

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 /// Resultado del análisis de colorimetría capilar.
 /// Generado por IA a partir del análisis facial o con fallback determinista.
 class HairColorimetryResult {
@@ -42,4 +44,46 @@ class HairColorimetryResult {
     this.recommendedFormulaTone = '0',
     this.recommendedOxidant = '20',
   });
+
+  Map<String, dynamic> toJson() => {
+        'skin_tone': skinTone,
+        'undertone': undertone,
+        'season': season,
+        'suggested_hair_tones': suggestedHairTones,
+        'hair_tones_to_avoid': hairTonesToAvoid,
+        'suggested_hair_labels': suggestedHairLabels,
+        'hair_care_advice': hairCareAdvice,
+        'stylist_note': stylistNote,
+        'recommended_formula_level': recommendedFormulaLevel,
+        'recommended_formula_tone': recommendedFormulaTone,
+        'recommended_oxidant': recommendedOxidant,
+      };
+
+  factory HairColorimetryResult.fromJson(Map<String, dynamic> json) =>
+      HairColorimetryResult(
+        skinTone: json['skin_tone'] as String? ?? '',
+        undertone: json['undertone'] as String? ?? '',
+        season: json['season'] as String? ?? '',
+        suggestedHairTones:
+            List<String>.from(json['suggested_hair_tones'] ?? []),
+        hairTonesToAvoid:
+            List<String>.from(json['hair_tones_to_avoid'] ?? []),
+        suggestedHairLabels:
+            List<String>.from(json['suggested_hair_labels'] ?? []),
+        hairCareAdvice:
+            List<String>.from(json['hair_care_advice'] ?? []),
+        stylistNote: json['stylist_note'] as String? ?? '',
+        recommendedFormulaLevel:
+            json['recommended_formula_level'] as String? ?? '7',
+        recommendedFormulaTone:
+            json['recommended_formula_tone'] as String? ?? '0',
+        recommendedOxidant:
+            json['recommended_oxidant'] as String? ?? '20',
+      );
+
+  String toJsonString() => jsonEncode(toJson());
+
+  factory HairColorimetryResult.fromJsonString(String jsonString) =>
+      HairColorimetryResult.fromJson(
+          jsonDecode(jsonString) as Map<String, dynamic>);
 }

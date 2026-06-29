@@ -32,27 +32,52 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_result == null) {
-      final id = ModalRoute.of(context)!.settings.arguments as int?;
-      if (id != null) {
-        _loadData(id);
+      final args = ModalRoute.of(context)!.settings.arguments;
+      if (args is Map<String, dynamic>) {
+        final id = args['id'] as int?;
+        final hairResult = args['hairResult'] as HairColorimetryResult?;
+        if (id != null) {
+          _loadData(id, precomputedHair: hairResult);
+        } else {
+          setState(() => _isLoading = false);
+        }
+      } else if (args is int) {
+        _loadData(args);
       } else {
         setState(() => _isLoading = false);
       }
     }
   }
 
-  Future<void> _loadData(int id) async {
+  Future<void> _loadData(int id, {HairColorimetryResult? precomputedHair}) async {
     final data = await _repo.getResultById(id);
-    if (data != null) {
-      final hair = await _hairService.generateFromColorimetry(data);
+    if (data == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    HairColorimetryResult? hair = precomputedHair ?? data.hairResult;
+
+    if (hair != null) {
       setState(() {
         _result = data;
         _hairResult = hair;
         _isLoading = false;
       });
       _loadGeneratedLooks();
-    } else {
-      setState(() => _isLoading = false);
+      return;
+    }
+
+    setState(() {
+      _result = data;
+      _isLoading = false;
+    });
+    _loadGeneratedLooks();
+
+    hair = await _hairService.generateFromColorimetry(data);
+    if (mounted && hair != null) {
+      await _repo.updateHairResult(data.id!, hair.toJsonString());
+      setState(() => _hairResult = hair);
     }
   }
 

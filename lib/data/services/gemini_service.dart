@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:http/http.dart' as http;
@@ -13,6 +14,19 @@ import '../../core/session_manager.dart';
 
 class GeminiService {
   final _userRepo = UserRepository();
+
+  Future<Uint8List> _resizeImage(Uint8List bytes, {int maxWidth = 1200}) async {
+    try {
+      final codec = await ui.instantiateImageCodec(bytes, targetWidth: maxWidth);
+      final frame = await codec.getNextFrame();
+      final resized = frame.image;
+      final byteData = await resized.toByteData(format: ui.ImageByteFormat.png);
+      codec.dispose();
+      return byteData?.buffer.asUint8List() ?? bytes;
+    } catch (_) {
+      return bytes;
+    }
+  }
 
   Future<ColorimetryResultModel> analyzeColorimetry(
     Uint8List imageBytes,
@@ -54,12 +68,13 @@ class GeminiService {
     const promptText = 'Eres un Asesor de Imagen Cromatico de Alto Nivel de una Revista de Moda. Analiza esta foto del rostro de la persona para determinar su Estacion Cromatica.';
 
     try {
+      final resizedBytes = await _resizeImage(imageBytes);
       final response = await model.generateContent([
         Content.multi([
           TextPart(promptText),
-          DataPart('image/jpeg', imageBytes),
+          DataPart('image/jpeg', resizedBytes),
         ]),
-      ]);
+      ]).timeout(const Duration(seconds: 30));
 
       final responseText = response.text ?? '{}';
       debugPrint('Gemini JSON response: $responseText');
@@ -158,7 +173,8 @@ DATOS DE LA CLIENTE:
 IMPORTANTE: Los tonos de tinte deben armonizar con TODO su perfil cromático, no solo con la temporada. Una cliente de "Primavera Cálida" con piel muy clara no recibe los mismos tonos que una de "Primavera Cálida" con piel oscura. Personaliza según sus datos específicos.''';
 
     try {
-      final response = await model.generateContent([Content.text(prompt)]);
+      final response = await model.generateContent([Content.text(prompt)])
+          .timeout(const Duration(seconds: 30));
       final responseText = response.text ?? '{}';
       debugPrint('Hair Gemini response: $responseText');
 
@@ -246,11 +262,13 @@ Asegúrate de que el resultado se vea profesional, fotorrealista y armonioso con
         }
       };
 
-      final response = await http.post(
-        endpoint,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(payload),
-      );
+      final response = await http
+          .post(
+            endpoint,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(payload),
+          )
+          .timeout(const Duration(seconds: 60));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -350,11 +368,13 @@ El resultado DEBE ser una única imagen fotorrealista mostrando las 4 variacione
         }
       };
 
-      final response = await http.post(
-        endpoint,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(payload),
-      );
+      final response = await http
+          .post(
+            endpoint,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(payload),
+          )
+          .timeout(const Duration(seconds: 60));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
