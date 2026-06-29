@@ -20,7 +20,7 @@ class DatabaseHelper {
       version: 7,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
-      onConfigure: (db) async => await db.execute('PRAGMA foreign_keys = ON'),
+      onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
     );
   }
 

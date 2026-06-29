@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -18,6 +19,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
   final HairColorimetryService _hairService = HairColorimetryService();
   String _statusText = 'Analizando colorimetría facial';
   double _progress = 0.0;
+  StreamSubscription? _timerSub;
 
   final List<String> _steps = [
     'Analizando colorimetría facial',
@@ -34,6 +36,12 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    _timerSub?.cancel();
+    super.dispose();
+  }
+
   void _updateProgress() {
     if (!mounted) return;
     setState(() {
@@ -46,7 +54,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
 
   Future<void> _processImageWithGemini() async {
     final timer = Stream.periodic(const Duration(milliseconds: 200), (_) => _updateProgress());
-    final sub = timer.listen(null);
+    _timerSub = timer.listen(null);
 
     try {
       final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
@@ -73,7 +81,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
 
       await colorimetryRepo.updateHairResult(savedId, hairResult.toJsonString());
 
-      sub.cancel();
+      _timerSub?.cancel();
 
       if (mounted) {
         setState(() => _progress = 1.0);
@@ -87,7 +95,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
         }
       }
     } catch (e) {
-      sub.cancel();
+      _timerSub?.cancel();
       debugPrint("Error al procesar con Gemini: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

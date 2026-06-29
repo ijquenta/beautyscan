@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../core/constants.dart';
+import '../../domain/models/colorimetry_result_model.dart';
 import '../../domain/models/hairstyle_model.dart';
 import '../components/molecules/formula_sheet.dart';
 
@@ -15,6 +16,7 @@ class _HairstyleDisplayScreenState extends State<HairstyleDisplayScreen> {
   String? _originalPhotoPath;
   String? _photoPath;
   HairstyleModel? _style;
+  ColorimetryResultModel? _colorimetry;
 
   @override
   void didChangeDependencies() {
@@ -24,6 +26,7 @@ class _HairstyleDisplayScreenState extends State<HairstyleDisplayScreen> {
       _style = args['style'] as HairstyleModel?;
       _photoPath = args['photoPath'] as String?;
       _originalPhotoPath = args['originalPhotoPath'] as String?;
+      _colorimetry = args['colorimetry'] as ColorimetryResultModel?;
     } else if (args is HairstyleModel) {
       _style = args;
     }
@@ -200,7 +203,10 @@ class _HairstyleDisplayScreenState extends State<HairstyleDisplayScreen> {
                             context: context,
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
-                            builder: (context) => const FormulaSheet(),
+                            builder: (context) => FormulaSheet(
+                              colorimetry: _colorimetry,
+                              hairColorimetry: _colorimetry?.hairResult,
+                            ),
                           );
                         },
                         child: Container(

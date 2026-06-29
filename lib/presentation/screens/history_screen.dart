@@ -254,8 +254,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 }
 
-enum _ItemType { colorimetry }
-
 class _HistoryItem {
   final int id;
   final String clientName;

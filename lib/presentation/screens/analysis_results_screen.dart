@@ -75,7 +75,7 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
     _loadGeneratedLooks();
 
     hair = await _hairService.generateFromColorimetry(data);
-    if (mounted && hair != null) {
+    if (mounted) {
       await _repo.updateHairResult(data.id!, hair.toJsonString());
       setState(() => _hairResult = hair);
     }
@@ -117,9 +117,18 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
     );
     if (result != null && mounted) {
       final technique = result['technique'] as Map<String, String>;
+      final tone = result['tone'] as Map<String, String>;
       final percentage = result['percentage'] as double;
-      final styleName = 'Rubio - ${technique['name']} ${percentage.toInt()}%';
-      final styleDescription = 'Transforma el cabello a rubio usando técnica "${technique['name']}" con ${percentage.toInt()}% de claridad. ${technique['desc']}';
+      final season = _result?.season ?? '';
+      final undertone = _result?.undertone ?? '';
+      final styleName = 'Rubio ${tone['name']} - ${technique['name']} ${percentage.toInt()}%';
+      final styleDescription = '''Aplica el tono "${tone['name']}" (${tone['desc']}) al cabello de esta persona.
+Técnica: ${technique['name']} - ${technique['desc']}.
+Claridad: ${percentage.toInt()}% de aclaración respecto a su base natural.
+Perfil cromático: Temporada $season, subtono $undertone.
+El tono elegido debe armonizar con su perfil cromático.
+Usa el color de cabello más fotorrealista posible para el tono solicitado.
+NO cambies el rostro ni el fondo, solo el color y estilo del cabello.''';
       await Navigator.pushNamed(context, '/hairstyle_loading', arguments: {
         'photoPath': _result!.photoPath,
         'colorimetry': _result,
@@ -783,13 +792,27 @@ class _BlondeSheet extends StatefulWidget {
 class _BlondeSheetState extends State<_BlondeSheet> {
   double _percentage = 50;
   int _selectedTechnique = 0;
+  int _selectedTone = 0;
+
+  final List<Map<String, String>> _tones = [
+    {'name': 'Rubio Miel', 'desc': 'Tono cálido y dorado, luminoso y vibrante', 'group': 'cálido'},
+    {'name': 'Rubio Caramelo', 'desc': 'Cálido profundo, ideal para bases castañas', 'group': 'cálido'},
+    {'name': 'Butter Blonde', 'desc': 'Rubio mantequilla, cremoso con reflejos amarillos suaves', 'group': 'cálido'},
+    {'name': 'Beige & Vainilla', 'desc': 'Tono neutro y cremoso, equilibrio entre frío y cálido', 'group': 'neutro'},
+    {'name': 'Rubio Ceniza', 'desc': 'Tono frío con matices grisáceos, neutraliza amarillos', 'group': 'frío'},
+    {'name': 'Platino / Hielo', 'desc': 'Máxima decoloración, rozando el blanco, alto impacto', 'group': 'frío'},
+    {'name': 'Plateado / Gris', 'desc': 'Tono gris plateado, sofisticado y moderno', 'group': 'frío'},
+    {'name': 'Irizado', 'desc': 'Tono iridiscente con reflejos perlados y tornasolados', 'group': 'frío'},
+    {'name': 'Bronde', 'desc': 'Fusión castaño-rubio, degradado natural y suave', 'group': 'neutro'},
+  ];
 
   final List<Map<String, String>> _techniques = [
     {'name': 'Balayage', 'desc': 'Degradado natural a mano alzada, raíz más oscura a puntas claras'},
-    {'name': 'Babylights', 'desc': 'Mechas finas desde la raíz que imitan el reflejo natural del sol'},
-    {'name': 'Color Melting', 'desc': 'Fundido de tonos sin líneas marcadas para transición gradual'},
-    {'name': 'Power Blond', 'desc': 'Decoloración estratégica para un rubio intenso y uniforme'},
-    {'name': 'Bronde', 'desc': 'Fusión de castaño claro y rubio para dar luz a bases oscuras'},
+    {'name': 'Babylights', 'desc': 'Mechas finas que imitan el reflejo natural del sol'},
+    {'name': 'Money Piece', 'desc': 'Mechones frontales que enmarcan el rostro'},
+    {'name': 'Hair Melting', 'desc': 'Derretido de color, transición imperceptible raíz-puntas'},
+    {'name': 'Color Melting', 'desc': 'Fundido de tonos sin líneas marcadas'},
+    {'name': 'Power Blond', 'desc': 'Decoloración estratégica para rubio intenso uniforme'},
   ];
 
   @override
@@ -813,8 +836,76 @@ class _BlondeSheetState extends State<_BlondeSheet> {
           const SizedBox(height: 24),
           const Text('Rubios IA', style: TextStyle(fontFamily: 'Poppins', fontSize: 28, fontWeight: FontWeight.w700, color: Colors.black87, letterSpacing: -0.5)),
           const SizedBox(height: 4),
-          const Text('Selecciona técnica y porcentaje de claridad', style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Colors.black45)),
+          const Text('Personaliza tono, técnica y claridad', style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Colors.black45)),
           const SizedBox(height: 28),
+          const Text('TONO / MATIZ', style: TextStyle(fontFamily: 'Poppins', fontSize: 9, fontWeight: FontWeight.w600, letterSpacing: 1.5, color: Colors.black38)),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 100,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _tones.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                final t = _tones[index];
+                final isSelected = index == _selectedTone;
+                final group = t['group']!;
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedTone = index),
+                  child: Container(
+                    width: 130,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isSelected ? AppColors.negroCarbon : Colors.white.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: isSelected ? Colors.transparent : Colors.black.withValues(alpha: 0.08)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 8, height: 8,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: group == 'cálido' ? const Color(0xFFD4A832)
+                                    : group == 'frío' ? const Color(0xFFA0A0C0)
+                                    : const Color(0xFFC0B090),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                t['name']!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.w600,
+                                  color: isSelected ? Colors.white : Colors.black87,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Expanded(
+                          child: Text(
+                            t['desc']!,
+                            style: TextStyle(
+                              fontFamily: 'Poppins', fontSize: 8,
+                              color: isSelected ? Colors.white.withValues(alpha: 0.7) : Colors.black45,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 24),
           const Text('PORCENTAJE DE CLARIDAD', style: TextStyle(fontFamily: 'Poppins', fontSize: 9, fontWeight: FontWeight.w600, letterSpacing: 1.5, color: Colors.black38)),
           const SizedBox(height: 12),
           Row(
@@ -846,10 +937,10 @@ class _BlondeSheetState extends State<_BlondeSheet> {
             child: Text('${_percentage.toInt()}%', style: const TextStyle(fontFamily: 'Poppins', fontSize: 24, fontWeight: FontWeight.w700, color: Colors.black87)),
           ),
           const SizedBox(height: 24),
-          const Text('TÉCNICA', style: TextStyle(fontFamily: 'Poppins', fontSize: 9, fontWeight: FontWeight.w600, letterSpacing: 1.5, color: Colors.black38)),
+          const Text('TÉCNICA DE APLICACIÓN', style: TextStyle(fontFamily: 'Poppins', fontSize: 9, fontWeight: FontWeight.w600, letterSpacing: 1.5, color: Colors.black38)),
           const SizedBox(height: 12),
           SizedBox(
-            height: 100,
+            height: 90,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: _techniques.length,
@@ -861,7 +952,7 @@ class _BlondeSheetState extends State<_BlondeSheet> {
                   onTap: () => setState(() => _selectedTechnique = index),
                   child: Container(
                     width: 140,
-                    padding: const EdgeInsets.all(14),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: isSelected ? AppColors.negroCarbon : Colors.white.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(16),
@@ -899,6 +990,7 @@ class _BlondeSheetState extends State<_BlondeSheet> {
             onTap: () => Navigator.pop(context, {
               'technique': _techniques[_selectedTechnique],
               'percentage': _percentage,
+              'tone': _tones[_selectedTone],
             }),
             child: Container(
               width: double.infinity,

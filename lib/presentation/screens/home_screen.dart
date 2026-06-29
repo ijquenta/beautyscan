@@ -31,8 +31,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) {
       setState(() => _user = user);
     }
-    if (user != null) {
-      final results = await _colorimetryRepo.getResultsByUser(user.id!);
+    if (user?.id != null) {
+      final results = await _colorimetryRepo.getResultsByUser(user!.id!);
       if (mounted) {
         setState(() {
           _recentResults = results.take(3).toList();

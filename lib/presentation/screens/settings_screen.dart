@@ -20,12 +20,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadSettings() async {
     final enabled = await SessionManager.isImageGenerationEnabled();
-    setState(() => _imageGenerationEnabled = enabled);
+    if (mounted) setState(() => _imageGenerationEnabled = enabled);
   }
 
   Future<void> _toggleImageGeneration(bool value) async {
     await SessionManager.setImageGenerationEnabled(value);
-    setState(() => _imageGenerationEnabled = value);
+    if (mounted) setState(() => _imageGenerationEnabled = value);
   }
 
   @override

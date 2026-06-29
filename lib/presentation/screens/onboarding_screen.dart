@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../components/atoms/beauty_background.dart';
+import '../../core/session_manager.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -18,14 +19,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
-  void _onNextPressed() {
+  Future<void> _onNextPressed() async {
     if (_currentPage < 2) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeOutCubic,
       );
     } else {
-      Navigator.pushReplacementNamed(context, '/login');
+      await SessionManager.setOnboardingDone();
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/login');
+      }
     }
   }
 

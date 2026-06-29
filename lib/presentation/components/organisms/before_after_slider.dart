@@ -23,7 +23,7 @@ class _BeforeAfterSliderState extends State<BeforeAfterSlider> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final double width = constraints.maxWidth;
-        final double height = constraints.maxHeight;
+        final double height = constraints.maxHeight.isFinite ? constraints.maxHeight : 400;
 
         return ClipRRect(
           borderRadius: AppConstants.largeCardRadius,

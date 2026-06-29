@@ -100,14 +100,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: resetEmailController,
                         keyboardType: TextInputType.emailAddress,
                         hintText: 'Correo electrónico',
-                        validator: (v) => v!.isEmpty ? 'Requerido' : null,
+                        validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
                       ),
                       const SizedBox(height: 16),
                       BeautyTextField(
                         controller: newPasswordController,
                         obscureText: true,
                         hintText: 'Nueva Contraseña',
-                        validator: (v) => v!.length < 6 ? 'Mínimo 6 caracteres' : null,
+                        validator: (v) => v == null || v.length < 6 ? 'Mínimo 6 caracteres' : null,
                       ),
                       const SizedBox(height: 32),
                       BeautyButton(
@@ -156,7 +156,10 @@ class _LoginScreenState extends State<LoginScreen> {
           },
         );
       },
-    );
+    ).then((_) {
+      resetEmailController.dispose();
+      newPasswordController.dispose();
+    });
   }
 
   @override

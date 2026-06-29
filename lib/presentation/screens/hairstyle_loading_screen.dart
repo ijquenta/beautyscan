@@ -96,6 +96,7 @@ class _HairstyleLoadingScreenState extends State<HairstyleLoadingScreen> {
               'style': selectedStyle,
               'photoPath': newPath,
               'originalPhotoPath': originalPhotoPath,
+              'colorimetry': colorimetry,
             },
           );
         }

@@ -37,13 +37,16 @@ class _ColorimetryDetailScreenState extends State<ColorimetryDetailScreen> {
 
   Future<void> _loadData(int id) async {
     final data = await _repo.getResultById(id);
+    if (!mounted) return;
     if (data != null) {
       final hair = await _hairService.generateFromColorimetry(data);
-      setState(() {
-        _result = data;
-        _hairResult = hair;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _result = data;
+          _hairResult = hair;
+          _isLoading = false;
+        });
+      }
     } else {
       setState(() => _isLoading = false);
     }

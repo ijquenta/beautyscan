@@ -3,6 +3,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SessionManager {
   static const String _keyUserId = 'session_user_id';
   static const String _keyImageGeneration = 'image_generation_enabled';
+  static const String _keyOnboardingDone = 'onboarding_done';
+
+  static Future<bool> isFirstTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    return !(prefs.getBool(_keyOnboardingDone) ?? false);
+  }
+
+  static Future<void> setOnboardingDone() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyOnboardingDone, true);
+  }
 
   static Future<void> saveSession(int userId) async {
     final prefs = await SharedPreferences.getInstance();

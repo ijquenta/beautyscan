@@ -231,10 +231,36 @@ INFORMACIÓN DE COLORIMETRÍA DE LA CLIENTE:
 El tono de tinte que apliques debe armonizar con todo su perfil cromático. No uses colores que desentonen con su temporada. Si el estilo indica un color específico, adáptalo para que favorezca a esta cliente en particular.''';
       }
 
+      final isBlonde = styleName.toLowerCase().contains('rubio')
+          || styleName.toLowerCase().contains('blond')
+          || styleName.toLowerCase().contains('platino')
+          || styleName.toLowerCase().contains('ceniza')
+          || styleName.toLowerCase().contains('miel')
+          || styleName.toLowerCase().contains('caramelo')
+          || styleName.toLowerCase().contains('bronde')
+          || styleName.toLowerCase().contains('iriza')
+          || styleName.toLowerCase().contains('plateado')
+          || styleName.toLowerCase().contains('gris')
+          || styleName.toLowerCase().contains('vainilla')
+          || styleName.toLowerCase().contains('butter');
+
+      final colorTheory = isBlonde ? '''
+GUÍA DE COLOR PARA RUBIOS:
+- Tonos CÁLIDOS (miel, caramelo, butter, dorado): usa reflejos amarillos/dorados, ideales para subtonos cálidos. El rubio debe verse luminoso y vibrante.
+- Tonos FRÍOS (ceniza, platino, hielo, plateado, gris): usa reflejos grises/azulados/violetas, ideales para subtonos fríos. Neutraliza cualquier tono amarillo.
+- Tonos NEUTROS (beige, vainilla, bronde): equilibrio entre cálido y frío, sin dominante excesiva.
+- IRIZADO: tono perlado/tornasolado con reflejos violáceos y azulados suaves, efecto iridiscente.
+- PLATEADO/GRIS: gris metálico sofisticado, sin amarillos. Debe verse plateado puro.
+- El nivel de claridad (porcentaje) determina qué tan claro queda el rubio: 10% = sutil, 50% = medio, 100% = máximo aclarado.
+- La técnica indica distribución: balayage (degradado), babylights (finos por todo), money piece (solo frontal), hair melting/color melting (fundido), power blond (uniforme).
+
+IMPORTANTE: El resultado debe verse FOTORREALISTA. El color de cabello debe coincidir EXACTAMENTE con el tono solicitado. No des un rubio genérico - usa el tono específico pedido.''': '';
+
       final prompt = '''Ajusta esta imagen. Mantén el rostro y todos los detalles corporales y del entorno SIN CAMBIOS.
 Cambia el cabello al estilo: $styleName.
 $styleDesc
 $colorContext
+$colorTheory
 Asegúrate de que el resultado se vea profesional, fotorrealista y armonioso con su perfil cromático.''';
 
       // To use the specific image generation model via raw REST HTTP because Dart SDK lacks responseModalities

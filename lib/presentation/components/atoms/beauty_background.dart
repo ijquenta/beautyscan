@@ -46,7 +46,7 @@ class BeautyBackground extends StatelessWidget {
           // Desenfoque para integrar los brillos con el fondo beige
           Positioned.fill(
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 100.0, sigmaY: 100.0),
+              filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
               child: Container(color: Colors.transparent),
             ),
           ),

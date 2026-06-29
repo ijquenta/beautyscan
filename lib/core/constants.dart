@@ -36,7 +36,7 @@ class AppConstants {
   static const double cardRadiusLarge = 32.0;
   static const double pillRadius = 50.0;
   
-  static BorderRadius defaultCardRadius = BorderRadius.circular(cardRadius);
-  static BorderRadius largeCardRadius = BorderRadius.circular(cardRadiusLarge);
-  static BorderRadius pillBorderRadius = BorderRadius.circular(pillRadius);
+  static const BorderRadius defaultCardRadius = BorderRadius.all(Radius.circular(cardRadius));
+  static const BorderRadius largeCardRadius = BorderRadius.all(Radius.circular(cardRadiusLarge));
+  static const BorderRadius pillBorderRadius = BorderRadius.all(Radius.circular(pillRadius));
 }

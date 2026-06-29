@@ -17,14 +17,20 @@ import 'package:beautyscan/presentation/screens/history_screen.dart';
 import 'package:beautyscan/presentation/screens/profile_screen.dart';
 import 'package:beautyscan/presentation/screens/settings_screen.dart';
 import 'package:beautyscan/presentation/screens/hairstyle_detail_screen.dart';
-import 'package:beautyscan/presentation/screens/colorimetry_detail_screen.dart';
 import 'package:beautyscan/presentation/screens/hairstyle_loading_screen.dart';
 import 'package:beautyscan/presentation/screens/lookbook_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env');
-  Gemini.init(apiKey: dotenv.env['API_KEY'] ?? '');
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (e) {
+    debugPrint('Error loading .env: $e');
+  }
+  final apiKey = dotenv.env['API_KEY'] ?? '';
+  if (apiKey.isNotEmpty) {
+    Gemini.init(apiKey: apiKey);
+  }
   runApp(const BeautyScanApp());
 }
 
@@ -55,7 +61,6 @@ class BeautyScanApp extends StatelessWidget {
         '/profile': (c) => const ProfileScreen(),
         '/settings': (c) => const SettingsScreen(),
         '/hairstyle_detail': (c) => const HairstyleDetailScreen(),
-        '/colorimetry_detail': (c) => const ColorimetryDetailScreen(),
         '/lookbook': (c) => const LookbookScreen(),
       },
     );

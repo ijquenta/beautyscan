@@ -16,25 +16,44 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 3), () async {
+    _navigateAfterDelay();
+  }
+
+  Future<void> _navigateAfterDelay() async {
+    try {
+      await Future.delayed(const Duration(seconds: 3));
       if (!mounted) return;
+      
+      final isFirstTime = await SessionManager.isFirstTime();
+      if (isFirstTime) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/onboarding');
+        }
+        return;
+      }
+
       final hasSession = await SessionManager.isLoggedIn();
-      var loggedIn = false;
+      if (!mounted) return;
+      
       if (hasSession) {
         final currentUser = await _userRepository.getCurrentUser();
         if (currentUser != null) {
-          loggedIn = true;
-        } else {
-          await SessionManager.clearSession();
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, '/home');
+          }
+          return;
         }
+        await SessionManager.clearSession();
       }
       if (mounted) {
-        Navigator.pushReplacementNamed(
-          context,
-          loggedIn ? '/home' : '/login',
-        );
+        Navigator.pushReplacementNamed(context, '/login');
       }
-    });
+    } catch (e) {
+      debugPrint('Splash error: $e');
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/login');
+      }
+    }
   }
 
   @override
