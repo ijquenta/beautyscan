@@ -17,7 +17,7 @@ class DatabaseHelper {
     final path = p.join(dbPath, 'beautyscan.db');
     return openDatabase(
       path,
-      version: 7,
+      version: 8,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
@@ -50,6 +50,7 @@ class DatabaseHelper {
         recommended_colors  TEXT    NOT NULL,
         colors_to_avoid     TEXT    NOT NULL,
         makeup_tips         TEXT,
+        hair_result_json    TEXT,
         created_at          TEXT    NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       )
@@ -107,6 +108,14 @@ class DatabaseHelper {
     if (oldVersion < 7) {
       await db.execute(
           'ALTER TABLE colorimetry_results ADD COLUMN hair_result_json TEXT');
+    }
+    if (oldVersion < 8) {
+      final columns = await db.rawQuery('PRAGMA table_info(colorimetry_results)');
+      final hasColumn = columns.any((col) => col['name'] == 'hair_result_json');
+      if (!hasColumn) {
+        await db.execute(
+            'ALTER TABLE colorimetry_results ADD COLUMN hair_result_json TEXT');
+      }
     }
   }
 
